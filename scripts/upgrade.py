@@ -273,6 +273,35 @@ def compute_item_ep(item_id, stats_json, sockets_json, bonus_json, weights, gem_
     return ep
 
 
+# Difficulty/rarity ratings by source type
+DIFFICULTY = {
+    "Quest":           ("🟢", "Quest reward"),
+    "Reputation":      ("🟢", "Rep vendor"),
+    "Badge":           ("🟢", "Badge vendor"),
+    "Crafted":         ("🟢", "Craftable"),
+    "enriched":        ("🟡", "Dungeon/other"),
+    "Normal Dungeon":  ("🟡", "Normal dungeon"),
+    "Heroic Dungeon":  ("🟡", "Heroic daily"),
+    "Arena":           ("🟠", "Arena rating"),
+    "PvP":             ("🟡", "Honor grind"),
+    "10-man Raid":     ("🟠", "Weekly 10-man"),
+    "25-man Raid":     ("🔴", "Weekly 25-man"),
+    "World Boss":      ("⚫", "World boss (contested)"),
+    "World Drop":      ("🟡", "BoE world drop"),
+    "Unknown":         ("⚪", "Source unknown"),
+}
+
+
+def get_difficulty(source_type, drop_rate=0):
+    """Return (emoji, label) for difficulty rating."""
+    base = DIFFICULTY.get(source_type, ("⚪", "Unknown"))
+    if drop_rate > 0 and drop_rate < 10:
+        return (base[0], f"{base[1]} (~{drop_rate:.0f}% drop)")
+    elif drop_rate >= 10:
+        return (base[0], f"{base[1]} (~{drop_rate:.0f}% drop)")
+    return base
+
+
 def is_excluded(item_name, set_name, source_type, exclusions):
     for cat_key, cat in exclusions.items():
         if cat_key.startswith("_") or not isinstance(cat, dict):
@@ -410,7 +439,7 @@ def main():
         name_filter = target_slot
 
     c = db.cursor()
-    query = "SELECT item_id, name, stats, quality, sockets, socket_bonus, source_type, source_name, set_name, class_restriction FROM items WHERE slot = ? AND phase <= ? AND quality IN ('Epic', 'Rare')"
+    query = "SELECT item_id, name, stats, quality, sockets, socket_bonus, source_type, source_name, set_name, class_restriction, drop_rate FROM items WHERE slot = ? AND phase <= ? AND quality IN ('Epic', 'Rare')"
     params = [db_slot, phase]
 
     if armor_types and target_slot not in ("Neck", "Back", "Ring", "Trinket", "Main Hand", "Off Hand", "One Hand", "Two-Hand", "Wand", "Ranged", "Relic", "Totem", "Idol", "Libram"):
@@ -445,8 +474,10 @@ def main():
         source_type = row[6] or "Unknown"
         source_name = row[7] or ""
         set_name = row[8] or ""
+        drop_rate = row[10] or 0
 
         excluded, excl_emoji, excl_label = is_excluded(row_name, set_name, source_type, exclusions)
+        diff_emoji, diff_label = get_difficulty(source_type, drop_rate)
 
         upgrades.append({
             "name": row_name,
@@ -459,6 +490,8 @@ def main():
             "excl_emoji": excl_emoji or "",
             "excl_label": excl_label or "",
             "quality": row[3],
+            "diff_emoji": diff_emoji,
+            "diff_label": diff_label,
         })
 
     upgrades.sort(key=lambda x: -x["gain"])
@@ -480,14 +513,14 @@ def main():
             source = up["source_name"] if up["source_name"] else up["source_type"]
             set_tag = f" [{up['set_name']}]" if up["set_name"] else ""
             lines.append(f"**{i}. {up['name']}** ({up['ep']:.0f} EP, +{up['gain']:.0f})")
-            lines.append(f"   {source}{set_tag}")
+            lines.append(f"   {source}{set_tag} — {up['diff_emoji']} {up['diff_label']}")
 
         if excluded_list:
             lines.append("")
             lines.append("*Also available (restricted):*")
             for up in excluded_list[:3]:
                 source = up["source_name"] if up["source_name"] else up["source_type"]
-                lines.append(f"{up['excl_emoji']} {up['name']} ({up['ep']:.0f} EP, +{up['gain']:.0f}) — {source} ({up['excl_label']})")
+                lines.append(f"{up['excl_emoji']} {up['name']} ({up['ep']:.0f} EP, +{up['gain']:.0f}) — {source}")
 
     lines.append(FOOTER)
     db.close()

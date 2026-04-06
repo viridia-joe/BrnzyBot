@@ -18,6 +18,7 @@ SCRIPTS = {
     "gearcheck": "gearcheck.py",
     "gearprio": "gearprio.py",
     "strat": "strat.py",
+    "upgrade": "upgrade.py",
 }
 
 

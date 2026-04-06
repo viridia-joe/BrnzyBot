@@ -1,0 +1,29 @@
+{
+  "spec": "Protection Paladin (0/49/12)",
+  "description": "AoE tank. Consecration, Holy Shield, Avenger's Shield. Spell damage = threat.",
+  "source": "Community theorycrafting",
+  "weights": {
+    "Stamina": 1.00,
+    "SpellPower": 0.60,
+    "Defense": 0.80,
+    "Dodge": 0.55,
+    "Parry": 0.50,
+    "Block": 0.45,
+    "BlockValue": 0.40,
+    "Armor": 0.03,
+    "SpellHit": 0.50,
+    "Intellect": 0.25,
+    "Expertise": 0.35,
+    "Resilience": 0.30,
+    "Spirit": 0.00,
+    "Agility": 0.20
+  },
+  "hit_cap": {
+    "base": 202,
+    "from_talents": 0,
+    "notes": "Spell hit cap for threat (Consecration, Holy Shield). 16% = 202 rating. Often not worth capping — spell damage scales threat better."
+  },
+  "armor_types": ["Plate"],
+  "weapon_types": ["Sword", "Mace", "Shield"],
+  "class": "Paladin"
+}

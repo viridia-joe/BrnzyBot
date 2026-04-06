@@ -1,0 +1,29 @@
+{
+  "spec": "Enhancement Shaman (17/44/0)",
+  "description": "Dual-wield melee. Stormstrike, WF/FT totems. Shamanistic Rage for mana.",
+  "source": "Community theorycrafting / WowSims",
+  "weights": {
+    "MeleeHit": 1.70,
+    "Expertise": 1.50,
+    "AttackPower": 0.45,
+    "Agility": 0.90,
+    "Strength": 0.55,
+    "MeleeCrit": 0.85,
+    "MeleeHaste": 0.80,
+    "ArmorPenetration": 0.40,
+    "Intellect": 0.10,
+    "Stamina": 0.00,
+    "SpellPower": 0.00,
+    "SpellHit": 0.00,
+    "Spirit": 0.00,
+    "Resilience": 0.00
+  },
+  "hit_cap": {
+    "base": 142,
+    "from_talents": 0,
+    "notes": "9% melee hit cap = 142 rating. Dual-wield miss penalty means hit is king. Nature's Guidance gives 3% melee hit if specced into Resto (not standard)."
+  },
+  "armor_types": ["Mail", "Leather"],
+  "weapon_types": ["Mace", "Axe", "Fist", "Dagger"],
+  "class": "Shaman"
+}

@@ -1,0 +1,26 @@
+{
+  "spec": "Affliction Warlock (40/0/21 or 42/0/19)",
+  "description": "DoT-based: Corruption, UA, CoA, Siphon Life. Shadow Bolt filler.",
+  "source": "Community theorycrafting / WowSims",
+  "weights": {
+    "SpellHit": 1.80,
+    "SpellPower": 1.00,
+    "ShadowSpellPower": 1.00,
+    "SpellHaste": 1.15,
+    "SpellCrit": 0.62,
+    "Intellect": 0.30,
+    "Spirit": 0.10,
+    "Stamina": 0.00,
+    "HealingPower": 0.00,
+    "MP5": 0.00,
+    "Resilience": 0.00
+  },
+  "hit_cap": {
+    "base": 202,
+    "from_talents": 38,
+    "notes": "Suppression gives 3% hit to affliction spells (37.8 rating). Need 13% from gear = 164 rating."
+  },
+  "armor_types": ["Cloth"],
+  "weapon_types": ["Sword", "Dagger", "Staff", "Wand"],
+  "class": "Warlock"
+}

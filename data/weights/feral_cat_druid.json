@@ -1,0 +1,28 @@
+{
+  "spec": "Feral Druid — Cat DPS (0/47/14 or 0/44/17)",
+  "description": "Cat form melee DPS. Mangle, Shred, Rip, Ferocious Bite. Leader of the Pack.",
+  "source": "Community theorycrafting / WowSims",
+  "weights": {
+    "Agility": 1.00,
+    "Strength": 0.70,
+    "AttackPower": 0.45,
+    "FeralAttackPower": 0.45,
+    "MeleeCrit": 0.80,
+    "MeleeHit": 0.90,
+    "MeleeHaste": 0.75,
+    "Expertise": 0.85,
+    "ArmorPenetration": 0.50,
+    "Stamina": 0.05,
+    "Intellect": 0.00,
+    "Spirit": 0.00,
+    "Resilience": 0.00
+  },
+  "hit_cap": {
+    "base": 142,
+    "from_talents": 0,
+    "notes": "9% melee hit cap vs bosses = 142 rating. No hit talents."
+  },
+  "armor_types": ["Leather"],
+  "weapon_types": ["Mace", "Fist", "Staff", "Polearm"],
+  "class": "Druid"
+}

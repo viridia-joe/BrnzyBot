@@ -1,0 +1,27 @@
+{
+  "spec": "Combat Rogue (15/41/5 or 20/41/0)",
+  "description": "Sinister Strike, Slice and Dice, Blade Flurry. Dominant TBC rogue spec.",
+  "source": "Community theorycrafting / WowSims",
+  "weights": {
+    "Agility": 1.00,
+    "MeleeHit": 1.10,
+    "Expertise": 1.20,
+    "MeleeCrit": 0.80,
+    "MeleeHaste": 0.90,
+    "AttackPower": 0.45,
+    "Strength": 0.50,
+    "ArmorPenetration": 0.50,
+    "Stamina": 0.00,
+    "Intellect": 0.00,
+    "Spirit": 0.00,
+    "Resilience": 0.00
+  },
+  "hit_cap": {
+    "base": 363,
+    "from_talents": 79,
+    "notes": "Dual-wield: 28% miss = 363 rating to hard cap. Precision gives 5% (79 rating). Soft cap (yellow attacks): 9% = 142 rating. Precision reduces to 64 rating."
+  },
+  "armor_types": ["Leather"],
+  "weapon_types": ["Sword", "Mace", "Fist", "Dagger"],
+  "class": "Rogue"
+}

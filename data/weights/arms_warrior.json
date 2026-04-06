@@ -1,0 +1,27 @@
+{
+  "spec": "Arms Warrior (33/28/0)",
+  "description": "Mortal Strike, Slam. Two-hander. Blood Frenzy debuff for raid melee.",
+  "source": "Community theorycrafting / WowSims",
+  "weights": {
+    "Strength": 1.00,
+    "MeleeHit": 0.95,
+    "Expertise": 1.00,
+    "MeleeCrit": 0.85,
+    "MeleeHaste": 0.70,
+    "AttackPower": 0.48,
+    "Agility": 0.55,
+    "ArmorPenetration": 0.60,
+    "Stamina": 0.00,
+    "Intellect": 0.00,
+    "Spirit": 0.00,
+    "Resilience": 0.00
+  },
+  "hit_cap": {
+    "base": 142,
+    "from_talents": 47,
+    "notes": "Precision gives 3%. Need 6% from gear = 95 rating."
+  },
+  "armor_types": ["Plate", "Mail", "Leather"],
+  "weapon_types": ["Sword", "Mace", "Axe", "Polearm"],
+  "class": "Warrior"
+}

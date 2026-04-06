@@ -1,0 +1,368 @@
+[
+  {
+    "name": "Attumen the Huntsman",
+    "raid": "Karazhan",
+    "phase": 1,
+    "type": "Tank and spank with add",
+    "aliases": ["Attumen", "Huntsman", "Midnight"],
+    "summary": "Two-phase fight. Phase 1: tank Midnight (the horse) while DPS burns it to 50%. Attumen spawns and merges with Midnight at 25%. Phase 2: tank the mounted Attumen, avoid Charge.",
+    "abilities": [
+      {"name": "Shadow Cleave", "desc": "Frontal cleave. Tank faces boss away from raid."},
+      {"name": "Intangible Presence", "desc": "Curse that reduces hit chance by 50%. Decurse immediately."},
+      {"name": "Charge", "desc": "Phase 2. Charges a random player. Stay spread, stay at range."}
+    ],
+    "killers": [
+      "Not decursing Intangible Presence — DPS and tanks miss everything",
+      "Standing in front of the boss (Shadow Cleave)"
+    ],
+    "prep": [],
+    "tips": [
+      "Easy first boss. Good warm-up.",
+      "Drops mount (Fiery Warhorse) at ~1% rate."
+    ]
+  },
+  {
+    "name": "Moroes",
+    "raid": "Karazhan",
+    "phase": 1,
+    "type": "Add management + bleeds",
+    "aliases": ["Moroes"],
+    "summary": "Moroes comes with 4 random dinner guests (adds). CC as many as possible (shackle, trap, banish). Kill adds first, then burn Moroes. He applies an undispellable bleed (Garrote) that ticks until he dies or a Paladin uses Blessing of Protection.",
+    "abilities": [
+      {"name": "Garrote", "desc": "Applies a bleed to a random player that deals 1000 damage every 3 sec for 5 min. Cannot be dispelled. Only removed by BoP, Stoneform, Ice Block, or killing Moroes."},
+      {"name": "Vanish", "desc": "Moroes vanishes and reappears with a Garrote on a random target. Healers must be ready."},
+      {"name": "Gouge", "desc": "Stuns the tank briefly. OT should be ready to taunt."},
+      {"name": "Blind", "desc": "Blinds a nearby player. Stay at range if possible."}
+    ],
+    "killers": [
+      "Garrote stacking on healers — if 3+ healers are garroted, the raid dies slowly",
+      "Adds getting loose — if CC breaks and adds go free, it's a wipe",
+      "No Paladin for BoP = Garrotes stay forever = healers OOM"
+    ],
+    "prep": [
+      "Bring a Paladin for Blessing of Protection to clear Garrote",
+      "Assign CC for each add before pull"
+    ],
+    "tips": [
+      "Priests can Shackle Undead the undead adds",
+      "Hunters can trap, Warlocks can banish (if Demon add is present)",
+      "Kill order on adds depends on which random set you get"
+    ]
+  },
+  {
+    "name": "Maiden of Virtue",
+    "raid": "Karazhan",
+    "phase": 1,
+    "type": "Tank and spank with raid damage",
+    "aliases": ["Maiden"],
+    "summary": "Stationary fight. She casts Holy Ground (consecration under her), Repentance (AoE stun on the whole raid), and Holy Fire on random players. Spread out, heal through the damage, interrupt nothing — just DPS and heal.",
+    "abilities": [
+      {"name": "Holy Ground", "desc": "Consecration effect dealing ~240 Holy damage/sec + silence to anyone in melee range. Tank eats this."},
+      {"name": "Repentance", "desc": "AoE stun on the entire raid for 12 seconds. Deals ~2000 Holy damage over the duration. Breaks on damage — Holy Fire will break it."},
+      {"name": "Holy Fire", "desc": "Hits a random player for ~3500-4500 Holy damage and applies a DoT. This breaks Repentance. Will kill low-HP players if they're not healed."},
+      {"name": "Holy Wrath", "desc": "Chain lightning-style Holy damage that jumps between nearby players. Spread out to limit jumps."}
+    ],
+    "killers": [
+      "Repentance into Holy Fire — if you're low HP when stunned and get Holy Fired, you die",
+      "Holy Wrath chaining through stacked players",
+      "Healers must top everyone before Repentance hits"
+    ],
+    "prep": [
+      "Shadow Protection helps with nothing here — it's all Holy damage",
+      "Healthstones and HoTs before Repentance are key"
+    ],
+    "tips": [
+      "Spread out to avoid Holy Wrath chains",
+      "Paladins can Divine Shield out of Repentance to heal others",
+      "Dwarf Priests can Stoneform the Holy Fire DoT"
+    ]
+  },
+  {
+    "name": "Opera Event",
+    "raid": "Karazhan",
+    "phase": 1,
+    "type": "Random encounter (3 variants)",
+    "aliases": ["Opera", "Wizard of Oz", "Romulo and Julianne", "Big Bad Wolf", "Red Riding Hood", "Oz", "R&J", "BBW"],
+    "summary": "Random one of three encounters each lockout. Wizard of Oz: kill adds (Dorothee, Roar, Strawman, Tinhead) then The Crone. Romulo & Julianne: kill both within 10 sec of each other. Big Bad Wolf: kite the wolf when you get Little Red Riding Hood debuff.",
+    "abilities": [
+      {"name": "Little Red Riding Hood (BBW)", "desc": "Turns a random player into Red Riding Hood — reduces armor to 0 and forces you to run. Wolf chases you. Run away or die."},
+      {"name": "Frightened Scream (Oz - Dorothee)", "desc": "AoE fear. Kill Dorothee first or keep her interrupted."},
+      {"name": "Cyclone (Oz - The Crone)", "desc": "Tosses a player into the air. Unavoidable, just heal through it."},
+      {"name": "Blinding Passion (R&J)", "desc": "Julianne heals. Interrupt or purge."}
+    ],
+    "killers": [
+      "BBW: Getting caught as Red Riding Hood — instant death if wolf reaches you",
+      "Oz: Not killing Dorothee first — fear chains wipe the raid",
+      "R&J: Not killing both within 10 sec — the survivor resurrects the other at full HP"
+    ],
+    "prep": [],
+    "tips": [
+      "BBW: Sprint, Blink, or any movement ability saves lives when you're the wolf target",
+      "Oz kill order: Dorothee > Roar > Strawman > Tinhead > The Crone",
+      "R&J: Get both to ~5% then cleave them down together"
+    ]
+  },
+  {
+    "name": "The Curator",
+    "raid": "Karazhan",
+    "phase": 1,
+    "type": "Add management + burn phase",
+    "aliases": ["Curator"],
+    "summary": "Curator spawns Astral Flares every 10 sec that must be killed quickly. At 80% mana he goes Evocation (takes 200% damage for 20 sec). Burn hard during Evocation. He Hateful Strikes the highest HP target in melee.",
+    "abilities": [
+      {"name": "Astral Flare", "desc": "Spawns a flare that chain-zaps nearby players for ~700 Arcane damage. Must be killed fast — they stack up."},
+      {"name": "Hateful Bolt", "desc": "Hits the highest HP target in the raid for ~4000-5000 Arcane damage. Soak with a tank or high-stam player."},
+      {"name": "Evocation", "desc": "At 80% mana, Curator channels for 20 sec, taking 200% damage. This is your burn window — pop cooldowns."}
+    ],
+    "killers": [
+      "Letting Flares stack — 3+ active flares = raid damage is unhealable",
+      "Missing the Evocation burn window — the fight becomes a mana war if you don't push phases",
+      "Squishies soaking Hateful Bolt — stay below tanks in HP"
+    ],
+    "prep": [
+      "Arcane resist is nice but not required",
+      "Assign ranged DPS to flare duty"
+    ],
+    "tips": [
+      "Save Heroism/Bloodlust for the first Evocation",
+      "Warlocks and Hunters are great flare killers",
+      "Drops T4 Glove tokens"
+    ]
+  },
+  {
+    "name": "Shade of Aran",
+    "raid": "Karazhan",
+    "phase": 1,
+    "type": "No-tank caster boss with deadly mechanics",
+    "aliases": ["Aran", "Shade"],
+    "summary": "No aggro table — attacks randomly. Three main mechanics to respect: Flame Wreath (DON'T MOVE), Blizzard (DO MOVE), and Arcane Explosion (run to the wall). He also Mass Polymorphs the raid and drinks to regen mana. If he reaches 20% he summons Water Elementals.",
+    "abilities": [
+      {"name": "Flame Wreath", "desc": "Rings of fire around 3 players. If ANYONE moves through a ring, it explodes for ~5000 fire damage to the entire raid. Stand absolutely still for 20 sec."},
+      {"name": "Blizzard", "desc": "Rotating Blizzard around the room. Move out of it. Does NOT conflict with Flame Wreath (they don't overlap)."},
+      {"name": "Arcane Explosion", "desc": "Slow-cast AoE. Run to the wall (max range). He pulls everyone in first with Magnetic Pull, then casts it. If you're close, you die."},
+      {"name": "Mass Polymorph", "desc": "Sheeps the entire raid and drinks to regen mana. DoTs on him break the sheep. Unavoidable."},
+      {"name": "Summon Water Elementals", "desc": "At 20% HP. Adds that spam Waterbolt. Burn the boss, don't worry about adds."}
+    ],
+    "killers": [
+      "Moving during Flame Wreath — the #1 wipe mechanic in all of Karazhan. DON'T MOVE.",
+      "Not running out for Arcane Explosion — one-shots anyone in melee range",
+      "Standing in Blizzard — it does a lot of damage and slows you"
+    ],
+    "prep": [],
+    "tips": [
+      "If you have pets (Warlock, Hunter), dismiss them or they WILL walk through Flame Wreath",
+      "No tank needed — he's untauntable. Everyone spreads around the room.",
+      "Counterspell/interrupts don't work on his main abilities",
+      "Drops Tirisfal Wand of Ascendancy and Uni-Mind Headdress"
+    ]
+  },
+  {
+    "name": "Terestian Illhoof",
+    "raid": "Karazhan",
+    "phase": 1,
+    "type": "Add management + sacrifice mechanic",
+    "aliases": ["Illhoof", "Terestian"],
+    "summary": "Illhoof sacrifices a random player (Demon Chains), dealing increasing damage until the chains are killed. He also spawns Imps constantly. AoE the imps, free sacrificed players fast, DPS the boss.",
+    "abilities": [
+      {"name": "Sacrifice (Demon Chains)", "desc": "Teleports a random player to the center and chains them. Deals increasing Shadow damage until the chains (~6k HP) are destroyed. Player dies in ~8 sec if not freed."},
+      {"name": "Summon Fiendish Imp", "desc": "Constantly spawns imps that cast Firebolt. AoE them or they overwhelm healers."},
+      {"name": "Shadow Bolt Volley", "desc": "AoE Shadow damage to the raid. Frequent and steady — healers must keep up."},
+      {"name": "Kil'rek", "desc": "Demon add that buffs Illhoof. Kill him first, but he respawns. Kill him when he's up."}
+    ],
+    "killers": [
+      "Not freeing Sacrificed players in time — they die in 8 sec",
+      "Letting imps stack up — AoE classes need to be on it constantly",
+      "Healer getting sacrificed with no fast DPS on chains"
+    ],
+    "prep": [
+      "Seed of Corruption (Warlock) is amazing for imp control",
+      "Shadow resist helps with Shadow Bolt Volley but not required"
+    ],
+    "tips": [
+      "Assign 2-3 DPS to chain duty — they must swap immediately when someone gets sacrificed",
+      "Warlocks use Seed of Corruption on imps, it dominates this fight",
+      "Drops The Lightning Capacitor trinket"
+    ]
+  },
+  {
+    "name": "Netherspite",
+    "raid": "Karazhan",
+    "phase": 1,
+    "type": "Beam management (unique mechanic)",
+    "aliases": ["Netherspite"],
+    "summary": "Three colored beams connect portals to Netherspite. Players must stand in the beams to intercept them — if a beam reaches the boss unchecked, he powers up and wipes you. Red beam: tank soaks (increases HP). Green beam: healer soaks (increases healing). Blue beam: DPS soaks (increases damage). Rotate soakers because debuff stacks.",
+    "abilities": [
+      {"name": "Red Beam (Perseverance)", "desc": "Increases HP and reduces damage dealt. Tank stands in this. Stacks reduce healing received — rotate tanks."},
+      {"name": "Green Beam (Serenity)", "desc": "Increases healing done and restores mana. Healer stands in this. Stacks reduce max HP — rotate healers."},
+      {"name": "Blue Beam (Dominance)", "desc": "Increases spell damage massively. DPS stands in this. Stacks reduce max HP — rotate DPS."},
+      {"name": "Netherbreath", "desc": "Frontal cone in Banish phase. Avoid being in front of him."},
+      {"name": "Banish Phase", "desc": "Every 30 sec, portals despawn for 30 sec. Boss is untargetable briefly. Beams return after."}
+    ],
+    "killers": [
+      "Nobody soaking a beam — boss absorbs it and becomes unhealable/unkillable",
+      "Blue beam soaker dying — they have massive spell damage but low HP from stacks. Heal them.",
+      "Not rotating soakers — debuff stacks eventually kill you"
+    ],
+    "prep": [
+      "Assign beam teams: 2 tanks for red, 2-3 healers for green, 2-3 DPS for blue",
+      "Practice the rotation before pulling"
+    ],
+    "tips": [
+      "Blue beam DPS does insane damage — time cooldowns with blue beam for massive burst",
+      "Warlocks and Shadow Priests are ideal blue beam soakers",
+      "This is one of the harder Kara fights. Coordination wins."
+    ]
+  },
+  {
+    "name": "Nightbane",
+    "raid": "Karazhan",
+    "phase": 1,
+    "type": "Ground + air phase dragon",
+    "aliases": ["Nightbane"],
+    "summary": "Summoned boss (requires Blackened Urn quest). Ground phase: tank and spank with Charred Earth and Tail Sweep. Air phase at 75%, 50%, 25%: lands Smoking Blast on highest threat, rains Bone skeletons on the raid. Kill skeletons, avoid fire, burn when he lands.",
+    "abilities": [
+      {"name": "Charred Earth", "desc": "Fire patch on the ground under a random player. Move out immediately."},
+      {"name": "Bellowing Roar", "desc": "AoE fear. Tremor Totem or Fear Ward helps. Breaks on damage."},
+      {"name": "Smoking Blast (Air Phase)", "desc": "Ranged attack on highest threat target during air phase. Tank must maintain threat and eat these with cooldowns."},
+      {"name": "Rain of Bones (Air Phase)", "desc": "Spawns Restless Skeleton adds. AoE them down before he lands."}
+    ],
+    "killers": [
+      "Standing in Charred Earth — fire patches persist and stack",
+      "Tank dying to Smoking Blast in air phase — must use cooldowns",
+      "Skeletons overwhelming healers if not AoE'd down before landing"
+    ],
+    "prep": [
+      "Requires Blackened Urn from Kara attunement quest chain to summon",
+      "Fire resist is helpful but not required"
+    ],
+    "tips": [
+      "Save AoE cooldowns for skeleton waves in air phase",
+      "Tank should build max threat before first air phase",
+      "Fear Ward on the tank before Bellowing Roar"
+    ]
+  },
+  {
+    "name": "Prince Malchezaar",
+    "raid": "Karazhan",
+    "phase": 1,
+    "type": "Three-phase with RNG infernals",
+    "aliases": ["Prince", "Malchezaar"],
+    "summary": "Three phases based on HP. Phase 1 (100-60%): easy, tank and spank. Phase 2 (60-30%): equips axes, hits much harder, applies Sunder Armor, drops Infernals randomly. Phase 3 (30-0%): drops axes, spams Shadow Nova and Amplify Damage. Infernals are the run-killer — if they drop on the raid, it's a wipe.",
+    "abilities": [
+      {"name": "Enfeeble", "desc": "Reduces 5 random players to 1 HP for 8 sec. Heals back to full when it expires. Do NOT take any damage during Enfeeble or you die. Tank is immune."},
+      {"name": "Shadow Nova", "desc": "AoE Shadow damage centered on Prince. Ranged stay at 25+ yards. In Phase 3 he spams this."},
+      {"name": "Infernal", "desc": "Phase 2+. Drops an Infernal from the sky every 40 sec. It lands, does AoE fire damage in a radius, and stays. Cannot be killed. If it lands on the raid, reposition."},
+      {"name": "Sunder Armor (Phase 2)", "desc": "Stacks Sunder on tank. Hits very hard. Tank needs heavy healing."},
+      {"name": "Amplify Damage (Phase 3)", "desc": "Doubles damage taken by a random player. If combined with Shadow Nova, it's lethal."}
+    ],
+    "killers": [
+      "Infernal RNG — if Infernals drop on the tank or ranged camp, there's nowhere to go. Wipes happen.",
+      "Taking any damage during Enfeeble = instant death",
+      "Phase 2 tank damage — Sunder stacks + hard melee hits require heavy healing",
+      "Shadow Nova hitting melee in Phase 3 — stay spread"
+    ],
+    "prep": [
+      "Shadow resist gear helps in Phase 3 but isn't required",
+      "Tank needs max mitigation gear for Phase 2"
+    ],
+    "tips": [
+      "Position the fight at the edge of the terrace so Infernals have room to drop away from the raid",
+      "Tank near a wall so Infernals can't land behind you",
+      "Phase 2 is the hard part — if you survive it, Phase 3 is a burn",
+      "Drops T4 Helm token, Nathrezim Mindblade, Ruby Drape of the Mysticant"
+    ]
+  },
+  {
+    "name": "High King Maulgar",
+    "raid": "Gruul's Lair",
+    "phase": 1,
+    "type": "Council fight — 5 mobs, kill order",
+    "aliases": ["HKM", "High King", "Maulgar"],
+    "summary": "Pull 5 mobs: Maulgar + 4 adds. Each add requires a dedicated tank or CC strategy. Kill adds in order, then burn Maulgar. Coordination on the pull is everything — most wipes happen in the first 10 seconds.",
+    "abilities": [
+      {"name": "Arcing Smash (Maulgar)", "desc": "Frontal cleave. Main tank faces him away."},
+      {"name": "Whirlwind (Maulgar)", "desc": "AoE melee damage. Melee back out."},
+      {"name": "Krosh Firehand (Mage add)", "desc": "Casts Blast Wave and Greater Fireball (~9000 damage). A mage must Spellsteal his fire shield and tank him at range."},
+      {"name": "Olm the Summoner (Warlock add)", "desc": "Summons Felhounds and casts Death Coil. Enslave or kill pets, interrupt."},
+      {"name": "Kiggler the Crazed (Shaman add)", "desc": "Casts Lightning Bolt and Arcane Shock (knockback). Ranged-tanked by a hunter or lock."},
+      {"name": "Blindeye the Seer (Priest add)", "desc": "Heals the other adds. Must be interrupted or killed first."}
+    ],
+    "killers": [
+      "Bad pull — if tanks don't pick up their assigned add immediately, it's a wipe",
+      "Krosh Firehand without a mage to Spellsteal — his Fireball one-shots people",
+      "Blindeye healing adds back up — must be interrupted or killed first",
+      "Maulgar during Whirlwind — melee need to back out"
+    ],
+    "prep": [
+      "Assign tanks/CC for each add BEFORE the raid",
+      "Need a Mage for Krosh (Spellsteal tank)",
+      "Need a ranged tank (Hunter) for Kiggler"
+    ],
+    "tips": [
+      "Kill order: Blindeye > Olm > Kiggler > Krosh > Maulgar",
+      "This fight is 90% preparation, 10% execution",
+      "Drops T4 Shoulder tokens"
+    ]
+  },
+  {
+    "name": "Gruul the Dragonkiller",
+    "raid": "Gruul's Lair",
+    "phase": 1,
+    "type": "DPS race with stacking damage",
+    "aliases": ["Gruul"],
+    "summary": "Simple concept, hard execution. Gruul does increasing damage over time (Growth stacks). He periodically Shatters the raid — Ground Slam knocks everyone back, then Shatter deals damage based on proximity to other players. Spread out after Ground Slam or Shatter kills everyone.",
+    "abilities": [
+      {"name": "Growth", "desc": "Every 30 sec, Gruul grows. Each stack increases damage by 10%. By 15+ stacks, he one-shots the tank. This is a soft enrage."},
+      {"name": "Ground Slam", "desc": "Knocks everyone back and stuns them briefly. Positions you randomly."},
+      {"name": "Shatter", "desc": "5 sec after Ground Slam. Deals damage to every player based on how many other players are within 15 yards. If stacked, it one-shots. SPREAD OUT after Ground Slam."},
+      {"name": "Cave In", "desc": "Rocks fall on random locations. Move out of the dust clouds."},
+      {"name": "Reverberation", "desc": "Silences the raid for 4 sec. Healers need to pre-HoT."}
+    ],
+    "killers": [
+      "Shatter with players stacked — the #1 wipe mechanic. SPREAD after Ground Slam.",
+      "Growth stacking too high — if DPS is slow, the tank dies to melee hits around 12-15 stacks",
+      "Cave In — standing in falling rocks while stunned from Ground Slam"
+    ],
+    "prep": [
+      "This is a DPS check. Bring consumables, use Heroism early.",
+      "No specific resist gear needed"
+    ],
+    "tips": [
+      "After Ground Slam, immediately move away from other players before Shatter hits",
+      "The room is large — use all of it. Don't stack up.",
+      "Drops T4 Leg tokens and Dragonspine Trophy"
+    ]
+  },
+  {
+    "name": "Magtheridon",
+    "raid": "Magtheridon's Lair",
+    "phase": 1,
+    "type": "Add phase then burn with cube mechanic",
+    "aliases": ["Mag", "Magtheridon"],
+    "summary": "Phase 1: Kill 5 Channeler adds while Mag is banished. Phase 2: Mag activates — tank him and use the 5 Hellfire Channeling cubes to interrupt his Blast Nova (raid-wipe ability). 5 players click cubes simultaneously. Phase 3 (30%): cave collapses, avoid falling debris, burn him down.",
+    "abilities": [
+      {"name": "Channelers (Phase 1)", "desc": "5 Hellfire Channeler adds. Each casts Shadow Bolt Volley, Dark Mending (heal — interrupt this), and summons an Abyssal. Kill them in order before Mag activates at 2 minutes."},
+      {"name": "Blast Nova", "desc": "Phase 2. Mag channels a raid-wipe AoE. Must be interrupted by 5 players clicking the Hellfire Cubes simultaneously. If you miss it, everyone dies."},
+      {"name": "Quake", "desc": "Periodic knockback. Stuns briefly. Can interrupt cube clickers if timed badly."},
+      {"name": "Collapse (Phase 3)", "desc": "At 30%, ceiling collapses. Rocks fall dealing ~5000 damage. Avoid the shadow zones on the ground."},
+      {"name": "Cleave", "desc": "Frontal cleave. Tank faces away."}
+    ],
+    "killers": [
+      "Missing Blast Nova interrupt — if 5 people don't click cubes in time, it's an instant raid wipe",
+      "Channelers not dying before Mag activates — you get adds + boss = wipe",
+      "Cube clickers getting killed or Quaked off their cube during Blast Nova channel",
+      "Phase 3 cave collapse killing people who don't move out of debris zones"
+    ],
+    "prep": [
+      "Assign 5 cube clickers + backups. They MUST know their cube position.",
+      "Practice the cube click timing — all 5 must click within 1 sec of each other",
+      "Shadow resist helps for Channeler phase (Shadow Bolt Volley)"
+    ],
+    "tips": [
+      "Kill Channeler order: start with the two closest, work around the room",
+      "Cube clickers should be ranged DPS or healers — they need to survive and be mobile",
+      "Head quest reward (from Mag's head) is great — don't forget to loot it",
+      "Drops T4 Chest tokens"
+    ]
+  }
+]

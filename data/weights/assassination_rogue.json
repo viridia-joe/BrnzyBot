@@ -1,0 +1,27 @@
+{
+  "spec": "Assassination Rogue (41/20/0)",
+  "description": "Mutilate build. Requires daggers. Envenom finisher. Viable in later tiers.",
+  "source": "Community theorycrafting / WowSims",
+  "weights": {
+    "Agility": 1.00,
+    "MeleeHit": 1.05,
+    "Expertise": 1.15,
+    "MeleeCrit": 0.85,
+    "MeleeHaste": 0.85,
+    "AttackPower": 0.45,
+    "Strength": 0.50,
+    "ArmorPenetration": 0.30,
+    "Stamina": 0.00,
+    "Intellect": 0.00,
+    "Spirit": 0.00,
+    "Resilience": 0.00
+  },
+  "hit_cap": {
+    "base": 363,
+    "from_talents": 79,
+    "notes": "Precision gives 5% (79 rating). Soft cap (specials): 9% = 142 rating, reduced to 64 by Precision."
+  },
+  "armor_types": ["Leather"],
+  "weapon_types": ["Dagger"],
+  "class": "Rogue"
+}

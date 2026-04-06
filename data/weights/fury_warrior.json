@@ -1,0 +1,27 @@
+{
+  "spec": "Fury Warrior (17/44/0)",
+  "description": "Dual-wield DPS. Bloodthirst, Whirlwind, Heroic Strike. Rampage buff.",
+  "source": "Community theorycrafting / WowSims",
+  "weights": {
+    "MeleeHit": 1.20,
+    "Expertise": 1.30,
+    "Strength": 1.00,
+    "Agility": 0.65,
+    "MeleeCrit": 0.85,
+    "MeleeHaste": 0.80,
+    "AttackPower": 0.48,
+    "ArmorPenetration": 0.55,
+    "Stamina": 0.00,
+    "Intellect": 0.00,
+    "Spirit": 0.00,
+    "Resilience": 0.00
+  },
+  "hit_cap": {
+    "base": 142,
+    "from_talents": 47,
+    "notes": "Precision gives 3% (47 rating). Yellow hit cap: 9% = 142, reduced to 95 by Precision. White DW cap much higher (28%). Prioritize yellow cap."
+  },
+  "armor_types": ["Plate", "Mail", "Leather"],
+  "weapon_types": ["Sword", "Mace", "Axe", "Fist", "Dagger", "Polearm"],
+  "class": "Warrior"
+}

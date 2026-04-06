@@ -1,0 +1,107 @@
+{
+  "_comment": "Tank survival thresholds for TBC raid bosses (level 73). Values are rating unless noted.",
+
+  "prot_warrior": {
+    "name": "Protection Warrior",
+    "crit_immune": {
+      "defense_needed": 490,
+      "defense_base": 350,
+      "from_talents": 0,
+      "notes": "490 defense = crit immune vs bosses. No defense talents in standard prot build."
+    },
+    "crush_immune": {
+      "method": "Shield Block ability pushes crushes off the attack table when active.",
+      "total_avoidance_needed": 102.4,
+      "notes": "Miss + Dodge + Parry + Block >= 102.4% with Shield Block up. Base miss vs 73 = 5%."
+    },
+    "conversions": {
+      "defense_per_rating": 0.4231,
+      "dodge_per_rating": 0.0529,
+      "parry_per_rating": 0.0423,
+      "block_per_rating": 0.0645,
+      "resilience_crit_per_rating": 0.0254,
+      "dodge_per_agility": 0.0304
+    },
+    "health_baseline": {
+      "minimum_hp": 12000,
+      "comfortable_hp": 14000,
+      "well_geared_hp": 16000,
+      "notes": "Unbuffed HP. Raid buffed adds ~2-3k from kings, fort, etc."
+    },
+    "armor_baseline": {
+      "minimum": 14000,
+      "comfortable": 16000,
+      "well_geared": 18000,
+      "notes": "Armor values in bear form or with shield. 75% cap at ~35880."
+    }
+  },
+
+  "prot_paladin": {
+    "name": "Protection Paladin",
+    "crit_immune": {
+      "defense_needed": 490,
+      "defense_base": 350,
+      "from_talents": 0,
+      "notes": "490 defense = crit immune vs bosses. Paladins can also use resilience from PvP gear."
+    },
+    "crush_immune": {
+      "method": "Holy Shield adds 30% block chance. Need total avoidance + block >= 102.4% with Holy Shield.",
+      "total_avoidance_needed": 102.4,
+      "holy_shield_block": 30.0,
+      "notes": "Miss(5%) + Dodge + Parry + Block + Holy Shield(30%) >= 102.4%. More achievable than warriors in early gear."
+    },
+    "conversions": {
+      "defense_per_rating": 0.4231,
+      "dodge_per_rating": 0.0529,
+      "parry_per_rating": 0.0423,
+      "block_per_rating": 0.0645,
+      "resilience_crit_per_rating": 0.0254,
+      "dodge_per_agility": 0.02
+    },
+    "health_baseline": {
+      "minimum_hp": 11000,
+      "comfortable_hp": 13000,
+      "well_geared_hp": 15000,
+      "notes": "Paladins run slightly lower HP than warriors. Spell damage for threat is also important."
+    },
+    "armor_baseline": {
+      "minimum": 14000,
+      "comfortable": 16000,
+      "well_geared": 18000
+    }
+  },
+
+  "feral_bear_druid": {
+    "name": "Feral Bear Druid",
+    "crit_immune": {
+      "defense_needed": 415,
+      "defense_base": 350,
+      "from_talents": 3.0,
+      "talent_name": "Survival of the Fittest",
+      "notes": "SotF reduces crit chance taken by 3%. Only need 415 defense (65 above base) instead of 490. Can also use resilience: ~103 rating covers the remaining 2.6%."
+    },
+    "crush_immune": {
+      "method": "Bears cannot receive crushing blows in bear form (game mechanic).",
+      "total_avoidance_needed": 0,
+      "notes": "Not applicable. Bears are inherently crush-immune."
+    },
+    "conversions": {
+      "defense_per_rating": 0.4231,
+      "dodge_per_rating": 0.0529,
+      "resilience_crit_per_rating": 0.0254,
+      "dodge_per_agility": 0.0416
+    },
+    "health_baseline": {
+      "minimum_hp": 14000,
+      "comfortable_hp": 17000,
+      "well_geared_hp": 20000,
+      "notes": "Bear form HP with dire bear multiplier. Bears compensate for no block/parry with massive HP and armor."
+    },
+    "armor_baseline": {
+      "minimum": 25000,
+      "comfortable": 28000,
+      "well_geared": 33000,
+      "notes": "Dire Bear Form armor multiplier makes bears the highest-armor tanks. Leather armor * 4.7 modifier."
+    }
+  }
+}

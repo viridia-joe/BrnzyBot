@@ -1,0 +1,37 @@
+{
+  "_comment": "Items excluded from BiS benchmarking. Still shown as alternatives with special markers. BiS should reflect what any raider can obtain from raids, dungeons, quests, BoE, badges, or rep.",
+
+  "world_boss": {
+    "emoji": "💎",
+    "label": "World Boss",
+    "source_types": ["World Boss"]
+  },
+
+  "crafted_bop": {
+    "emoji": "🪡",
+    "label": "Crafted BoP",
+    "set_names": [
+      "Wrath of Spellfire",
+      "Shadow's Embrace",
+      "Primal Mooncloth",
+      "Windhawk Armor",
+      "Primal Intent",
+      "Netherstrike Armor",
+      "Netherscale Armor"
+    ],
+    "item_name_patterns": [
+      "Goggles", "Holo-gogs", "Holo-Gogs"
+    ]
+  },
+
+  "unavailable": {
+    "emoji": "🚫",
+    "label": "Not Available",
+    "item_name_patterns": [
+      "Direbrew", "Coren's Lucky Coin", "Empty Mug of Direbrew",
+      "Dark Iron Smoking Pipe", "Brightbrew Charm", "Balebrew Charm",
+      "Chancellor's"
+    ],
+    "_notes": "Seasonal event items (Brewfest) and out-of-season PvP gear (Chancellor = S4 arena). Not obtainable in Anniversary TBC progression."
+  }
+}

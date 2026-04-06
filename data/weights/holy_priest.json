@@ -1,0 +1,25 @@
+{
+  "spec": "Holy Priest (23/38/0)",
+  "description": "Raid healer. Greater Heal, CoH, PoM. Spirit-based regen.",
+  "source": "Community theorycrafting",
+  "weights": {
+    "HealingPower": 1.00,
+    "SpellHaste": 0.90,
+    "SpellCrit": 0.55,
+    "Intellect": 0.55,
+    "Spirit": 0.50,
+    "MP5": 0.80,
+    "Stamina": 0.10,
+    "SpellPower": 0.50,
+    "SpellHit": 0.00,
+    "Resilience": 0.00
+  },
+  "hit_cap": {
+    "base": 0,
+    "from_talents": 0,
+    "notes": "Healers don't need hit rating."
+  },
+  "armor_types": ["Cloth"],
+  "weapon_types": ["Mace", "Dagger", "Staff", "Wand"],
+  "class": "Priest"
+}

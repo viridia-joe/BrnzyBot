@@ -1,0 +1,26 @@
+{
+  "spec": "Shadow Priest (14/0/47)",
+  "description": "Mind Blast, SW:Pain, Vampiric Touch, Mind Flay. Raid mana battery via VT.",
+  "source": "Community theorycrafting / WowSims",
+  "weights": {
+    "SpellHit": 1.80,
+    "SpellPower": 1.00,
+    "ShadowSpellPower": 1.00,
+    "SpellHaste": 1.15,
+    "SpellCrit": 0.65,
+    "Intellect": 0.30,
+    "Spirit": 0.15,
+    "Stamina": 0.00,
+    "HealingPower": 0.00,
+    "MP5": 0.10,
+    "Resilience": 0.00
+  },
+  "hit_cap": {
+    "base": 202,
+    "from_talents": 76,
+    "notes": "Shadow Focus gives 6% hit (3/3 Shadow Focus = 10%... actually 2% per point, 3 points = 6%). Need 10% from gear = 126 rating. With ToW: 7% = 88 rating."
+  },
+  "armor_types": ["Cloth"],
+  "weapon_types": ["Mace", "Dagger", "Staff", "Wand"],
+  "class": "Priest"
+}

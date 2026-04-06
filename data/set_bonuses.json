@@ -1,0 +1,141 @@
+{
+  "_comment": "Set bonus EP values. Per-spec overrides in 'spec_overrides' set a bonus to 0 if it doesn't apply to that build. Sources: Wowhead BiS guides, community theorycraft consensus.",
+
+  "Beast Lord Armor": {
+    "2": {"ep": 5, "desc": "Reduces trap cooldown by 4 sec (minor PvE value)", "stats": {}},
+    "4": {"ep": 45, "desc": "Kill Command makes your attacks ignore 600 armor for 15 sec. Keep 4pc until you have 4pc T5.", "stats": {}},
+    "spec_overrides": {
+      "survival_hunter": {"4": 25},
+      "mm_hunter": {"4": 20}
+    },
+    "_source": "Wowhead/community: BM hunters keep 4pc through Phase 2. Only break for 4pc Rift Stalker (T5). ~80-100 AP equiv sustained = ~45 EP for BM. Lower for SV/MM since Kill Command is less central."
+  },
+
+  "Mana-Etched Regalia": {
+    "2": {"ep": 68.6, "desc": "+35 hit rating", "stats": {"SpellHit": 35}},
+    "4": {"ep": 0, "desc": "+5% spell haste for 6 sec on harmful spell cast (uptime too low to be reliable)", "stats": {}}
+  },
+  "Spellstrike Infusion": {
+    "2": {"ep": 25, "desc": "5% chance on harmful spell to gain 92 spell damage for 10 sec (~25 EP avg)", "stats": {}},
+    "spec_overrides": {}
+  },
+  "Battlecast Garb": {
+    "2": {"ep": 15, "desc": "+15 spell damage", "stats": {"SpellPower": 15}}
+  },
+  "Whitemend Wisdom": {
+    "2": {"ep": 10, "desc": "10% of Int as healing power", "stats": {}},
+    "spec_overrides": {
+      "destro_warlock": {"2": 0},
+      "affliction_warlock": {"2": 0},
+      "fire_mage": {"2": 0},
+      "arcane_mage": {"2": 0},
+      "shadow_priest": {"2": 0}
+    }
+  },
+
+  "Voidheart Raiment": {
+    "2": {"ep": 20, "desc": "Shadow Bolt and Incinerate have 5% chance to grant 135 shadow/fire spell power for 15 sec", "stats": {}},
+    "4": {"ep": 0, "desc": "Corruption, Immolate, CoA ticks reduce cast time of next Shadow Bolt by 10% (DS/Ruin doesn't use these enough)", "stats": {}},
+    "spec_overrides": {
+      "affliction_warlock": {"4": 35}
+    }
+  },
+  "Aldor Regalia": {
+    "2": {"ep": 15, "desc": "Arcane Blast has 20% chance to grant 150 spell damage for 6 sec (~15 EP avg)", "stats": {}},
+    "4": {"ep": 0, "desc": "Reduces mana cost of Arcane Blast by 100 (minor)", "stats": {}},
+    "spec_overrides": {
+      "fire_mage": {"2": 10}
+    }
+  },
+
+  "Cyclone Regalia": {
+    "2": {"ep": 35, "desc": "Spell crit bonus +5% (Lightning Bolt, Chain Lightning, etc.)", "stats": {"SpellCrit": 35}},
+    "4": {"ep": 25, "desc": "15% chance on spell crit to reduce next Lightning Bolt cast time by 0.75 sec", "stats": {}}
+  },
+  "Cyclone Raiment": {
+    "2": {"ep": 25, "desc": "+25 healing per Lesser Healing Wave", "stats": {}},
+    "4": {"ep": 15, "desc": "+5% crit to Lesser Healing Wave", "stats": {}}
+  },
+  "Cyclone Harness": {
+    "2": {"ep": 30, "desc": "+40 AP and reduces mana cost of Stormstrike by 20%", "stats": {"AttackPower": 40}},
+    "4": {"ep": 20, "desc": "Stormstrike gives 10% spell crit for 12 sec", "stats": {}}
+  },
+
+  "Justicar Armor": {
+    "2": {"ep": 20, "desc": "+15% Holy Shield block value", "stats": {}},
+    "4": {"ep": 25, "desc": "+8% increased healing from Lay on Hands and +100 spell damage for 60 sec after Judgement", "stats": {}}
+  },
+  "Justicar Raiment": {
+    "2": {"ep": 15, "desc": "+40 healing to Flash of Light", "stats": {}},
+    "4": {"ep": 15, "desc": "8% mana cost reduction on Flash of Light", "stats": {}}
+  },
+  "Justicar Battlegear": {
+    "2": {"ep": 15, "desc": "+10% Judgement damage", "stats": {}},
+    "4": {"ep": 10, "desc": "+5 Judgement of Wisdom mana", "stats": {}}
+  },
+
+  "Incarnate Raiment": {
+    "2": {"ep": 15, "desc": "+10% Greater Heal healing", "stats": {}},
+    "4": {"ep": 10, "desc": "Greater Heal reduces cast time of next Flash Heal by 0.5 sec", "stats": {}}
+  },
+  "Incarnate Regalia": {
+    "2": {"ep": 15, "desc": "Mind Blast cost reduction by 10%", "stats": {}},
+    "4": {"ep": 20, "desc": "SW:Pain, VT, and SW:Death grant 5% to gain up to 150 shadow spell power for 6 sec", "stats": {}}
+  },
+
+  "Demon Stalker Armor": {
+    "2": {"ep": 20, "desc": "5% bonus pet damage", "stats": {}},
+    "4": {"ep": 15, "desc": "Kill Command cooldown reduced by 3 sec", "stats": {}},
+    "spec_overrides": {
+      "survival_hunter": {"2": 5},
+      "mm_hunter": {"2": 5}
+    }
+  },
+
+  "Netherblade": {
+    "2": {"ep": 20, "desc": "+5% Eviscerate/Envenom damage", "stats": {}},
+    "4": {"ep": 15, "desc": "+3 energy on combo point generating abilities", "stats": {}}
+  },
+
+  "Malorne Raiment": {
+    "2": {"ep": 15, "desc": "+60 healing on Rejuvenation over its duration", "stats": {}},
+    "4": {"ep": 15, "desc": "+3 sec Regrowth HoT duration", "stats": {}}
+  },
+  "Malorne Regalia": {
+    "2": {"ep": 15, "desc": "20% chance on spell crit to gain 120 nature spell damage for 6 sec", "stats": {}},
+    "4": {"ep": 15, "desc": "Reduces Starfire cast time by 0.15 sec", "stats": {}}
+  },
+  "Malorne Harness": {
+    "2": {"ep": 20, "desc": "+15 Mangle damage", "stats": {}},
+    "4": {"ep": 25, "desc": "+3 energy per combo point on finisher", "stats": {}},
+    "spec_overrides": {
+      "feral_bear_druid": {"4": 10}
+    }
+  },
+
+  "Warbringer Armor": {
+    "2": {"ep": 20, "desc": "+10% Shield Slam damage", "stats": {}},
+    "4": {"ep": 15, "desc": "Revenge grants 200 AP for 8 sec", "stats": {}}
+  },
+  "Warbringer Battlegear": {
+    "2": {"ep": 15, "desc": "+10% Mortal Strike / Bloodthirst damage", "stats": {}},
+    "4": {"ep": 15, "desc": "Increases damage of Whirlwind / Overpower by 10%", "stats": {}}
+  },
+
+  "Shadow's Embrace": {
+    "3": {"ep": 30, "desc": "+24 shadow spell damage", "stats": {"ShadowSpellPower": 24}},
+    "spec_overrides": {
+      "fire_mage": {"3": 0},
+      "ele_shaman": {"3": 0}
+    }
+  },
+  "Wrath of Spellfire": {
+    "3": {"ep": 20, "desc": "+7% Int as spell damage", "stats": {}},
+    "spec_overrides": {
+      "shadow_priest": {"3": 5}
+    }
+  },
+  "Primal Mooncloth": {
+    "3": {"ep": 20, "desc": "+5% Spirit-based mana regen while casting", "stats": {}}
+  }
+}

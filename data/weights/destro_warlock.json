@@ -1,0 +1,27 @@
+{
+  "spec": "Destruction Warlock (0/21/40 DS/Ruin)",
+  "description": "Shadow Bolt spam, Demonic Sacrifice succubus",
+  "source": "Icy Veins TBC Classic / community theorycrafting",
+  "weights": {
+    "SpellHit": 1.96,
+    "SpellPower": 1.00,
+    "ShadowSpellPower": 1.00,
+    "FireSpellPower": 0.00,
+    "SpellHaste": 1.35,
+    "SpellCrit": 0.88,
+    "Intellect": 0.26,
+    "Spirit": 0.09,
+    "Stamina": 0.00,
+    "HealingPower": 0.00,
+    "MP5": 0.00,
+    "Resilience": 0.00
+  },
+  "hit_cap": {
+    "base": 202,
+    "from_talents": 0,
+    "notes": "No hit talents in DS/Ruin. Full 16% from gear+buffs. Totem of Wrath gives 3% (37.8 rating)."
+  },
+  "armor_types": ["Cloth"],
+  "weapon_types": ["Sword", "Dagger", "Staff", "Wand"],
+  "class": "Warlock"
+}

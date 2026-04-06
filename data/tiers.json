@@ -1,0 +1,10 @@
+{
+  "_comment": "Gear tier thresholds based on % of Phase BiS EP. Tiers are evaluated top-down, first match wins.",
+  "tiers": [
+    {"min_pct": 95, "label": "⭐", "name": "BiS",     "desc": "Best in slot or near-identical"},
+    {"min_pct": 85, "label": "🥇", "name": "Gold",    "desc": "Strong piece, minor upgrade available"},
+    {"min_pct": 70, "label": "🥈", "name": "Silver",  "desc": "Solid but clear upgrades exist"},
+    {"min_pct": 50, "label": "🥉", "name": "Bronze",  "desc": "Needs work, meaningful upgrades waiting"},
+    {"min_pct": 0,  "label": "🔨", "name": "Anvil",   "desc": "Major weakness, priority upgrade"}
+  ]
+}

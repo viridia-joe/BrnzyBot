@@ -1,0 +1,27 @@
+{
+  "spec": "Marksmanship Hunter (5/41/15)",
+  "description": "Aimed Shot, Multi-Shot, Steady Shot. Trueshot Aura. Less common than BM in TBC.",
+  "source": "Community theorycrafting / WowSims",
+  "weights": {
+    "Agility": 1.00,
+    "MeleeHit": 0.85,
+    "MeleeCrit": 0.80,
+    "AttackPower": 0.48,
+    "RangedAttackPower": 0.48,
+    "MeleeHaste": 0.65,
+    "ArmorPenetration": 0.38,
+    "Intellect": 0.10,
+    "Stamina": 0.00,
+    "Strength": 0.10,
+    "Spirit": 0.00,
+    "Resilience": 0.00
+  },
+  "hit_cap": {
+    "base": 142,
+    "from_talents": 47,
+    "notes": "Surefooted gives 3% from Survival tree. Need 6% from gear = 95 rating."
+  },
+  "armor_types": ["Mail", "Leather"],
+  "weapon_types": ["Sword", "Axe", "Fist", "Dagger", "Polearm", "Staff"],
+  "class": "Hunter"
+}

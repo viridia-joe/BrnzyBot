@@ -1,0 +1,29 @@
+{
+  "spec": "Feral Druid — Bear Tank (0/47/14 or 0/44/17)",
+  "description": "Bear form tank. Mangle, Lacerate, Maul. Stam/armor stacking, dodge for avoidance.",
+  "source": "Community theorycrafting",
+  "weights": {
+    "Stamina": 1.00,
+    "Armor": 0.05,
+    "Agility": 0.80,
+    "Dodge": 0.70,
+    "Defense": 0.60,
+    "MeleeHit": 0.40,
+    "Expertise": 0.50,
+    "Strength": 0.20,
+    "AttackPower": 0.10,
+    "FeralAttackPower": 0.10,
+    "MeleeCrit": 0.15,
+    "Resilience": 0.35,
+    "Intellect": 0.00,
+    "Spirit": 0.00
+  },
+  "hit_cap": {
+    "base": 142,
+    "from_talents": 0,
+    "notes": "9% melee hit cap. Threat gen values hit/expertise, but survival stats come first."
+  },
+  "armor_types": ["Leather"],
+  "weapon_types": ["Mace", "Fist", "Staff", "Polearm"],
+  "class": "Druid"
+}

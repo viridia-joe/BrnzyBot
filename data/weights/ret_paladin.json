@@ -1,0 +1,28 @@
+{
+  "spec": "Retribution Paladin (5/8/48 or 10/5/46)",
+  "description": "Crusader Strike, Seal of Blood/Command. Melee DPS + Sanctity Aura.",
+  "source": "Community theorycrafting / WowSims",
+  "weights": {
+    "Strength": 1.00,
+    "MeleeHit": 0.90,
+    "Expertise": 0.95,
+    "MeleeCrit": 0.75,
+    "MeleeHaste": 0.70,
+    "AttackPower": 0.42,
+    "Agility": 0.55,
+    "SpellPower": 0.15,
+    "SpellCrit": 0.10,
+    "Intellect": 0.10,
+    "Stamina": 0.00,
+    "Spirit": 0.00,
+    "Resilience": 0.00
+  },
+  "hit_cap": {
+    "base": 142,
+    "from_talents": 0,
+    "notes": "9% melee hit cap = 142 rating. No hit talents. Spell hit from Precision aura doesn't apply to melee."
+  },
+  "armor_types": ["Plate", "Mail", "Leather"],
+  "weapon_types": ["Sword", "Mace", "Axe", "Polearm"],
+  "class": "Paladin"
+}

@@ -1,0 +1,27 @@
+{
+  "spec": "Balance Druid (33/0/28 or 37/0/24)",
+  "description": "Moonkin. Starfire/Wrath rotation. Moonkin Aura for party crit.",
+  "source": "Community theorycrafting / WowSims",
+  "weights": {
+    "SpellHit": 1.85,
+    "SpellPower": 1.00,
+    "NatureSpellPower": 0.45,
+    "ArcaneSpellPower": 0.55,
+    "SpellHaste": 1.30,
+    "SpellCrit": 0.75,
+    "Intellect": 0.35,
+    "Spirit": 0.12,
+    "MP5": 0.20,
+    "Stamina": 0.00,
+    "HealingPower": 0.00,
+    "Resilience": 0.00
+  },
+  "hit_cap": {
+    "base": 202,
+    "from_talents": 50,
+    "notes": "Balance of Power gives 4% hit (50.5 rating). Need 12% from gear = 152 rating. With ToW: 9% = 114 rating."
+  },
+  "armor_types": ["Leather", "Cloth"],
+  "weapon_types": ["Mace", "Dagger", "Staff", "Fist"],
+  "class": "Druid"
+}

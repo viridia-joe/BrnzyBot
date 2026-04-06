@@ -1,0 +1,28 @@
+{
+  "spec": "Beast Mastery Hunter (41/20/0)",
+  "description": "Steady Shot + Auto Shot rotation. Pet does massive damage. Dominant TBC DPS spec.",
+  "source": "Community theorycrafting / WowSims",
+  "weights": {
+    "Agility": 1.00,
+    "MeleeHit": 0.80,
+    "MeleeCrit": 0.75,
+    "AttackPower": 0.45,
+    "RangedAttackPower": 0.45,
+    "MeleeHaste": 0.70,
+    "ArmorPenetration": 0.35,
+    "Intellect": 0.10,
+    "MP5": 0.05,
+    "Stamina": 0.00,
+    "Strength": 0.10,
+    "Spirit": 0.00,
+    "Resilience": 0.00
+  },
+  "hit_cap": {
+    "base": 142,
+    "from_talents": 0,
+    "notes": "9% hit cap = 142 rating. Surefooted gives 3% if specced Survival. Standard BM doesn't have hit talents."
+  },
+  "armor_types": ["Mail", "Leather"],
+  "weapon_types": ["Sword", "Axe", "Fist", "Dagger", "Polearm", "Staff"],
+  "class": "Hunter"
+}

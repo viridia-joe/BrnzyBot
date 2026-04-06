@@ -1,0 +1,27 @@
+{
+  "spec": "Fire Destruction Warlock (0/21/40 Incinerate)",
+  "description": "Incinerate spam with Demonic Sacrifice imp for fire damage.",
+  "source": "Community theorycrafting / WowSims",
+  "weights": {
+    "SpellHit": 1.90,
+    "SpellPower": 1.00,
+    "FireSpellPower": 1.00,
+    "SpellHaste": 1.40,
+    "SpellCrit": 0.85,
+    "Intellect": 0.26,
+    "Spirit": 0.09,
+    "Stamina": 0.00,
+    "ShadowSpellPower": 0.00,
+    "HealingPower": 0.00,
+    "MP5": 0.00,
+    "Resilience": 0.00
+  },
+  "hit_cap": {
+    "base": 202,
+    "from_talents": 0,
+    "notes": "No hit talents. Full 16% from gear+buffs. Totem of Wrath gives 3%."
+  },
+  "armor_types": ["Cloth"],
+  "weapon_types": ["Sword", "Dagger", "Staff", "Wand"],
+  "class": "Warlock"
+}

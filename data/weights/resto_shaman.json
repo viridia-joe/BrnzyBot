@@ -1,0 +1,25 @@
+{
+  "spec": "Restoration Shaman (0/5/56)",
+  "description": "Chain Heal specialist. Mana Tide Totem. Earth Shield on tank.",
+  "source": "Community theorycrafting",
+  "weights": {
+    "HealingPower": 1.00,
+    "SpellHaste": 0.80,
+    "MP5": 0.85,
+    "Intellect": 0.60,
+    "SpellCrit": 0.50,
+    "Spirit": 0.15,
+    "Stamina": 0.10,
+    "SpellPower": 0.50,
+    "SpellHit": 0.00,
+    "Resilience": 0.00
+  },
+  "hit_cap": {
+    "base": 0,
+    "from_talents": 0,
+    "notes": "Healers don't need hit rating."
+  },
+  "armor_types": ["Mail", "Leather", "Cloth"],
+  "weapon_types": ["Mace", "Dagger", "Fist", "Staff", "Shield"],
+  "class": "Shaman"
+}

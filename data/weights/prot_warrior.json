@@ -1,0 +1,30 @@
+{
+  "spec": "Protection Warrior (8/5/48 or 12/5/44)",
+  "description": "Main tank. Shield Slam, Devastate, Shield Block. Defense/stam stacking.",
+  "source": "Community theorycrafting",
+  "weights": {
+    "Stamina": 1.00,
+    "Defense": 0.80,
+    "Dodge": 0.65,
+    "Parry": 0.60,
+    "Block": 0.50,
+    "BlockValue": 0.35,
+    "Armor": 0.04,
+    "Expertise": 0.55,
+    "MeleeHit": 0.45,
+    "Strength": 0.25,
+    "Agility": 0.40,
+    "MeleeCrit": 0.10,
+    "Resilience": 0.30,
+    "Intellect": 0.00,
+    "Spirit": 0.00
+  },
+  "hit_cap": {
+    "base": 142,
+    "from_talents": 0,
+    "notes": "9% melee hit cap for threat. Usually not worth capping — survival stats come first."
+  },
+  "armor_types": ["Plate"],
+  "weapon_types": ["Sword", "Mace", "Axe", "Dagger", "Fist", "Shield"],
+  "class": "Warrior"
+}

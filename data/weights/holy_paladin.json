@@ -1,0 +1,25 @@
+{
+  "spec": "Holy Paladin (41/20/0 or 48/13/0)",
+  "description": "Flash of Light spam. Holy Light on tank. Plate healer with Illumination mana return.",
+  "source": "Community theorycrafting",
+  "weights": {
+    "HealingPower": 1.00,
+    "SpellCrit": 0.80,
+    "SpellHaste": 0.75,
+    "Intellect": 0.70,
+    "MP5": 0.60,
+    "Spirit": 0.10,
+    "Stamina": 0.10,
+    "SpellPower": 0.50,
+    "SpellHit": 0.00,
+    "Resilience": 0.00
+  },
+  "hit_cap": {
+    "base": 0,
+    "from_talents": 0,
+    "notes": "Healers don't need hit rating. Crit is especially valuable due to Illumination mana return."
+  },
+  "armor_types": ["Plate", "Mail", "Leather", "Cloth"],
+  "weapon_types": ["Mace", "Sword", "Shield"],
+  "class": "Paladin"
+}

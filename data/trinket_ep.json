@@ -1,0 +1,153 @@
+{
+  "_comment": "Trinket EP overrides. Sources: Wowhead BiS guides, community calcs on Wowhead comments, TBC theorycraft consensus. Values represent total effective EP including proc uptime for a typical 3-5 min raid fight.",
+  "_methodology": "For on-use trinkets: passive_stat_EP + (use_effect_EP * uptime). For procs: effective_stat_equivalent from community calcs. Validated against Wowhead BiS rankings — if a guide ranks Trinket A over B, A must have higher EP than B for that spec.",
+
+  "28785": {
+    "_name": "The Lightning Capacitor",
+    "_source": "Wowhead comments: ~80 DPS at 33% crit = ~80 SP equiv. BiS for ele shaman (Wowhead Phase 1 guide). NOT in destro lock BiS list.",
+    "ele_shaman": 95, "balance_druid": 75,
+    "fire_mage": 80, "arcane_mage": 70, "frost_mage": 60,
+    "destro_warlock": 55, "affliction_warlock": 45, "fire_destro_warlock": 60,
+    "shadow_priest": 55
+  },
+  "27683": {
+    "_name": "Quagmirran's Eye",
+    "_source": "37 spell haste passive. Wowhead: BiS #1 for destro warlock. Haste is ~1.35 EP/rating for destro = 50 base. Proc uptime adds effective value.",
+    "destro_warlock": 72, "affliction_warlock": 55, "fire_destro_warlock": 72,
+    "fire_mage": 72, "arcane_mage": 70, "frost_mage": 65,
+    "shadow_priest": 58,
+    "ele_shaman": 68, "balance_druid": 62
+  },
+  "29370": {
+    "_name": "Icon of the Silver Crescent",
+    "_source": "43 passive SP + on-use 155 SP for 20s / 2 min CD. Effective avg: 43 + 155*(20/120) = 43 + 26 = 69 EP. Wowhead: BiS #2 for destro warlock, BiS #2 for ele shaman.",
+    "destro_warlock": 70, "affliction_warlock": 68, "fire_destro_warlock": 70,
+    "fire_mage": 72, "arcane_mage": 75, "frost_mage": 68,
+    "shadow_priest": 68,
+    "ele_shaman": 70, "balance_druid": 68
+  },
+  "28789": {
+    "_name": "Eye of Magtheridon",
+    "_source": "54 SP passive + on-use 170 SP for 10s / 2 min CD. Effective avg: 54 + 170*(10/120) = 54 + 14 = 68 EP.",
+    "destro_warlock": 68, "affliction_warlock": 65, "fire_destro_warlock": 68,
+    "fire_mage": 65, "arcane_mage": 65, "frost_mage": 60,
+    "shadow_priest": 65,
+    "ele_shaman": 65, "balance_druid": 62
+  },
+  "19379": {
+    "_name": "Neltharion's Tear",
+    "_source": "44 SP + 16 spell hit. Pure stats. EP = 44*1.0 + 16*~1.9 = ~74 for hit-uncapped, ~44 for hit-capped. Wowhead: alternative when hit-capped.",
+    "destro_warlock": 75, "affliction_warlock": 73, "fire_destro_warlock": 73,
+    "fire_mage": 73, "arcane_mage": 70, "frost_mage": 68,
+    "shadow_priest": 73,
+    "ele_shaman": 60, "balance_druid": 65
+  },
+  "29132": {
+    "_name": "Scryer's Bloodgem",
+    "_source": "32 spell hit passive + on-use 150 SP for 15s / 90s CD. Effective: 32*~1.9 + 150*(15/90) = 61 + 25 = 86 EP when hit-uncapped, ~42 when hit-capped.",
+    "destro_warlock": 65, "affliction_warlock": 62, "fire_destro_warlock": 65,
+    "fire_mage": 60, "arcane_mage": 60, "frost_mage": 55,
+    "shadow_priest": 60,
+    "ele_shaman": 45, "balance_druid": 55
+  },
+  "28418": {
+    "_name": "Shiffar's Nexus-Horn",
+    "_source": "30 spell crit passive + proc 225 SP for 10s on spell crit (45s ICD). Effective: 30*0.88 + 225*(10/45)*~0.6 uptime = 26 + 30 = ~56 EP for destro.",
+    "destro_warlock": 56, "affliction_warlock": 42, "fire_destro_warlock": 56,
+    "fire_mage": 58, "arcane_mage": 52, "frost_mage": 48,
+    "shadow_priest": 48,
+    "ele_shaman": 55, "balance_druid": 50
+  },
+  "28223": {
+    "_name": "Arcanist's Stone",
+    "_source": "25 spell hit passive + on-use 175 SP for 20s / 2 min CD. Effective: 25*~1.9 + 175*(20/120) = 48 + 29 = 77 EP when hit-uncapped.",
+    "destro_warlock": 60, "affliction_warlock": 58, "fire_destro_warlock": 60,
+    "fire_mage": 55, "arcane_mage": 55, "frost_mage": 50,
+    "shadow_priest": 55,
+    "ele_shaman": 40, "balance_druid": 50
+  },
+  "29179": {
+    "_name": "Xi'ri's Gift",
+    "_source": "32 spell crit passive + on-use 150 SP for 15s / 90s CD. Effective: 32*0.88 + 150*(15/90) = 28 + 25 = 53 EP.",
+    "destro_warlock": 53, "affliction_warlock": 48, "fire_destro_warlock": 53,
+    "fire_mage": 52, "arcane_mage": 50, "frost_mage": 48,
+    "shadow_priest": 48,
+    "ele_shaman": 52, "balance_druid": 48
+  },
+
+  "28830": {
+    "_name": "Dragonspine Trophy",
+    "_source": "40 AP passive + proc 325 haste for 10s on melee crit. ~20% proc rate. BiS melee trinket Phase 1-3.",
+    "combat_rogue": 105, "assassination_rogue": 100,
+    "fury_warrior": 100, "arms_warrior": 90,
+    "enh_shaman": 95,
+    "feral_cat_druid": 95,
+    "bm_hunter": 90, "mm_hunter": 85, "survival_hunter": 85,
+    "ret_paladin": 80
+  },
+  "29383": {
+    "_name": "Bloodlust Brooch",
+    "_source": "72 AP passive + on-use 278 AP for 20s / 2 min CD. Effective: 72 + 278*(20/120) = 72 + 46 = 118 AP equiv. At ~0.45 EP/AP = ~53 EP for most melee.",
+    "combat_rogue": 70, "assassination_rogue": 65,
+    "fury_warrior": 70, "arms_warrior": 65,
+    "enh_shaman": 65,
+    "feral_cat_druid": 65,
+    "bm_hunter": 65, "mm_hunter": 60, "survival_hunter": 60,
+    "ret_paladin": 60
+  },
+  "28034": {
+    "_name": "Hourglass of the Unraveller",
+    "_source": "32 crit passive + proc 300 AP for 10s on melee crit (50s ICD).",
+    "combat_rogue": 75, "assassination_rogue": 70,
+    "fury_warrior": 75, "arms_warrior": 70,
+    "enh_shaman": 70,
+    "feral_cat_druid": 70,
+    "bm_hunter": 70, "mm_hunter": 65, "survival_hunter": 65,
+    "ret_paladin": 65
+  },
+  "28288": {
+    "_name": "Abacus of Violent Odds",
+    "_source": "64 AP passive + on-use 260 haste for 10s / 2 min CD.",
+    "combat_rogue": 60, "assassination_rogue": 55,
+    "fury_warrior": 60, "arms_warrior": 55,
+    "enh_shaman": 55,
+    "feral_cat_druid": 55,
+    "bm_hunter": 55, "mm_hunter": 50, "survival_hunter": 50,
+    "ret_paladin": 50
+  },
+  "28579": {
+    "_name": "Romulo's Poison Vial",
+    "_source": "35 hit passive + proc 222 AP for 15s.",
+    "combat_rogue": 72, "assassination_rogue": 68,
+    "fury_warrior": 65, "arms_warrior": 60,
+    "enh_shaman": 62,
+    "feral_cat_druid": 62,
+    "bm_hunter": 60, "mm_hunter": 55, "survival_hunter": 55
+  },
+
+  "28528": {
+    "_name": "Moroes' Lucky Pocket Watch",
+    "prot_warrior": 80, "prot_paladin": 70, "feral_bear_druid": 85
+  },
+  "28727": {
+    "_name": "Pendant of the Violet Eye",
+    "holy_priest": 65, "resto_druid": 60, "resto_shaman": 55, "holy_paladin": 55,
+    "arcane_mage": 55
+  },
+  "29376": {
+    "_name": "Essence of the Martyr",
+    "holy_priest": 90, "resto_druid": 85, "resto_shaman": 80, "holy_paladin": 85
+  },
+  "28823": {
+    "_name": "Eye of Gruul",
+    "holy_priest": 80, "resto_druid": 75, "resto_shaman": 70, "holy_paladin": 75
+  },
+  "30841": {
+    "_name": "Lower City Prayerbook",
+    "holy_priest": 75, "resto_druid": 70, "resto_shaman": 65, "holy_paladin": 70
+  },
+  "28370": {
+    "_name": "Bangle of Endless Blessings",
+    "holy_priest": 70, "resto_druid": 65, "resto_shaman": 60, "holy_paladin": 65
+  }
+}

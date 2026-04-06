@@ -1,0 +1,38 @@
+{
+  "_comment": "Best TBC gems by color and role. EP computed at runtime from spec weights.",
+  "caster": {
+    "Red": {"name": "Runed Living Ruby", "stats": {"SpellPower": 9}},
+    "Yellow": {"name": "Veiled Noble Topaz", "stats": {"SpellHit": 5, "SpellPower": 5}},
+    "Blue": {"name": "Glowing Nightseye", "stats": {"SpellPower": 5, "Stamina": 6}},
+    "Meta": {"name": "Chaotic Skyfire Diamond", "stats": {"SpellCrit": 12}, "bonusEP": 30},
+    "notes": "Meta bonusEP represents the 3% increased crit damage effect (~30 EP for a raid-geared caster)."
+  },
+  "melee_phys": {
+    "Red": {"name": "Delicate Living Ruby", "stats": {"Agility": 8}},
+    "Yellow": {"name": "Glinting Noble Topaz", "stats": {"MeleeHit": 4, "Agility": 4}},
+    "Blue": {"name": "Shifting Nightseye", "stats": {"Agility": 4, "Stamina": 6}},
+    "Meta": {"name": "Relentless Earthstorm Diamond", "stats": {"MeleeCrit": 12}, "bonusEP": 30},
+    "notes": "Meta bonusEP represents the 3% increased crit damage effect."
+  },
+  "melee_str": {
+    "Red": {"name": "Bold Living Ruby", "stats": {"Strength": 8}},
+    "Yellow": {"name": "Inscribed Noble Topaz", "stats": {"MeleeCrit": 4, "Strength": 4}},
+    "Blue": {"name": "Sovereign Nightseye", "stats": {"Strength": 4, "Stamina": 6}},
+    "Meta": {"name": "Relentless Earthstorm Diamond", "stats": {"MeleeCrit": 12}, "bonusEP": 30},
+    "notes": "Meta bonusEP represents the 3% increased crit damage effect."
+  },
+  "healer": {
+    "Red": {"name": "Teardrop Living Ruby", "stats": {"HealingPower": 18}},
+    "Yellow": {"name": "Luminous Noble Topaz", "stats": {"HealingPower": 9, "Intellect": 4}},
+    "Blue": {"name": "Royal Nightseye", "stats": {"HealingPower": 9, "MP5": 2}},
+    "Meta": {"name": "Insightful Earthstorm Diamond", "stats": {"Intellect": 12}, "bonusEP": 25},
+    "notes": "Meta bonusEP represents the mana restore proc (~25 EP value for sustain)."
+  },
+  "tank": {
+    "Red": {"name": "Subtle Living Ruby", "stats": {"Dodge": 8}},
+    "Yellow": {"name": "Enduring Talasite", "stats": {"Defense": 4, "Stamina": 6}},
+    "Blue": {"name": "Solid Star of Elune", "stats": {"Stamina": 12}},
+    "Meta": {"name": "Powerful Earthshatter Diamond", "stats": {"Stamina": 18}, "bonusEP": 20},
+    "notes": "Meta bonusEP represents the 5% stun duration reduction."
+  }
+}

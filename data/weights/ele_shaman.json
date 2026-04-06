@@ -1,0 +1,26 @@
+{
+  "spec": "Elemental Shaman (~40/0/21)",
+  "description": "Lightning Bolt spam, Totem of Wrath",
+  "source": "Community theorycrafting / WowSims",
+  "weights": {
+    "SpellHit": 2.00,
+    "SpellPower": 1.00,
+    "NatureSpellPower": 1.00,
+    "SpellHaste": 1.30,
+    "SpellCrit": 0.80,
+    "Intellect": 0.35,
+    "MP5": 0.15,
+    "Spirit": 0.05,
+    "Stamina": 0.00,
+    "HealingPower": 0.00,
+    "Resilience": 0.00
+  },
+  "hit_cap": {
+    "base": 202,
+    "from_talents": 152,
+    "notes": "Elemental Precision (6%) + Totem of Wrath (3%) + Nature's Guidance (3%) = 12%. Need ~50 rating from gear."
+  },
+  "armor_types": ["Mail", "Leather", "Cloth"],
+  "weapon_types": ["Mace", "Dagger", "Fist", "Staff", "Shield", "Off Hand"],
+  "class": "Shaman"
+}

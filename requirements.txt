@@ -1,0 +1,17 @@
+# BrnzyBot dependencies
+
+# Discord
+discord.py>=2.3.0
+
+# Gear optimizer
+scipy>=1.11.0
+numpy>=1.24.0
+
+# LLM routing (LiteLLM talks to local Ollama cluster + Claude escalation)
+litellm>=1.30.0
+
+# Already in stdlib — listed for documentation
+# sqlite3
+# asyncio
+# json
+# logging

@@ -1,0 +1,15 @@
+{
+  "_note": "BOP crafted item_id → profession. Run build_professions_db.py on jarvis to populate from tbc_items.db. IDs here are bootstrapped from known TBC data and will be overwritten/extended by the script.",
+
+  "21869": "Tailoring",
+  "21870": "Tailoring",
+  "21871": "Tailoring",
+
+  "21872": "Tailoring",
+  "21873": "Tailoring",
+  "21874": "Tailoring",
+
+  "21875": "Tailoring",
+  "21876": "Tailoring",
+  "21877": "Tailoring"
+}

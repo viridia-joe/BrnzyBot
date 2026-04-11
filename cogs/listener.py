@@ -98,17 +98,29 @@ class ListenerCog(commands.Cog, name="Listener"):
             return
 
         # Route natural language through classifier
-        await self._handle_nl(message)
+        was_mentioned = _bot_mentioned(message, self.bot.user)
+        await self._handle_nl(message, was_mentioned=was_mentioned)
 
-    async def _handle_nl(self, message: discord.Message) -> None:
+    async def _handle_nl(self, message: discord.Message, was_mentioned: bool = False) -> None:
         """Run NL triage and dispatch resulting intent."""
         content = message.clean_content.strip()
         if not content:
             return
 
-        # Remove bot mention from the front if present
-        if self.bot.user and content.startswith(f"@{self.bot.user.display_name}"):
-            content = content[len(self.bot.user.display_name) + 1:].strip()
+        # Strip bot mention from the start of the message
+        if self.bot.user:
+            mention_forms = [
+                f"<@{self.bot.user.id}>",
+                f"<@!{self.bot.user.id}>",
+                f"@{self.bot.user.display_name}",
+            ]
+            for form in mention_forms:
+                if content.startswith(form):
+                    content = content[len(form):].strip()
+                    break
+
+        if not content:
+            return
 
         # Classify in a thread — triage LLM call is blocking
         loop = asyncio.get_running_loop()
@@ -117,12 +129,23 @@ class ListenerCog(commands.Cog, name="Listener"):
             lambda: classify(content, source="nl", use_llm=True),
         )
 
+        # When directly @mentioned, fall back to general_qa instead of dropping
         if not intent.is_executable() or intent.confidence < 0.5:
-            log.debug(
-                "NL triage: unrecognized or low-confidence (%s, %.2f) — dropping",
-                intent.command, intent.confidence,
-            )
-            return
+            if was_mentioned:
+                log.info("NL triage low-confidence (%s, %.2f) but bot was mentioned — routing to general_qa",
+                         intent.command, intent.confidence)
+                intent = Intent(
+                    command="general_qa",
+                    confidence=1.0,
+                    source="nl",
+                    raw_message=content,
+                )
+            else:
+                log.debug(
+                    "NL triage: unrecognized or low-confidence (%s, %.2f) — dropping",
+                    intent.command, intent.confidence,
+                )
+                return
 
         if intent.needs_clarification():
             await self._ask_clarification(message, intent)
@@ -235,6 +258,49 @@ class ListenerCog(commands.Cog, name="Listener"):
                 result_text = f"Gear check failed: {exc}"
 
             await thinking_msg.edit(content=result_text)
+
+        elif intent.command in ("general_qa", "unknown") and intent.raw_message:
+            from core.messages import thinking as _thinking
+            thinking_msg = await message.reply(_thinking(), mention_author=False)
+
+            loop = asyncio.get_running_loop()
+            try:
+                from core.general_handler import handle_general_question
+                question = intent.raw_message
+                result_text = await loop.run_in_executor(
+                    None,
+                    lambda: handle_general_question(question, guild_id=guild_id),
+                )
+            except Exception as exc:
+                log.exception("general_qa dispatch failed")
+                result_text = f"Something went wrong: {exc}"
+
+            from cogs.gear import _chunks
+            chunks = _chunks(result_text)
+            await thinking_msg.edit(content=chunks[0])
+            for chunk in chunks[1:]:
+                await thinking_msg.reply(chunk, mention_author=False)
+
+        elif intent.command == "strategy":
+            from core.messages import thinking as _thinking
+            thinking_msg = await message.reply(_thinking(), mention_author=False)
+
+            loop = asyncio.get_running_loop()
+            try:
+                from core.strategy_handler import handle_strategy_question
+                result_text = await loop.run_in_executor(
+                    None,
+                    lambda: handle_strategy_question(message.clean_content.strip()),
+                )
+            except Exception as exc:
+                log.exception("strategy dispatch failed")
+                result_text = f"Strategy lookup failed: {exc}"
+
+            from cogs.gear import _chunks
+            chunks = _chunks(result_text)
+            await thinking_msg.edit(content=chunks[0])
+            for chunk in chunks[1:]:
+                await thinking_msg.reply(chunk, mention_author=False)
 
         else:
             log.debug("Unhandled intent command: %s", intent.command)

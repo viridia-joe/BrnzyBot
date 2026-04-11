@@ -218,10 +218,6 @@ def check_nodes(post_alerts: bool = True) -> NodeStatus:
 # Discord alert posting
 # ---------------------------------------------------------------------------
 def _post_alerts(messages: list[str]) -> None:
-    """Post node status alerts to the raid recap channel."""
-    try:
-        import discord_post
-        combined = "\n".join(f"_{m}_" for m in messages)
-        discord_post.post(combined)
-    except Exception as e:
-        log.error("Failed to post node health alerts to Discord: %s", e)
+    """No-op: alert posting removed (OpenClaw discord_post no longer available)."""
+    for msg in messages:
+        log.warning("Node alert (unposted): %s", msg)

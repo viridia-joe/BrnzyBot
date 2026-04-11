@@ -259,11 +259,15 @@ def _fetch_from_wcl(name: str, realm: str, spec: str, region: str,
                 continue
 
             # Resolve from local DB — no external calls
-            c.execute("SELECT name, stats, set_name FROM items WHERE item_id = ?", (item_id,))
+            c.execute("SELECT name, stats, set_name, slot FROM items WHERE item_id = ?", (item_id,))
             row = c.fetchone()
             item_name = row[0] if row else f"Unknown ({item_id})"
             stats     = json.loads(row[1]) if row and row[1] else {}
             set_name  = row[2] if row else ""
+            # For ranged/wand/totem/relic position (WCL index 17), prefer the DB's
+            # actual slot type so Shamans' totems aren't mislabeled as "Wand"
+            if slot == "Wand" and row and row[3] in ("Ranged", "Totem"):
+                slot = row[3]
 
             gear.append({
                 "slot":     slot,
@@ -273,7 +277,7 @@ def _fetch_from_wcl(name: str, realm: str, spec: str, region: str,
                 "set_name": set_name or "",
             })
 
-        combat_stats = {k: event.get(k, 0) for k in ["hitSpell", "critSpell", "hasteSpell"]}
+        combat_stats = {k: event.get(k, 0) for k in ["hitSpell", "hitMelee", "hitRanged", "critSpell", "hasteSpell"]}
 
         return GearSnapshot(
             character=name,
@@ -290,6 +294,164 @@ def _fetch_from_wcl(name: str, realm: str, spec: str, region: str,
 
     except (URLError, HTTPError, KeyError, json.JSONDecodeError, TimeoutError) as e:
         log.warning("WCL fetch failed for %s: %s", name, e)
+        return None
+
+
+# ---------------------------------------------------------------------------
+# Spec detection for auto-registration
+# ---------------------------------------------------------------------------
+
+# WoW specID → our spec key. These are the Blizzard spec IDs embedded in
+# WCL CombatantInfo events. Using specID is far more accurate than guessing
+# from classID alone.
+WCL_SPEC_MAP: dict[int, str] = {
+    # Mage
+    62: "arcane_mage", 63: "fire_mage", 64: "frost_mage",
+    # Paladin
+    65: "holy_paladin", 66: "prot_paladin", 70: "ret_paladin",
+    # Warrior
+    71: "arms_warrior", 72: "fury_warrior", 73: "prot_warrior",
+    # Hunter
+    253: "bm_hunter", 254: "mm_hunter", 255: "survival_hunter",
+    # Priest
+    256: "holy_priest", 257: "holy_priest", 258: "shadow_priest",
+    # Rogue
+    259: "assassination_rogue", 260: "combat_rogue", 261: "assassination_rogue",
+    # Shaman
+    262: "ele_shaman", 263: "enh_shaman", 264: "resto_shaman",
+    # Warlock
+    265: "affliction_warlock", 266: "destro_warlock", 267: "destro_warlock",
+    # Druid
+    281: "feral_cat_druid", 282: "resto_druid", 283: "balance_druid",
+}
+
+# Fallback: classID → most common raiding spec if specID lookup fails
+WCL_CLASS_DEFAULT_SPEC = {
+    1:  "fury_warrior",
+    2:  "ret_paladin",
+    3:  "bm_hunter",
+    4:  "combat_rogue",
+    5:  "shadow_priest",
+    7:  "ele_shaman",
+    8:  "fire_mage",
+    9:  "destro_warlock",
+    11: "balance_druid",
+}
+
+WCL_CLASS_NAME = {
+    1: "Warrior", 2: "Paladin", 3: "Hunter", 4: "Rogue", 5: "Priest",
+    7: "Shaman", 8: "Mage", 9: "Warlock", 11: "Druid",
+}
+
+
+def fetch_class_id(name: str, realm: str, region: str = "us") -> tuple[int | None, str | None]:
+    """
+    Returns (classID, display_name) from WCL. Used for auto-registration fallback.
+    Prefer fetch_character_spec() which also resolves the specific spec.
+    """
+    result = fetch_character_spec(name, realm, region)
+    if result is None:
+        return None, None
+    display_name, spec_key, class_id = result
+    return class_id, display_name
+
+
+def fetch_character_spec(
+    name: str, realm: str, region: str = "us"
+) -> tuple[str, str, int] | None:
+    """
+    Query WCL for a character's actual spec from their most recent log.
+
+    Returns (display_name, spec_key, class_id) or None on any failure.
+
+    Strategy:
+      1. Get classID + most recent report code from the character endpoint.
+      2. Get the actor ID from the report's master data.
+      3. Read the last CombatantInfo event to get specID.
+      4. Map specID → spec_key via WCL_SPEC_MAP.
+      5. Fall back to WCL_CLASS_DEFAULT_SPEC if specID lookup fails.
+    """
+    client_id     = os.environ.get("WCL_CLIENT_ID", "")
+    client_secret = os.environ.get("WCL_CLIENT_SECRET", "")
+    if not client_id or not client_secret:
+        return None
+
+    try:
+        token = _get_token(client_id, client_secret)
+
+        # Step 1: classID + recent report
+        r1 = _wcl_query(token, f'''{{
+            characterData {{
+                character(name: "{name}", serverSlug: "{realm}", serverRegion: "{region}") {{
+                    classID
+                    name
+                    recentReports(limit: 1) {{ data {{ code startTime }} }}
+                }}
+            }}
+        }}''')
+        char = r1["data"]["characterData"]["character"]
+        if not char:
+            log.warning("WCL spec lookup: no character found for %s@%s/%s", name, realm, region)
+            return None
+
+        class_id     = char["classID"]
+        display_name = char["name"]
+        reports      = char["recentReports"]["data"]
+        log.info("WCL spec lookup: %s@%s → classID=%d name=%s reports=%d",
+                 name, realm, class_id, display_name, len(reports))
+
+        if not reports:
+            # No logs at all — fall back to class default
+            spec_key = WCL_CLASS_DEFAULT_SPEC.get(class_id)
+            if not spec_key:
+                return None
+            log.warning("No WCL reports for %s — using class default %s", display_name, spec_key)
+            return display_name, spec_key, class_id
+
+        code = reports[0]["code"]
+
+        # Step 2: actor ID
+        r2 = _wcl_query(token, f'''{{
+            reportData {{ report(code: "{code}") {{
+                masterData {{ actors(type: "Player") {{ id name }} }}
+            }} }}
+        }}''')
+        actor_id = None
+        for actor in r2["data"]["reportData"]["report"]["masterData"]["actors"]:
+            if actor["name"].lower() == display_name.lower():
+                actor_id = actor["id"]
+                break
+
+        if not actor_id:
+            log.warning("WCL spec lookup: actor %s not in report %s", display_name, code)
+            spec_key = WCL_CLASS_DEFAULT_SPEC.get(class_id)
+            return (display_name, spec_key, class_id) if spec_key else None
+
+        # Step 3: CombatantInfo specID
+        r3 = _wcl_query(token, f'''{{
+            reportData {{ report(code: "{code}") {{
+                events(sourceID: {actor_id}, dataType: CombatantInfo,
+                       startTime: 0, endTime: 999999999999) {{ data }}
+            }} }}
+        }}''')
+        events = r3["data"]["reportData"]["report"]["events"]["data"]
+        spec_key = None
+        if events:
+            spec_id = events[-1].get("specID")
+            spec_key = WCL_SPEC_MAP.get(spec_id)
+            log.info("WCL spec lookup: %s specID=%s → %s", display_name, spec_id, spec_key)
+
+        if not spec_key:
+            spec_key = WCL_CLASS_DEFAULT_SPEC.get(class_id)
+            log.warning("WCL spec lookup: specID unknown for %s — using class default %s",
+                        display_name, spec_key)
+
+        if not spec_key:
+            return None
+        return display_name, spec_key, class_id
+
+    except (URLError, HTTPError, KeyError, json.JSONDecodeError, TimeoutError) as e:
+        log.warning("WCL spec lookup failed for %s@%s: %s", name, realm, e)
         return None
 
 

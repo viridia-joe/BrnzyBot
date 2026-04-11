@@ -23,21 +23,39 @@ from discord import app_commands
 from discord.ext import commands
 
 import config
-from core import gearprio
 from core.classifier import classify
 from core.intent import Intent
 from core.messages import thinking
-from db.server_config import get_character, list_characters
+from core.gear_handler import handle_gear_question, handle_gear_list
+from db.server_config import get_character, list_characters, add_character, get_guild_config
 
 log = logging.getLogger(__name__)
+
+DISCORD_MAX = 2000
+
+
+def _chunks(text: str, limit: int = DISCORD_MAX) -> list[str]:
+    """Split text into Discord-safe chunks, breaking on newlines where possible."""
+    if len(text) <= limit:
+        return [text]
+    parts = []
+    while text:
+        if len(text) <= limit:
+            parts.append(text)
+            break
+        split = text.rfind("\n", 0, limit)
+        if split == -1:
+            split = limit
+        parts.append(text[:split])
+        text = text[split:].lstrip("\n")
+    return parts
 
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
 
-async def _resolve_character(
-    interaction_or_ctx,
+def _resolve_character(
     char_name: str | None,
     guild_id: str,
 ) -> tuple[str | None, str | None, str | None, str | None]:
@@ -63,30 +81,52 @@ async def _resolve_character(
     return row["display_name"], row["spec"], row["realm"], row["region"]
 
 
-async def _run_gearprio_async(
+async def _try_auto_register(
     char_name: str,
-    spec: str,
-    realm: str,
-    region: str,
-    mode: str,
-    max_changes: int,
-) -> str:
-    """Run the blocking MIP optimizer in a thread pool. Returns the Discord message string."""
+    guild_id: str,
+    added_by: str,
+) -> tuple[str, str, str, str, str] | None:
+    """
+    Try to auto-register an unknown character using WCL class data.
+
+    Returns (display_name, spec, realm, region, note) on success, or None if
+    WCL lookup fails (character not found, no logs, missing creds, etc.).
+    """
+    from core.gear_cache import fetch_character_spec, WCL_CLASS_NAME
+
+    guild_cfg = get_guild_config(guild_id)
+    if not guild_cfg:
+        return None
+    realm  = guild_cfg.get("server_slug", config.DEFAULT_REALM)
+    region = guild_cfg.get("region", "us")
+
     loop = asyncio.get_running_loop()
     result = await loop.run_in_executor(
-        None,
-        lambda: gearprio.run(
-            char_name=char_name,
-            spec=spec,
-            realm=realm,
-            region=region,
-            mode=mode,
-            max_changes=max_changes,
-        ),
+        None, lambda: fetch_character_spec(char_name, realm, region)
     )
-    if isinstance(result, str):
-        return result   # error message
-    return result.to_discord_block()
+    if result is None:
+        return None
+
+    display_name, spec, class_id = result
+    class_name = WCL_CLASS_NAME.get(class_id, "Unknown")
+
+    add_character(
+        guild_id=guild_id,
+        name=display_name,
+        spec=spec,
+        realm=realm,
+        region=region,
+        added_by=added_by,
+    )
+    log.info("Auto-registered %s as %s on %s (%s class %d)",
+             display_name, spec, realm, region, class_id)
+
+    note = (
+        f"*Auto-registered **{display_name}** as `{spec}` ({class_name} on {realm}) "
+        f"based on their latest WCL log. Wrong spec? Run `/addchar {display_name} <spec>` "
+        f"— use `/listspecs` for valid options.*"
+    )
+    return display_name, spec, realm, region, note
 
 
 # ---------------------------------------------------------------------------
@@ -104,80 +144,85 @@ class GearCog(commands.Cog, name="Gear"):
     # -----------------------------------------------------------------------
     @app_commands.command(
         name="gearprio",
-        description="Find your best gear upgrades using the MIP optimizer.",
+        description="Get prioritized upgrade advice for a character (AI-powered).",
     )
     @app_commands.describe(
         character="Character name (must be registered with /addchar)",
-        mode="upgrades = best N swaps over current gear | bis = full theoretical best-in-slot",
-        slots="Number of upgrade slots to evaluate (1–10, default 3). Ignored for bis.",
     )
-    @app_commands.choices(mode=[
-        app_commands.Choice(name="upgrades", value="upgrades"),
-        app_commands.Choice(name="bis",      value="bis"),
-    ])
     async def slash_gearprio(
         self,
         interaction: discord.Interaction,
         character: str,
-        mode: str = "upgrades",
-        slots: app_commands.Range[int, 1, 10] = 3,
     ) -> None:
         guild_id = str(interaction.guild_id)
 
-        display, spec, realm, region = await _resolve_character(
-            interaction, character, guild_id
-        )
-        if spec is None:
-            await interaction.response.send_message(display, ephemeral=True)
+        display, spec, realm, region = _resolve_character(character, guild_id)
+        if display is None:
+            await interaction.response.send_message(spec, ephemeral=True)
             return
 
-        # Acknowledge immediately — optimizer takes 10-30s
         await interaction.response.defer(thinking=True)
 
-        result_text = await _run_gearprio_async(
-            char_name=display,
-            spec=spec,
-            realm=realm,
-            region=region or "us",
-            mode=mode,
-            max_changes=slots,
-        )
-        await interaction.followup.send(result_text)
+        loop = asyncio.get_running_loop()
+        try:
+            result_text = await loop.run_in_executor(
+                None,
+                lambda: handle_gear_question(
+                    character=display,
+                    spec=spec,
+                    realm=realm,
+                    region=region or "us",
+                    question=f"Give me prioritized upgrade advice for {display}.",
+                ),
+            )
+        except Exception as exc:
+            log.exception("gearprio failed for %s", display)
+            result_text = f"Gear priority failed for **{display}**: {exc}"
+
+        try:
+            for chunk in _chunks(result_text):
+                await asyncio.wait_for(interaction.followup.send(chunk), timeout=15)
+        except asyncio.TimeoutError:
+            log.error("followup.send timed out for gearprio %s", display)
 
     # -----------------------------------------------------------------------
     # !gearprio — prefix command (aliases: !gp, !prio)
     # -----------------------------------------------------------------------
     @commands.command(name="gearprio", aliases=["gp", "prio"])
     async def prefix_gearprio(self, ctx: commands.Context, *args: str) -> None:
-        # Reconstruct as if it were typed without the prefix for the classifier
         raw = "gearprio " + " ".join(args)
         intent = classify(raw, source="prefix")
 
-        guild_id = str(ctx.guild.id) if ctx.guild else "dm"
-
+        guild_id  = str(ctx.guild.id) if ctx.guild else "dm"
         char_name = intent.character
-        mode      = intent.params.get("mode", "upgrades")
-        max_chg   = intent.params.get("max_changes", 3)
 
-        display, spec, realm, region = await _resolve_character(ctx, char_name, guild_id)
-        if spec is None:
-            await ctx.reply(display, mention_author=False)
+        display, spec, realm, region = _resolve_character(char_name, guild_id)
+        if display is None:
+            await ctx.reply(spec, mention_author=False)
             return
 
-        # Post thinking message immediately — prefix commands can't defer like slash
         thinking_msg = await ctx.reply(thinking(), mention_author=False)
 
-        result_text = await _run_gearprio_async(
-            char_name=display,
-            spec=spec,
-            realm=realm,
-            region=region or "us",
-            mode=mode,
-            max_changes=max_chg,
-        )
+        loop = asyncio.get_running_loop()
+        try:
+            result_text = await loop.run_in_executor(
+                None,
+                lambda: handle_gear_question(
+                    character=display,
+                    spec=spec,
+                    realm=realm,
+                    region=region or "us",
+                    question=f"Give me prioritized upgrade advice for {display}.",
+                ),
+            )
+        except Exception as exc:
+            log.exception("gearprio failed for %s", display)
+            result_text = f"Gear priority failed for **{display}**: {exc}"
 
-        # Edit the thinking message in place — clean, no double post
-        await thinking_msg.edit(content=result_text)
+        chunks = _chunks(result_text)
+        await thinking_msg.edit(content=chunks[0])
+        for chunk in chunks[1:]:
+            await thinking_msg.reply(chunk, mention_author=False)
 
     # -----------------------------------------------------------------------
     # /gearcheck — slash command
@@ -198,34 +243,43 @@ class GearCog(commands.Cog, name="Gear"):
     ) -> None:
         guild_id = str(interaction.guild_id)
 
-        display, reg_spec, realm, region = await _resolve_character(
-            interaction, character, guild_id
-        )
-        if reg_spec is None:
-            await interaction.response.send_message(display, ephemeral=True)
-            return
+        display, reg_spec, realm, region = _resolve_character(character, guild_id)
+        auto_note = None
+        if display is None:
+            auto_result = await _try_auto_register(
+                character, guild_id, added_by=str(interaction.user.id)
+            )
+            if auto_result is None:
+                await interaction.response.send_message(reg_spec, ephemeral=True)
+                return
+            display, reg_spec, realm, region, auto_note = auto_result
 
         resolved_spec = spec or reg_spec
         await interaction.response.defer(thinking=True)
 
         loop = asyncio.get_running_loop()
         try:
-            from core.gear_handler import handle_gear_question
             result_text = await loop.run_in_executor(
                 None,
-                lambda: handle_gear_question(
+                lambda: handle_gear_list(
                     character=display,
                     spec=resolved_spec,
                     realm=realm,
                     region=region or "us",
-                    question=f"Give me a full gear check for {display}.",
                 ),
             )
         except Exception as exc:
             log.exception("gearcheck failed for %s", display)
             result_text = f"Gear check failed for **{display}**: {exc}"
 
-        await interaction.followup.send(result_text)
+        if auto_note:
+            result_text = result_text + "\n\n" + auto_note
+
+        try:
+            for chunk in _chunks(result_text):
+                await asyncio.wait_for(interaction.followup.send(chunk), timeout=15)
+        except asyncio.TimeoutError:
+            log.error("followup.send timed out for gearcheck %s", display)
 
     # -----------------------------------------------------------------------
     # !gearcheck — prefix command (alias: !gc, !gear)
@@ -239,32 +293,42 @@ class GearCog(commands.Cog, name="Gear"):
         char_name = intent.character
         spec_override = intent.spec
 
-        display, spec, realm, region = await _resolve_character(ctx, char_name, guild_id)
-        if spec is None:
-            await ctx.reply(display, mention_author=False)
-            return
+        display, spec, realm, region = _resolve_character(char_name, guild_id)
+        auto_note = None
+        if display is None:
+            auto_result = await _try_auto_register(
+                char_name, guild_id, added_by=str(ctx.author.id)
+            )
+            if auto_result is None:
+                await ctx.reply(spec, mention_author=False)
+                return
+            display, spec, realm, region, auto_note = auto_result
 
         resolved_spec = spec_override or spec
         thinking_msg  = await ctx.reply(thinking(), mention_author=False)
 
         loop = asyncio.get_running_loop()
         try:
-            from core.gear_handler import handle_gear_question
             result_text = await loop.run_in_executor(
                 None,
-                lambda: handle_gear_question(
+                lambda: handle_gear_list(
                     character=display,
                     spec=resolved_spec,
                     realm=realm,
                     region=region or "us",
-                    question=f"Give me a full gear check for {display}.",
                 ),
             )
         except Exception as exc:
             log.exception("gearcheck failed for %s", display)
             result_text = f"Gear check failed for **{display}**: {exc}"
 
-        await thinking_msg.edit(content=result_text)
+        if auto_note:
+            result_text = result_text + "\n\n" + auto_note
+
+        chunks = _chunks(result_text)
+        await thinking_msg.edit(content=chunks[0])
+        for chunk in chunks[1:]:
+            await thinking_msg.reply(chunk, mention_author=False)
 
 
 async def setup(bot: commands.Bot) -> None:

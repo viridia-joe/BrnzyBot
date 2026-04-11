@@ -235,12 +235,12 @@ def parse(text: str, source: str = "unknown") -> Optional[Intent]:
 # ---------------------------------------------------------------------------
 
 _TRIAGE_SYSTEM = """\
-You are a World of Warcraft gear assistant dispatcher.
+You are a World of Warcraft TBC dispatcher for a raid-focused Discord bot.
 Given a player's message, extract their intent as JSON.
 
 Respond ONLY with valid JSON matching this schema:
 {
-  "command": "gearprio" | "gearcheck" | "unknown",
+  "command": "gearprio" | "gearcheck" | "strategy" | "general_qa" | "unknown",
   "character": string | null,
   "spec": string | null,
   "params": {},
@@ -249,13 +249,17 @@ Respond ONLY with valid JSON matching this schema:
 }
 
 Commands:
-- gearprio: player wants to know what gear upgrades to prioritize
-- gearcheck: player wants a full gear analysis or advice on their current gear
-- unknown: message is not about gear optimization
+- gearprio: player wants to know what gear upgrades to prioritize for a character
+- gearcheck: player wants a full gear analysis or review of a character's current gear
+- strategy: player is asking about a boss encounter, raid mechanic, spell, or fight strategy
+- general_qa: player is asking a general WoW/TBC question — item comparisons, theorycrafting,
+              how a mechanic works, stat math, set bonuses, class questions, etc.
+              Use this when the question is directed at the bot but doesn't fit the above commands.
+- unknown: message is clearly not a WoW-related question
 
 For spec, use canonical names like "destro_warlock", "ele_shaman", "bm_hunter".
 If the character or spec is ambiguous, set clarification to a short question to ask the user.
-If confidence is below 0.6, set command to "unknown".
+Only use "unknown" if the message has nothing to do with WoW or raiding.
 """
 
 

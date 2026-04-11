@@ -167,10 +167,11 @@ class OptimalSet:
                 lines.append(f"Set bonuses active: {bonus_str}")
             lines.append("")
             for r in swaps:
-                set_tag = f" [{r.set_name}]" if r.set_name else ""
-                lines.append(f"**{r.slot}:** {r.item_name}{set_tag} (+{r.ep:.1f} EP) — {r.source}")
+                set_tag  = f" [{r.set_name}]" if r.set_name else ""
+                ep_label = f"+{r.ep:.1f}" if r.ep >= 0 else f"{r.ep:.1f}"
+                lines.append(f"**{r.slot}:** {r.item_name}{set_tag} ({ep_label} EP vs equipped) — {r.source}")
             lines.append("")
-            lines.append("_Items above replace your current gear in those slots. EP gain is the joint improvement across all swaps._")
+            lines.append("_Per-slot EP is the marginal gain over your currently equipped item. Total EP gain accounts for set bonus interactions across all swaps._")
             if self.warnings:
                 lines.append("")
                 for w in self.warnings:
@@ -312,17 +313,20 @@ def _gem_ep_for_item(
 
 def _best_gem_ep_per_socket(weights: dict, hit_weight: float,
                              gem_profile: dict) -> float:
-    """EP of the best single gem given current spec weights."""
-    # Try each gem in the caster profile and return the highest EP
+    """EP of the best single non-meta gem given current spec weights."""
     best = 0.0
     for color, gem in gem_profile.items():
         if not isinstance(gem, dict):
             continue
+        if color.lower() == "meta":
+            continue   # Meta gems only go in Meta sockets — skip here
         stats = gem.get("stats", {})
         ep = sum(stats.get(s, 0) * (hit_weight if s in HIT_STAT_NAMES
                                     else weights.get(s, 0))
                  for s in stats)
-        ep += gem.get("bonusEP", 0)
+        # bonusEP on non-meta gems is rare but allowed
+        if "bonusEP" in gem and color.lower() != "meta":
+            ep += gem["bonusEP"]
         if ep > best:
             best = ep
     # Fallback: Runed Living Ruby = 9 SP = 9 EP at weight 1.0
@@ -370,17 +374,28 @@ def _load_candidates(
     source_filter = ("AND " + " AND ".join(source_filter_parts)
                      if source_filter_parts else "")
 
+    # Equipped items must always appear as candidates regardless of source filters,
+    # so the optimizer has an accurate baseline. Without this, a PvP-geared slot
+    # gets treated as EP=0 and any non-PvP item looks like a massive upgrade.
+    equipped_id_placeholders = ",".join("?" * len(equipped_ids)) if equipped_ids else "NULL"
+    equipped_override = (
+        f"OR item_id IN ({equipped_id_placeholders})" if equipped_ids else ""
+    )
+
     c = db.cursor()
     c.execute(f"""
         SELECT item_id, name, slot, armor_type, is_unique,
                class_restriction, stats, sockets, socket_bonus,
                set_name, source_type, source_name, phase
         FROM items
-        WHERE {quality_filter}
-          AND phase >= 1
-          AND phase <= ?
-          {source_filter}
-    """, (params.phase,))
+        WHERE (
+            ({quality_filter}
+             AND phase >= 1
+             AND phase <= ?
+             {source_filter})
+            {equipped_override}
+        )
+    """, (params.phase, *list(equipped_ids)))
 
     candidates = []
     for row in c.fetchall():
@@ -473,11 +488,12 @@ def _gem_profile_for_spec(spec_data: dict) -> str:
     """Map spec to gem profile key in gems.json."""
     role = spec_data.get("role", "caster")
     return {
-        "caster":    "caster",
-        "healer":    "healer",
-        "tank":      "tank",
-        "melee":     "melee_phys",
-        "melee_str": "melee_str",
+        "caster":     "caster",
+        "healer":     "healer",
+        "tank":       "tank",
+        "melee":      "melee_phys",   # legacy alias
+        "melee_phys": "melee_phys",
+        "melee_str":  "melee_str",
     }.get(role, "caster")
 
 
@@ -490,6 +506,7 @@ def _build_mip(
     spec_data: dict,
     set_bonuses: dict,
     params: OptimizeParams,
+    spec_key: str = "",
 ) -> dict:
     """
     Construct the MIP problem matrices.
@@ -532,6 +549,9 @@ def _build_mip(
                 continue
             t = int(t_str)
             ep = bonus.get("ep", 0)
+            # Apply spec-specific override if present (e.g. Beast Lord 4pc for SV/MM)
+            if spec_key:
+                ep = bonus.get("spec_overrides", {}).get(spec_key, {}).get(t_str, ep)
             if t <= count and ep > 0:
                 set_bonus_vars.append((set_name, t, ep))
 
@@ -622,7 +642,23 @@ def _build_mip(
         con_lb.append(-np.inf)
         con_ub.append(0.0)
 
-    # 4. Upgrades mode: limit number of new (non-equipped) items selected.
+    # 4. Unique-equipped constraint: Σ_{i: item_id==k} x[i] ≤ 1 for unique items.
+    #    Prevents recommending the same unique item in both ring/trinket slots.
+    unique_id_idxs: dict[int, list[int]] = {}
+    for i, item in enumerate(items):
+        if item.get("is_unique"):
+            uid = item["item_id"]
+            unique_id_idxs.setdefault(uid, []).append(i)
+    for uid, idxs in unique_id_idxs.items():
+        if len(idxs) > 1:
+            row = np.zeros(total_vars)
+            for i in idxs:
+                row[i] = 1.0
+            A_rows.append(row)
+            con_lb.append(-np.inf)
+            con_ub.append(1.0)
+
+    # 5. Upgrades mode: limit number of new (non-equipped) items selected.
     #    Σ_{i: not equipped} x[i] ≤ max_changes
     if params.mode == "upgrades" and params.max_changes < N:
         row = np.zeros(total_vars)
@@ -699,6 +735,14 @@ def _solve(problem: dict, candidates: list[dict], spec_data: dict,
     set_counts: dict[str, int] = {}
     total_hit = 0.0
 
+    # Build slot → equipped EP lookup so we can show marginal gain per swap
+    equipped_ep_by_slot: dict[str, float] = {}
+    for item in candidates:
+        if item["equipped"]:
+            slot = item["slot"]
+            # For dual slots (Ring/Trinket) sum both; for others take the single value
+            equipped_ep_by_slot[slot] = equipped_ep_by_slot.get(slot, 0.0) + item["base_ep"]
+
     result_ids = []
     current_ep = sum(item["base_ep"] for item in candidates if item["equipped"])
     for i, item in enumerate(candidates):
@@ -707,11 +751,19 @@ def _solve(problem: dict, candidates: list[dict], spec_data: dict,
             total_hit += item["hit_rating"]
             if item["set_name"]:
                 set_counts[item["set_name"]] = set_counts.get(item["set_name"], 0) + 1
+
+            # Per-slot EP: marginal gain over what was equipped, or raw EP if nothing equipped
+            slot_equipped_ep = equipped_ep_by_slot.get(item["slot"], 0.0)
+            if item["equipped"]:
+                slot_display_ep = item["base_ep"]
+            else:
+                slot_display_ep = item["base_ep"] - slot_equipped_ep
+
             slots_result.append(SlotResult(
                 slot=item["slot"],
                 item_id=item["item_id"],
                 item_name=item["name"],
-                ep=item["base_ep"],
+                ep=round(slot_display_ep, 1),
                 set_name=item["set_name"],
                 source=(item["source_name"] or item["source_type"] or ""),
                 was_equipped=item["equipped"],
@@ -765,7 +817,14 @@ def _solve(problem: dict, candidates: list[dict], spec_data: dict,
 
     # Warn if snapshot indicates hit but optimizer solution differs significantly
     if snapshot and hasattr(snapshot, "combat_stats"):
-        wcl_hit = snapshot.combat_stats.get("hitSpell", 0)
+        weights = spec_data.get("weights", {})
+        if weights.get("MeleeHit", 0) > 0:
+            _wcl_hit_key = "hitMelee"
+        elif weights.get("RangedHit", 0) > 0:
+            _wcl_hit_key = "hitRanged"
+        else:
+            _wcl_hit_key = "hitSpell"
+        wcl_hit = snapshot.combat_stats.get(_wcl_hit_key, 0)
         if wcl_hit and abs(wcl_hit - total_hit) > 30:
             warnings.append(
                 f"Optimal set hit ({total_hit:.0f}) differs from WCL-logged hit "
@@ -828,7 +887,7 @@ def solve_bis(
             warnings=["No candidate items found — check DB and phase."],
         )
 
-    problem = _build_mip(candidates, spec_data, set_bonuses, params)
+    problem = _build_mip(candidates, spec_data, set_bonuses, params, spec_key=spec)
     return _solve(problem, candidates, spec_data, character, snapshot, params)
 
 

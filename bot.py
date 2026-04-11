@@ -65,6 +65,7 @@ class BrnzyBot(commands.Bot):
     async def setup_hook(self) -> None:
         """Called once before the bot connects. Load cogs and sync slash commands."""
         await self.load_extension("cogs.gear")
+        await self.load_extension("cogs.strategy")
         await self.load_extension("cogs.listener")
         await self.load_extension("cogs.admin")
         log.info("Cogs loaded")

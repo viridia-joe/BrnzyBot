@@ -26,8 +26,8 @@ from urllib.error import URLError, HTTPError
 from urllib.request import Request, urlopen
 
 import config
-from gear_context import GearContext
-from triage import TriageResult
+from core.gear_context import GearContext
+from core.triage import TriageResult
 
 log = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ GENERATOR_MODEL  = "gear-generator"
 CRITIC_MODEL     = "gear-critic"
 ESCALATION_MODEL = "gear-escalation"   # LiteLLM route → Claude Opus via Anthropic API
 REASONING_TIMEOUT  = 360   # 6 min — 32B on 4090 w/ partial CPU offload is slow
-CRITIQUE_TIMEOUT   = 240   # 4 min
+CRITIQUE_TIMEOUT   = 30    # 30s — skip critic rather than make Discord wait
 ESCALATION_TIMEOUT = 90    # Claude is fast
 
 CONFIDENCE_POST_WITH_WARNING = 5   # 5–6: post with uncertainty note
@@ -88,7 +88,7 @@ def _litellm(model: str, messages: list, temperature: float = 0.3,
         "model":       model,
         "messages":    messages,
         "temperature": temperature,
-        "max_tokens":  1024,   # cap output — gear answers don't need to be long
+        "max_tokens":  2048,   # gear checks with priority summaries need room
     }
     headers = {"Content-Type": "application/json"}
     if config.LITELLM_API_KEY:
@@ -108,7 +108,19 @@ def _litellm(model: str, messages: list, temperature: float = 0.3,
 GENERATOR_SYSTEM = """\
 You are BrnzyBot, a World of Warcraft gear advisor for a TBC (The Burning Crusade)
 Anniversary raid team. You are a fire robot with a gnomish tinkering pedigree —
-precise, dry, and slightly menacing. You take gear math seriously.
+precise, dry, and analytical. You take gear math seriously, but you respect that
+players are real people doing their best in a raid environment.
+
+Tone guidelines:
+- Be encouraging, not dismissive. Current gear that's doing its job should be
+  acknowledged as such before explaining what could replace it.
+- Recognize that many upgrades require rare drops, crafted gear with expensive mats,
+  or specific raid progression. Noting that something is an upgrade is useful; calling
+  current gear trash is not. A piece with 19 spell damage, 11 crit, 15 int is doing
+  real work — lead with the best available upgrade and explain the EP gain, not with
+  mockery of what's equipped.
+- Save urgency for things that are genuinely holding the character back (missing hit
+  cap, broken set bonus math). Everything else is "here's the next step."
 
 You will be given a pre-computed Gear Context block. This block contains facts
 that have already been calculated: hit cap status, active set bonuses, and per-item
@@ -122,6 +134,9 @@ Critical rules you must never violate:
 3. Never mix expansion constants. Everything here is TBC.
 4. Be honest about uncertainty. If you're not sure, say so.
 5. Show your math. State the EP values, the set bonus costs, and the net gain.
+6. Only recommend items available in the current server phase shown in the context.
+   Do NOT suggest items from later phases (e.g. do not recommend SSC/TK items
+   if the context says Phase 1).
 
 Format: Discord-friendly. Short sentences. No markdown tables. Bullet points OK.
 Keep the answer under 300 words unless the question requires more.

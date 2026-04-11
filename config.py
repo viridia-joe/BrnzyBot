@@ -44,10 +44,12 @@ WCL_CLIENT_SECRET: str = os.environ.get("WCL_CLIENT_SECRET", "")
 # ---------------------------------------------------------------------------
 # Paths — shared with gear scripts
 # ---------------------------------------------------------------------------
-DATA_DIR       = os.path.expanduser("~/.openclaw/data")
-ITEM_DB_PATH   = os.path.join(DATA_DIR, "tbc_items.db")
-WEIGHTS_DIR    = os.path.join(DATA_DIR, "weights")
-BOT_DB_PATH    = os.path.join(DATA_DIR, "brnzybot.db")
+DATA_DIR          = os.path.expanduser("~/.openclaw/data")
+ITEM_DB_PATH      = os.path.join(DATA_DIR, "tbc_items.db")
+WEIGHTS_DIR       = os.path.join(DATA_DIR, "weights")
+BOT_DB_PATH       = os.path.join(DATA_DIR, "brnzybot.db")
+STRATEGY_DB_PATH  = os.path.join(DATA_DIR, "tbc_strategy.db")
+STRATEGY_DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "strategy")
 
 
 # ---------------------------------------------------------------------------

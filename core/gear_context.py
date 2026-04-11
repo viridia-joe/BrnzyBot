@@ -75,6 +75,8 @@ class GearContext:
     from_cache:      bool
     rulings:         str    # contents of gear_rulings.md, empty if none
     warnings:        list[str] = field(default_factory=list)
+    upgrade_candidates: list[dict] = field(default_factory=list)
+    # [{slot, from_name, from_ep, to_name, to_ep}] — pre-computed by optimizer
 
     def set_bonus_cost(self, set_name: str) -> float:
         """Return EP that would be lost by removing one piece of a set."""
@@ -89,10 +91,21 @@ class GearContext:
 
     def to_prompt_block(self) -> str:
         """Render this context as a structured block for injection into model prompts."""
+        import config as _cfg
+        current_phase = getattr(_cfg, "CURRENT_PHASE", 1)
+        phase_labels = {1: "Phase 1 (Karazhan / Gruul's Lair / Magtheridon)",
+                        2: "Phase 2 (SSC / TK)",
+                        3: "Phase 3 (Hyjal / Black Temple)",
+                        4: "Phase 4 (Zul'Aman)",
+                        5: "Phase 5 (Sunwell Plateau)"}
+        phase_label = phase_labels.get(current_phase, f"Phase {current_phase}")
+
         lines = [
             f"## Gear Context: {self.character} — {self.spec_desc}",
             "",
             f"**Expansion:** {self.expansion.upper()}",
+            f"**Current Server Phase:** {phase_label}",
+            "  ⚠ Only recommend items available in this phase or earlier. Do NOT suggest items from later phases.",
             f"**From cache:** {'Yes (WCL unavailable)' if self.from_cache else 'No (live WCL data)'}",
             "",
             "### Hit Cap Status",
@@ -122,6 +135,23 @@ class GearContext:
         for g in self.gear_summary:
             set_tag = f" [{g['set_name']}]" if g.get("set_name") else ""
             lines.append(f"- {g['slot']}: {g['name']}{set_tag} (EP {g['ep']:.1f})")
+
+        if self.upgrade_candidates:
+            lines.append("")
+            lines.append("### Pre-computed Upgrade Candidates")
+            lines.append("⚠ These EP values were calculated with spec weights and hit cap correction.")
+            lines.append("  Use them as ground truth. Do NOT re-calculate item EP from first principles.")
+            for uc in self.upgrade_candidates:
+                raw_net = uc['to_ep'] - uc['from_ep']
+                set_cost = uc.get('set_cost', 0.0)
+                true_net = raw_net - set_cost
+                net_str = f"+{true_net:.1f} EP"
+                if set_cost > 0:
+                    net_str += f" (raw +{raw_net:.1f}, minus {set_cost:.1f} set bonus lost)"
+                lines.append(
+                    f"- {uc['slot']}: {uc['from_name']} ({uc['from_ep']:.1f} EP) → "
+                    f"{uc['to_name']} ({uc['to_ep']:.1f} EP), net {net_str}"
+                )
 
         if self.warnings:
             lines.append("")
@@ -178,20 +208,28 @@ def compute_hit_cap(snapshot, spec_data: dict) -> HitCapStatus:
     from_talents = hit_cap_data.get("from_talents", 0)
     effective_cap = base_cap - from_talents
 
-    # Sum spell hit from all equipped items
+    # Determine which hit stat applies to this spec from its weights.
+    # Melee specs weight MeleeHit; ranged weight RangedHit; casters weight SpellHit.
+    weights = spec_data.get("weights", {})
+    if weights.get("MeleeHit", 0) > 0:
+        hit_stat_item = "MeleeHit"
+        hit_stat_wcl  = "hitMelee"
+    elif weights.get("RangedHit", 0) > 0:
+        hit_stat_item = "RangedHit"
+        hit_stat_wcl  = "hitRanged"
+    else:
+        hit_stat_item = "SpellHit"
+        hit_stat_wcl  = "hitSpell"
+
+    # Sum hit rating from all equipped items
     gear_sum = 0
     for item in snapshot.gear:
-        gear_sum += int(item.get("stats", {}).get("SpellHit", 0))
+        gear_sum += int(item.get("stats", {}).get(hit_stat_item, 0))
 
-    # WCL's hitSpell is the character's actual hit rating from the CombatantInfo
-    # event — it includes gems and enchants on equipped items, which the local
-    # items DB often lacks. When the WCL value is available and the gap vs the
-    # gear-only sum is large (>20 rating), prefer WCL for hit cap status since
-    # it's the ground truth for "what the character actually has on."
-    #
-    # We keep gear_sum on the object as well so upgrade EP math (which evaluates
-    # items in isolation, without gems/enchants) can use it if needed.
-    wcl_hit = snapshot.combat_stats.get("hitSpell", 0)
+    # WCL combat stats include the character's actual rating (with gems/enchants).
+    # When available and the gap vs the item DB sum is large (>20 rating), prefer
+    # WCL as it's the ground truth for what the character actually has on.
+    wcl_hit = snapshot.combat_stats.get(hit_stat_wcl, 0)
     if wcl_hit and abs(wcl_hit - gear_sum) > 20:
         log.info(
             "Using WCL hit rating %d (gear DB sum %d, gap likely gems/enchants).",

@@ -1,20 +1,11 @@
-# Generated files (rebuild with setup.sh)
-data/tbc_items.db
-
-# Generated workspace files (output of scripts)
-workspace-templates/GEAR-STATUS.md
-
-# Downloaded source data
-/tmp/all_items.go
-
-# Environment / secrets
-.env
-*.env
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
+.env
+*.db
+*.log
+*.egg-info/
+dist/
+build/
+.venv/
+venv/

@@ -46,6 +46,39 @@ def _throttle() -> None:
 
 
 # ---------------------------------------------------------------------------
+# Circuit breaker — trips after 3 consecutive failures, resets after 60s
+# ---------------------------------------------------------------------------
+_CB_THRESHOLD  = 3
+_CB_RESET_SECS = 60
+
+_cb_failures:    int   = 0
+_cb_tripped_at:  float = 0.0
+
+
+def _cb_check() -> None:
+    global _cb_failures, _cb_tripped_at
+    if _cb_failures >= _CB_THRESHOLD:
+        if time.time() - _cb_tripped_at < _CB_RESET_SECS:
+            raise RuntimeError(
+                "WCL circuit breaker open — too many recent failures. "
+                f"Retrying in {int(_CB_RESET_SECS - (time.time() - _cb_tripped_at))}s."
+            )
+        _cb_failures = 0  # half-open: allow one attempt
+
+
+def _cb_success() -> None:
+    global _cb_failures
+    _cb_failures = 0
+
+
+def _cb_failure() -> None:
+    global _cb_failures, _cb_tripped_at
+    _cb_failures += 1
+    if _cb_failures >= _CB_THRESHOLD:
+        _cb_tripped_at = time.time()
+
+
+# ---------------------------------------------------------------------------
 # Token management — persisted to disk so cron restarts don't re-auth
 # ---------------------------------------------------------------------------
 def _load_token_from_disk() -> dict:
@@ -102,41 +135,75 @@ def _get_token() -> str:
 
 
 # ---------------------------------------------------------------------------
-# Core GraphQL executor
+# Core GraphQL executor — with retry + circuit breaker
 # ---------------------------------------------------------------------------
+_RETRY_ATTEMPTS = 3
+_RETRY_BACKOFF  = (1.0, 3.0, 9.0)   # seconds between attempts
+
+
 def graphql(query: str, variables: dict = None) -> dict:
-    """Execute a WCL GraphQL query. Returns the parsed JSON response data."""
-    _throttle()
-    token = _get_token()
-    body  = json.dumps({"query": query, "variables": variables or {}}).encode()
+    """Execute a WCL GraphQL query with retry and circuit breaker."""
+    _cb_check()
 
-    req = urllib.request.Request(
-        WCL_GRAPHQL_URL,
-        data=body,
-        headers={
-            "Authorization": f"Bearer {token}",
-            "Content-Type":  "application/json",
-        },
-        method="POST",
-    )
+    last_exc: Exception = RuntimeError("No attempt made")
 
-    try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            result = json.loads(resp.read())
-    except urllib.error.HTTPError as e:
-        body_text = e.read().decode(errors="replace")
-        # 401 → token may have been revoked; wipe the disk cache so next call re-auths
-        if e.code == 401:
-            try:
-                os.remove(_TOKEN_FILE)
-            except FileNotFoundError:
-                pass
-        raise RuntimeError(f"WCL GraphQL HTTP {e.code}: {body_text[:300]}") from e
+    for attempt, backoff in enumerate((*_RETRY_BACKOFF, None), start=1):
+        _throttle()
+        try:
+            token = _get_token()
+        except RuntimeError:
+            _cb_failure()
+            raise
 
-    if "errors" in result:
-        raise RuntimeError(f"WCL GraphQL errors: {result['errors']}")
+        body = json.dumps({"query": query, "variables": variables or {}}).encode()
+        req  = urllib.request.Request(
+            WCL_GRAPHQL_URL,
+            data=body,
+            headers={
+                "Authorization": f"Bearer {token}",
+                "Content-Type":  "application/json",
+            },
+            method="POST",
+        )
 
-    return result["data"]
+        try:
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                result = json.loads(resp.read())
+        except urllib.error.HTTPError as e:
+            body_text = e.read().decode(errors="replace")
+            if e.code == 401:
+                try:
+                    os.remove(_TOKEN_FILE)
+                except FileNotFoundError:
+                    pass
+                last_exc = RuntimeError(f"WCL auth failure: {body_text[:200]}")
+                _cb_failure()
+                break  # no point retrying a bad token
+            if e.code == 429 or e.code >= 500:
+                last_exc = RuntimeError(f"WCL HTTP {e.code}: {body_text[:200]}")
+                if backoff is not None:
+                    time.sleep(backoff)
+                continue
+            _cb_failure()
+            raise RuntimeError(f"WCL GraphQL HTTP {e.code}: {body_text[:300]}") from e
+        except (urllib.error.URLError, OSError) as e:
+            last_exc = RuntimeError(f"WCL network error: {e}")
+            if backoff is not None:
+                time.sleep(backoff)
+            continue
+
+        if "errors" in result:
+            err_msg = str(result["errors"])[:300]
+            last_exc = RuntimeError(f"WCL GraphQL errors: {err_msg}")
+            if backoff is not None:
+                time.sleep(backoff)
+            continue
+
+        _cb_success()
+        return result["data"]
+
+    _cb_failure()
+    raise last_exc
 
 
 # ---------------------------------------------------------------------------

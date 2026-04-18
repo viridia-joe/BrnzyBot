@@ -135,6 +135,25 @@ def set_guild_config(
         )
 
 
+def set_guild_phase(guild_id: str, phase: int, path: str = DB_PATH) -> None:
+    with _conn(path) as conn:
+        conn.execute(
+            """INSERT INTO guild_config (guild_id, current_phase)
+               VALUES (?, ?)
+               ON CONFLICT (guild_id)
+               DO UPDATE SET current_phase=excluded.current_phase""",
+            (guild_id, phase),
+        )
+
+
+def get_guild_phase(guild_id: str, path: str = DB_PATH) -> int:
+    with _conn(path) as conn:
+        row = conn.execute(
+            "SELECT current_phase FROM guild_config WHERE guild_id=?", (guild_id,)
+        ).fetchone()
+    return row["current_phase"] if row else 1
+
+
 # ---------------------------------------------------------------------------
 # Character registry
 # ---------------------------------------------------------------------------
@@ -232,6 +251,152 @@ def pop_pending_intent(
             conn.execute("DELETE FROM pending_intents WHERE id=?", (row["id"],))
             return json.loads(row["intent_json"])
     return None
+
+
+# ---------------------------------------------------------------------------
+# Usage logging + metering
+# ---------------------------------------------------------------------------
+
+def log_usage(guild_id: str, user_id: str, command: str, path: str = DB_PATH) -> None:
+    with _conn(path) as conn:
+        conn.execute(
+            "INSERT INTO usage_log (guild_id, user_id, command) VALUES (?, ?, ?)",
+            (guild_id, user_id, command),
+        )
+
+
+def count_usage_today(guild_id: str, path: str = DB_PATH) -> int:
+    """Count how many commands this guild has run today (UTC)."""
+    today = datetime.utcnow().strftime("%Y-%m-%d")
+    with _conn(path) as conn:
+        row = conn.execute(
+            "SELECT COUNT(*) AS n FROM usage_log WHERE guild_id=? AND logged_at >= ?",
+            (guild_id, today),
+        ).fetchone()
+    return row["n"] if row else 0
+
+
+# ---------------------------------------------------------------------------
+# Subscriptions
+# ---------------------------------------------------------------------------
+
+FREE_DAILY_LIMIT = 20  # commands per guild per day on free plan
+
+
+def get_subscription(guild_id: str, path: str = DB_PATH) -> dict:
+    with _conn(path) as conn:
+        row = conn.execute(
+            "SELECT * FROM subscriptions WHERE guild_id=?", (guild_id,)
+        ).fetchone()
+    return dict(row) if row else {"guild_id": guild_id, "plan": "free", "status": "active"}
+
+
+def upsert_subscription(
+    guild_id: str,
+    plan: str,
+    status: str,
+    stripe_customer_id: Optional[str] = None,
+    stripe_sub_id: Optional[str] = None,
+    path: str = DB_PATH,
+) -> None:
+    with _conn(path) as conn:
+        conn.execute(
+            """INSERT INTO subscriptions
+               (guild_id, plan, status, stripe_customer_id, stripe_sub_id, updated_at)
+               VALUES (?, ?, ?, ?, ?, datetime('now'))
+               ON CONFLICT (guild_id)
+               DO UPDATE SET plan=excluded.plan,
+                             status=excluded.status,
+                             stripe_customer_id=COALESCE(excluded.stripe_customer_id, stripe_customer_id),
+                             stripe_sub_id=COALESCE(excluded.stripe_sub_id, stripe_sub_id),
+                             updated_at=excluded.updated_at""",
+            (guild_id, plan, status, stripe_customer_id, stripe_sub_id),
+        )
+
+
+def is_pro(guild_id: str, path: str = DB_PATH) -> bool:
+    sub = get_subscription(guild_id, path)
+    return sub["plan"] == "pro" and sub["status"] in ("active", "trialing")
+
+
+def check_rate_limit(guild_id: str, path: str = DB_PATH) -> tuple[bool, int]:
+    """
+    Returns (allowed, remaining).
+    Pro guilds are always allowed. Free guilds capped at FREE_DAILY_LIMIT/day.
+    """
+    if is_pro(guild_id, path):
+        return True, 999
+    used = count_usage_today(guild_id, path)
+    remaining = max(0, FREE_DAILY_LIMIT - used)
+    return remaining > 0, remaining
+
+
+# ---------------------------------------------------------------------------
+# Per-user custom stat weights
+# ---------------------------------------------------------------------------
+
+def get_user_weights(
+    guild_id: str, user_id: str, spec: str, path: str = DB_PATH
+) -> Optional[dict]:
+    with _conn(path) as conn:
+        row = conn.execute(
+            "SELECT weights_json FROM user_weights WHERE guild_id=? AND user_id=? AND spec=?",
+            (guild_id, user_id, spec),
+        ).fetchone()
+    return json.loads(row["weights_json"]) if row else None
+
+
+def set_user_weights(
+    guild_id: str, user_id: str, spec: str, weights: dict, path: str = DB_PATH
+) -> None:
+    with _conn(path) as conn:
+        conn.execute(
+            """INSERT INTO user_weights (guild_id, user_id, spec, weights_json, updated_at)
+               VALUES (?, ?, ?, ?, datetime('now'))
+               ON CONFLICT (guild_id, user_id, spec)
+               DO UPDATE SET weights_json=excluded.weights_json,
+                             updated_at=excluded.updated_at""",
+            (guild_id, user_id, spec, json.dumps(weights)),
+        )
+
+
+def delete_user_weights(
+    guild_id: str, user_id: str, path: str = DB_PATH
+) -> None:
+    with _conn(path) as conn:
+        conn.execute(
+            "DELETE FROM user_weights WHERE guild_id=? AND user_id=?",
+            (guild_id, user_id),
+        )
+
+
+# ---------------------------------------------------------------------------
+# GDPR — full guild/user data deletion
+# ---------------------------------------------------------------------------
+
+def delete_guild_data(guild_id: str, path: str = DB_PATH) -> None:
+    """Hard-delete all stored data for a guild."""
+    with _conn(path) as conn:
+        for table in ("server_config", "guild_config", "characters",
+                      "pending_intents", "usage_log", "subscriptions", "user_weights"):
+            conn.execute(f"DELETE FROM {table} WHERE guild_id=?", (guild_id,))
+
+
+def delete_user_data(guild_id: str, user_id: str, path: str = DB_PATH) -> None:
+    """Hard-delete all stored data for a specific user in a guild."""
+    with _conn(path) as conn:
+        conn.execute(
+            "DELETE FROM usage_log WHERE guild_id=? AND user_id=?", (guild_id, user_id)
+        )
+        conn.execute(
+            "DELETE FROM user_weights WHERE guild_id=? AND user_id=?", (guild_id, user_id)
+        )
+        conn.execute(
+            "DELETE FROM characters WHERE guild_id=? AND added_by=?", (guild_id, user_id)
+        )
+        conn.execute(
+            "DELETE FROM pending_intents WHERE guild_id=? AND user_id=?", (guild_id, user_id)
+        )
 
 
 def purge_expired_intents(path: str = DB_PATH) -> int:

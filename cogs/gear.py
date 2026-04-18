@@ -27,7 +27,10 @@ from core.classifier import classify
 from core.intent import Intent
 from core.messages import thinking
 from core.gear_handler import handle_gear_question, handle_gear_list
-from db.server_config import get_character, list_characters, add_character, get_guild_config
+from db.server_config import (
+    get_character, list_characters, add_character, get_guild_config,
+    log_usage, check_rate_limit,
+)
 
 log = logging.getLogger(__name__)
 
@@ -156,12 +159,22 @@ class GearCog(commands.Cog, name="Gear"):
     ) -> None:
         guild_id = str(interaction.guild_id)
 
+        allowed, remaining = check_rate_limit(guild_id)
+        if not allowed:
+            await interaction.response.send_message(
+                "This server has hit the free plan daily limit (20 commands). "
+                "Upgrade to Pro for unlimited usage — use `/subscribe`.",
+                ephemeral=True,
+            )
+            return
+
         display, spec, realm, region = _resolve_character(character, guild_id)
         if display is None:
             await interaction.response.send_message(spec, ephemeral=True)
             return
 
         await interaction.response.defer(thinking=True)
+        log_usage(guild_id, str(interaction.user.id), "gearprio")
 
         loop = asyncio.get_running_loop()
         try:
@@ -243,6 +256,15 @@ class GearCog(commands.Cog, name="Gear"):
     ) -> None:
         guild_id = str(interaction.guild_id)
 
+        allowed, _ = check_rate_limit(guild_id)
+        if not allowed:
+            await interaction.response.send_message(
+                "This server has hit the free plan daily limit (20 commands). "
+                "Upgrade to Pro for unlimited usage — use `/subscribe`.",
+                ephemeral=True,
+            )
+            return
+
         display, reg_spec, realm, region = _resolve_character(character, guild_id)
         auto_note = None
         if display is None:
@@ -256,6 +278,7 @@ class GearCog(commands.Cog, name="Gear"):
 
         resolved_spec = spec or reg_spec
         await interaction.response.defer(thinking=True)
+        log_usage(guild_id, str(interaction.user.id), "gearcheck")
 
         loop = asyncio.get_running_loop()
         try:

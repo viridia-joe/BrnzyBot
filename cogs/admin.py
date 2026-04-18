@@ -30,6 +30,8 @@ from db.server_config import (
     list_characters,
     remove_character,
     set_guild_config,
+    set_guild_phase,
+    get_guild_phase,
     set_response_target,
     set_verbosity,
 )
@@ -66,6 +68,21 @@ class AdminCog(commands.Cog, name="Admin"):
     # /setup realm
     # -----------------------------------------------------------------------
     setup_group = app_commands.Group(name="setup", description="Configure BrnzyBot for this server")
+
+    @setup_group.command(name="phase", description="Set the current TBC content phase for this guild (1–6).")
+    @app_commands.describe(phase="Content phase number (1 = Karazhan, 2 = SSC/TK, etc.)")
+    @_require_manage_guild()
+    async def setup_phase(self, interaction: discord.Interaction, phase: int) -> None:
+        if not 1 <= phase <= 6:
+            await interaction.response.send_message("Phase must be between 1 and 6.", ephemeral=True)
+            return
+        guild_id = str(interaction.guild_id)
+        set_guild_phase(guild_id, phase)
+        await interaction.response.send_message(
+            f"Content phase set to **Phase {phase}**. "
+            "Gear recommendations will now filter by phase-appropriate sources.",
+            ephemeral=True,
+        )
 
     @setup_group.command(name="realm", description="Set the WoW realm slug for this guild.")
     @app_commands.describe(

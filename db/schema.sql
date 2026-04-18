@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS guild_config (
     guild_name      TEXT,
     server_slug     TEXT,   -- WCL/WoW realm slug
     region          TEXT NOT NULL DEFAULT 'us',
-    -- Interest threshold for raid analyst (Phase 5)
+    current_phase   INTEGER NOT NULL DEFAULT 1,
     interest_threshold INTEGER NOT NULL DEFAULT 5,
     setup_at        TEXT NOT NULL DEFAULT (datetime('now'))
 );
@@ -34,6 +34,35 @@ CREATE TABLE IF NOT EXISTS characters (
     added_by        TEXT,            -- Discord user ID who registered them
     added_at        TEXT NOT NULL DEFAULT (datetime('now')),
     PRIMARY KEY (guild_id, name_lower)
+);
+
+CREATE TABLE IF NOT EXISTS usage_log (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id    TEXT NOT NULL,
+    user_id     TEXT NOT NULL,
+    command     TEXT NOT NULL,  -- 'gearprio', 'gearcheck', 'nl_gear', 'nl_general'
+    logged_at   TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_usage_log_guild_day
+    ON usage_log (guild_id, logged_at);
+
+CREATE TABLE IF NOT EXISTS subscriptions (
+    guild_id            TEXT PRIMARY KEY,
+    stripe_customer_id  TEXT,
+    stripe_sub_id       TEXT,
+    plan                TEXT NOT NULL DEFAULT 'free',   -- 'free', 'pro'
+    status              TEXT NOT NULL DEFAULT 'active', -- 'active', 'past_due', 'canceled'
+    updated_at          TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS user_weights (
+    guild_id        TEXT NOT NULL,
+    user_id         TEXT NOT NULL,
+    spec            TEXT NOT NULL,
+    weights_json    TEXT NOT NULL,  -- JSON object mapping stat -> float
+    updated_at      TEXT NOT NULL DEFAULT (datetime('now')),
+    PRIMARY KEY (guild_id, user_id, spec)
 );
 
 CREATE TABLE IF NOT EXISTS pending_intents (

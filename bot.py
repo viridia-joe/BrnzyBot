@@ -17,8 +17,11 @@ Requires DISCORD_BOT_TOKEN in ~/.openclaw/data/.env or environment.
 """
 
 import asyncio
+import json
 import logging
 import sys
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from threading import Thread
 
 import discord
 from discord.ext import commands
@@ -68,6 +71,8 @@ class BrnzyBot(commands.Bot):
         await self.load_extension("cogs.strategy")
         await self.load_extension("cogs.listener")
         await self.load_extension("cogs.admin")
+        await self.load_extension("cogs.onboarding")
+        await self.load_extension("cogs.billing")
         log.info("Cogs loaded")
 
         # Sync slash commands globally
@@ -102,6 +107,29 @@ class BrnzyBot(commands.Bot):
 # Entry point
 # ---------------------------------------------------------------------------
 
+class _HealthHandler(BaseHTTPRequestHandler):
+    def log_message(self, format, *args):
+        pass
+
+    def do_GET(self):
+        if self.path == "/health":
+            body = json.dumps({"status": "ok", "service": "brnzybot"}).encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+        else:
+            self.send_response(404)
+            self.end_headers()
+
+
+def _start_health_server(port: int = 8081) -> None:
+    server = HTTPServer(("0.0.0.0", port), _HealthHandler)
+    Thread(target=server.serve_forever, daemon=True, name="health-server").start()
+    log.info("Health endpoint: http://0.0.0.0:%d/health", port)
+
+
 def main() -> None:
     missing = config.validate()
     if missing:
@@ -112,6 +140,9 @@ def main() -> None:
     # Ensure bot DB is initialized
     init_db()
     log.info("Bot database ready at %s", config.BOT_DB_PATH)
+
+    health_port = int(__import__("os").environ.get("HEALTH_PORT", "8081"))
+    _start_health_server(health_port)
 
     bot = BrnzyBot()
     bot.run(config.DISCORD_TOKEN, log_handler=None)

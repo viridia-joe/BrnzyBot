@@ -33,10 +33,10 @@ jobs:
         run: |
           ssh ${JARVIS_USER}@${JARVIS_HOST} '
             set -e
-            cd ~/brnzybot
+            cd ~/brnzybot-git
             git fetch origin master
             git reset --hard origin/master
-            systemctl --user restart brnzybot
+            systemctl --user restart brnzybot brnzybot-webhook
             echo "Deploy complete at $(date)"
           '
 

@@ -211,7 +211,8 @@ def handle_gear_list(
     if hc.overcap_by > 0:
         hit_str = f"{hc.current_rating}/{hc.cap_rating} rating (**+{hc.overcap_by} over cap**)"
     elif hc.uncapped_by > 0:
-        hit_str = f"{hc.current_rating}/{hc.cap_rating} rating (**{hc.uncapped_by} short**)"
+        gem_note = " — gems/enchants not counted, gap may be smaller" if not hc.gems_included else ""
+        hit_str = f"{hc.current_rating}/{hc.cap_rating} rating (**{hc.uncapped_by} short**{gem_note})"
     else:
         hit_str = f"{hc.current_rating}/{hc.cap_rating} rating (capped ✓)"
 
@@ -259,19 +260,27 @@ def handle_gear_list(
             if sr is None or sr.item_name in equipped_names:
                 # No BIS data, or BIS is a unique already worn in the other slot — neutral
                 lines.append(f"**{slot}** {cur_name}{set_tag} `{cur_ep:.1f}`")
-            elif sr.item_name == cur_name:
-                # Genuinely at BIS
-                lines.append(f"**{slot}** {cur_name}{set_tag} `{cur_ep:.1f}` ✓")
+            elif sr.was_equipped:
+                # Currently wearing BIS for this slot 🔥
+                lines.append(f"**{slot}** {cur_name}{set_tag} `{cur_ep:.1f}` 🔥")
             else:
-                delta = sr.ep - cur_ep
-                if delta > 0.5:
+                # sr.ep is the EP gain over current (from solve_bis SlotResult)
+                gain = sr.ep
+                bis_ep = cur_ep + gain
+                pct_off = gain / bis_ep if bis_ep > 0 else 0
+                if pct_off <= 0.10:
+                    marker = "🔥"
+                elif pct_off <= 0.20:
+                    marker = ""
+                else:
+                    marker = "❄️"
+                if gain > 0.5:
                     lines.append(
                         f"**{slot}** {cur_name} `{cur_ep:.1f}` "
-                        f"→ {sr.item_name} **+{delta:.1f}**"
+                        f"→ {sr.item_name} **+{gain:.1f}** {marker}"
                     )
                 else:
-                    # Optimizer chose differently (e.g. set bonus tradeoff) — neutral
-                    lines.append(f"**{slot}** {cur_name}{set_tag} `{cur_ep:.1f}`")
+                    lines.append(f"**{slot}** {cur_name}{set_tag} `{cur_ep:.1f}` {marker}")
         else:
             lines.append(f"**{slot}** {cur_name}{set_tag} `{cur_ep:.1f}`")
 

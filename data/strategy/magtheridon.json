@@ -1,0 +1,102 @@
+{
+  "_meta": {
+    "zone": "Magtheridon's Lair",
+    "zone_slug": "magtheridon",
+    "phase": 1,
+    "updated": "2026-04-10"
+  },
+  "bosses": [
+    {
+      "name": "Magtheridon",
+      "slug": "magtheridon",
+      "encounter_id": 1025,
+      "summary": "Two-phase encounter. Phase 1 is a channeler-management fight: 5 Channelers must be killed within ~2 minutes before Magtheridon breaks free. Phase 2 is Magtheridon himself — high tank damage, a room-wide quake mechanic, and the signature cube-clicking mechanic where 5 players must simultaneously click Cube of Forcing devices to interrupt his Blast Nova. Tight coordination throughout.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Channeler Phase",
+          "hp_range": "Before Magtheridon breaks free",
+          "description": "5 Hellfire Channelers around the room must all be killed before Magtheridon breaks his chains (approximately 2 minutes). Each Channeler has: Shadow Bolt Volley (raid AoE), Burning Abyssal (fire add), and Dark Mending (heals other channelers — interrupt immediately). Pull all 5 with misdirect/hunter pulls and kill them in sequence or simultaneously. Burning Abyssals must be tanked or CC'd.",
+          "key_mechanics": ["Dark Mending (Channeler heal)", "Burning Abyssal", "Shadow Bolt Volley", "Manticron Cube", "2-minute Enrage Timer"]
+        },
+        {
+          "number": 2,
+          "name": "Magtheridon Phase",
+          "hp_range": "100% – 0%",
+          "description": "Magtheridon breaks free and must be tanked. Heavy physical damage on the tank. Quake randomly knocks back nearby players. Blast Nova is a channeled AoE that wipes the raid if not interrupted — 5 designated players must simultaneously click the 5 Manticron Cubes around the room to interrupt it. Cave-In collapses part of the ceiling for AoE damage. Enrage at low HP.",
+          "key_mechanics": ["Blast Nova", "Quake", "Cave-In", "Enrage", "Manticron Cube Interrupt"]
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Dark Mending",
+          "mechanic_type": "special",
+          "targets": "channeler",
+          "description": "Each Channeler casts Dark Mending on nearby Channelers, healing them for large amounts. Must be interrupted or the Channelers will never die. Assign dedicated interrupters to each Channeler.",
+          "important": true
+        },
+        {
+          "name": "Burning Abyssal",
+          "mechanic_type": "special",
+          "targets": "raid",
+          "description": "Channelers summon Burning Abyssal adds during Phase 1. These must be tanked or controlled. They don't hit hard individually but can overwhelm if ignored. Assign an OT or CC for them.",
+          "important": false
+        },
+        {
+          "name": "Blast Nova",
+          "mechanic_type": "aoe",
+          "targets": "raid",
+          "description": "Magtheridon's signature wipe mechanic. He channels Blast Nova, dealing ~3500 fire damage per second to the entire raid. If the channel completes (5-second cast), the raid dies. Interrupt it by having 5 designated players simultaneously click the 5 Manticron Cubes (one in each corner and one in the center). The click must be simultaneous — within about 1 second of each other. Blast Nova is cast every ~60 seconds.",
+          "important": true
+        },
+        {
+          "name": "Manticron Cube",
+          "mechanic_type": "special",
+          "targets": "raid",
+          "description": "5 clickable devices positioned around the room. When all 5 are clicked simultaneously, they interrupt Blast Nova. Each cube also applies a debuff to the clicker — they cannot click again until the debuff expires (~60s). Assign primary and backup cube clickers for each cube. The debuff means you need a rotation.",
+          "important": true
+        },
+        {
+          "name": "Quake",
+          "mechanic_type": "aoe",
+          "targets": "raid",
+          "description": "Knocks back all nearby players and deals moderate physical damage. Ranged players are generally unaffected. Melee must re-engage after each Quake. Can knock the tank out of position.",
+          "important": false
+        },
+        {
+          "name": "Cave-In",
+          "mechanic_type": "aoe",
+          "targets": "raid",
+          "description": "Collapses a section of the ceiling, dealing massive AoE damage to anyone in the area. The cave-in location is telegraphed. Move out of the affected area immediately. Players standing in the cave-in zone take ~10,000 physical damage.",
+          "important": true
+        },
+        {
+          "name": "Enrage",
+          "mechanic_type": "enrage",
+          "targets": "tank",
+          "description": "Magtheridon enrages at approximately 30% HP, dramatically increasing his damage. Tank must use cooldowns. Raid must burn quickly. Lust/Heroism at or before enrage.",
+          "important": true
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard — 5-Tank + Cube Clickers",
+          "summary": "Phase 1: Assign 5 tanks/off-tanks to pull one Channeler each to separate positions. Interrupt Dark Mending on each. Burn Channelers down sequentially starting with the most central one, converging at the end. Kill all 5 before the 2-minute timer. Phase 2: MT picks up Magtheridon immediately. Assign 5 cube clickers (one per cube) with a primary and backup for each. Designate a caller who announces 'CLICK' when Blast Nova begins — all 5 click simultaneously. Move out of Cave-In. Lust at 30%.",
+          "applicable_to": ["all"],
+          "notes": "Magtheridon was widely considered the hardest Phase 1 boss for progression guilds due to the simultaneous cube-click coordination requirement. 25-man communication is essential. Use a verbal callout ('BLAST NOVA — CLICK') and practice the timing. The most common wipe cause in progression is a cube clicker being late, dead, or CC'd during Blast Nova."
+        },
+        {
+          "name": "Mark + Macro Cube Click",
+          "summary": "Assign a raid warning macro to each cube clicker that spams 'CLICKING NOW' on click. The raid leader calls Blast Nova and cube clickers hit their macro+click simultaneously. Reduces click desynchronization.",
+          "applicable_to": ["coordination-heavy"],
+          "notes": "Macros that both click the cube AND announce readiness significantly reduce the coordination overhead. Highly recommended for guilds working on this progression fight."
+        }
+      ],
+      "roles": {
+        "tank": "Phase 1: Each of the 5 tanks pulls one Channeler and holds them in place while assigned DPS burns them. Interrupt Dark Mending — make this your personal responsibility. Phase 2: Main tank picks up Magtheridon as he breaks free. Tank him in the center facing away. His damage is high and increases with enrage — use cooldowns liberally. Quake will knock you back periodically.",
+        "healer": "Phase 1: Sustain all 5 tanks simultaneously while they hold Channelers. Shadow Bolt Volley hits the whole raid for moderate damage. Phase 2: Heavy MT healing throughout. Blast Nova during the 5 seconds before it's interrupted does significant raid damage — top everyone quickly. Cave-In creates burst damage that needs emergency healing. Mana management on this long fight is important.",
+        "dps": "Phase 1: Know which Channeler you're assigned to. Interrupt Dark Mending — every healer cast set back the fight. Focus one Channeler at a time. Phase 2: If you're a cube clicker, know your cube's position, know your primary/backup assignment, and listen for the call. Do not DPS during the cube click — you need to be at your cube. Everyone else: burn Magtheridon and move out of Cave-In. Lust at 30%."
+      }
+    }
+  ]
+}

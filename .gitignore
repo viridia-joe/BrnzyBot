@@ -9,3 +9,6 @@ dist/
 build/
 .venv/
 venv/
+b64_*.txt
+brnzybot_b64.txt
+brnzybot_plan_revised.txt

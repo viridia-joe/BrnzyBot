@@ -38,6 +38,7 @@ class HitCapStatus:
     overcap_by:       int     # > 0 means wasted hit
     uncapped_by:      int     # > 0 means still needs hit
     effective_weight: float   # SpellHit EP weight to use in calculations
+    gems_included:    bool    # True if WCL-reported hit was used (gems/enchants counted)
 
     @property
     def status(self) -> str:
@@ -236,8 +237,10 @@ def compute_hit_cap(snapshot, spec_data: dict) -> HitCapStatus:
             wcl_hit, gear_sum,
         )
         current_rating = int(wcl_hit)
+        gems_included  = True
     else:
         current_rating = gear_sum
+        gems_included  = bool(wcl_hit)  # WCL matched item DB closely — gems probably covered
 
     overcap  = max(0, current_rating - effective_cap)
     uncapped = max(0, effective_cap - current_rating)
@@ -254,6 +257,7 @@ def compute_hit_cap(snapshot, spec_data: dict) -> HitCapStatus:
         overcap_by=overcap,
         uncapped_by=uncapped,
         effective_weight=effective_weight,
+        gems_included=gems_included,
     )
 
 

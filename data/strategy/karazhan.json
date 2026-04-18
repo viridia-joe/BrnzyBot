@@ -1,0 +1,776 @@
+{
+  "_meta": {
+    "zone": "Karazhan",
+    "zone_slug": "karazhan",
+    "phase": 1,
+    "updated": "2026-04-10"
+  },
+  "bosses": [
+    {
+      "name": "Attumen the Huntsman",
+      "slug": "attumen_the_huntsman",
+      "encounter_id": 1038,
+      "summary": "Two-phase encounter. Midnight (the horse) is pulled first; Attumen mounts and joins at 95% Midnight HP. The fight becomes a straightforward tank-and-spank with a shared HP pool once mounted. Main hazards are a frontal cleave and a debuff that reduces threat generation on the tank.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Phase 1 — Midnight",
+          "hp_range": "100% – 95%",
+          "description": "Engage Midnight near her stall. DPS burn her to 95% quickly. She hits hard — tank her away from the raid. Attumen spawns mid-room and must be picked up immediately by an off-tank or the main tank must move fast.",
+          "key_mechanics": ["Cleave", "Shadow Cleave"]
+        },
+        {
+          "number": 2,
+          "name": "Phase 2 — Mounted",
+          "hp_range": "95% – 0%",
+          "description": "Attumen mounts Midnight and the HP pools merge. Standard tank-and-spank. Face him away from the raid. Unholy Ground periodically spawns AoE patches on the ground — move out. Intangible Presence reduces the tank's threat generation; be ready for threat drops.",
+          "key_mechanics": ["Cleave", "Intangible Presence", "Unholy Ground", "Berserker Charge"]
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Cleave",
+          "mechanic_type": "cleave",
+          "targets": "tank",
+          "description": "Frontal cleave hitting up to 3 targets in front of Attumen. Always face him away from the raid. Melee DPS should stand to his sides or behind.",
+          "important": true
+        },
+        {
+          "name": "Intangible Presence",
+          "mechanic_type": "debuff",
+          "targets": "tank",
+          "description": "Reduces the affected player's chance to hit and generates 50% reduced threat for 3 minutes. When this lands on the main tank, DPS must throttle immediately to avoid pulling aggro. The off-tank should be positioned to taunt if needed.",
+          "important": true
+        },
+        {
+          "name": "Berserker Charge",
+          "mechanic_type": "special",
+          "targets": "random_player",
+          "description": "Charges a random raid member, knocking them back and stunning briefly. Positional awareness required — don't stand near the edges of the room or near other bosses' areas.",
+          "important": false
+        },
+        {
+          "name": "Unholy Ground",
+          "mechanic_type": "aoe",
+          "targets": "raid",
+          "description": "Periodically places AoE patches of shadow damage on the ground. Move out when you see the visual. Tanks may need to reposition slightly.",
+          "important": false
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "Pull Midnight into her stall area. OT picks up Attumen at spawn. At 95%, Attumen mounts — both tanks converge on one target. Face away from raid, DPS burns. Watch Intangible Presence and be ready to throttle threat.",
+          "applicable_to": ["all"],
+          "notes": "Very forgiving encounter. The only real wipe risk is Intangible Presence + a DPS who doesn't throttle."
+        }
+      ],
+      "roles": {
+        "tank": "Main tank Midnight initially; be ready to pick up Attumen when he spawns. At the merge, hold the combined boss. React immediately to Intangible Presence by calling it out — DPS must stop. Face Attumen away at all times to prevent Cleave splash on the raid.",
+        "healer": "Straightforward tank healing. Watch for the Cleave if the tank gets hit hard. Intangible Presence can cause a brief threat-swap — be ready to keep both the tank and whoever temporarily grabs aggro alive.",
+        "dps": "Watch your threat throughout, especially after Intangible Presence lands on the tank. Stop attacking immediately when called. Stand to the sides or behind — never in front of Attumen. Move out of Unholy Ground promptly."
+      }
+    },
+    {
+      "name": "Moroes",
+      "slug": "moroes",
+      "encounter_id": 1039,
+      "summary": "Council-style fight with Moroes plus 4 random adds from a pool of 6. The adds must be crowd-controlled or killed quickly — their composition varies each reset. Moroes himself applies Garrote, a bleed that cannot be dispelled and kills over time if not mitigated. Vanish and reappear is his signature threat mechanic.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Pull and Add Management",
+          "hp_range": "100% – 0%",
+          "description": "On pull, CC as many adds as possible. Kill priority is typically: Holy Priest (Fear Ward-like abilities), Paladin (Blessing of Protection can save Garroted players), then remaining adds. Moroes is tanked separately and must be re-taunted after each Vanish. Garrote management is the central healer challenge throughout.",
+          "key_mechanics": ["Garrote", "Vanish", "Blind", "Gouge", "Cheap Shot", "Add Abilities"]
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Garrote",
+          "mechanic_type": "debuff",
+          "targets": "random_player",
+          "description": "Applies a stacking bleed debuff to a random raid member that deals ~1000 shadow damage every 3 seconds and cannot be removed by standard dispels. Stacks indefinitely. Affected players need sustained healing or external mitigation. Paladins can use Blessing of Protection to temporarily remove the damage component (though the debuff persists). Moroes re-applies Garrote after each Vanish.",
+          "important": true
+        },
+        {
+          "name": "Vanish",
+          "mechanic_type": "special",
+          "targets": "tank",
+          "description": "Moroes vanishes, dropping aggro. He reappears on a random raid member and applies Garrote. The tank must immediately re-taunt when he reappears. Keep the raid spread so the Vanish target is obvious.",
+          "important": true
+        },
+        {
+          "name": "Blind",
+          "mechanic_type": "debuff",
+          "targets": "random_player",
+          "description": "Blinds a random target, incapacitating them briefly. Standard dispel/trinket clears it. Not a major threat mechanic but can disrupt healers.",
+          "important": false
+        },
+        {
+          "name": "Gouge",
+          "mechanic_type": "special",
+          "targets": "tank",
+          "description": "Gouges the current target, incapacitating them briefly and resetting aggro. The off-tank or second highest threat player will take hits during the Gouge. Have a second tank ready.",
+          "important": true
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard — CC and Kill Priority",
+          "summary": "Sheep/shackle/trap/banish adds immediately on pull. Kill order: Holy Priest > Holy Paladin > Ret Paladin > Shadow Priest > Warrior > Mage. Moroes is tanked off to the side. Re-CC as needed. Garroted players need constant HoT coverage. Paladin BoP rotation on Garrote victims buys time. Kill all adds before burning Moroes.",
+          "applicable_to": ["all"],
+          "notes": "The add composition is random each reset from a fixed pool of 6. Always check which 4 spawned — a Holy Paladin add is significantly more dangerous than a Warrior add."
+        },
+        {
+          "name": "Ignore Adds — Burn Moroes",
+          "summary": "With sufficient DPS (late-T4/T5 gear), some groups CC the two most dangerous adds and burn Moroes directly, then clean up adds. Reduces the number of Garrote applications but requires high raid DPS and strong Garrote healing.",
+          "applicable_to": ["overgeared"],
+          "notes": "Only viable if your raid has enough DPS to kill Moroes before Garrote stacks become unmanageable. Not recommended for progression groups."
+        }
+      ],
+      "roles": {
+        "tank": "Main tank Moroes. After each Vanish, watch for him to reappear and taunt immediately — he will Garrote the Vanish target and attack them before you can react, but get him back ASAP. Gouge will incapacitate you briefly; make sure an OT is positioned to absorb hits. Call out Vanish loudly.",
+        "healer": "Garrote is your primary concern. Keep HoTs on every Garroted player at all times — the debuff ticks constantly. Coordinate with the Paladin healer on BoP rotations for Garrote victims. After Vanish, a new player gets Garroted — immediately identify them and prioritize. Running out of mana on a long fight is a real risk; use mana efficiently.",
+        "dps": "CC your assigned add immediately on pull. Re-CC on cooldown. Follow the kill priority. On Moroes: DPS him when you have no CC responsibilities. Spread out slightly so Vanish targets are obvious to the tank. If you get Garroted, call it out so healers can prioritize you."
+      }
+    },
+    {
+      "name": "Maiden of Virtue",
+      "slug": "maiden_of_virtue",
+      "encounter_id": 1040,
+      "summary": "Single-phase tank-and-spank with a simple but punishing mechanic: Holy Ground deals constant AoE damage to anyone in melee range except the tank. Melee DPS must learn to live with it or stay at range. Repentance is a channeled sleep that affects the whole raid — healers must top everyone before she casts it.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Full Fight",
+          "hp_range": "100% – 0%",
+          "description": "Tank Maiden in the center of the room. Holy Ground pulses AoE damage in melee range every 2 seconds — melee DPS take significant sustained damage. She periodically casts Repentance, a 12-second sleep on all non-tank players. Heal everyone to full before each Repentance. Holy Fire and Consecration add passive raid damage.",
+          "key_mechanics": ["Holy Ground", "Repentance", "Holy Fire", "Consecrate"]
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Holy Ground",
+          "mechanic_type": "aoe",
+          "targets": "raid",
+          "description": "Persistent AoE pulsing ~350 Holy damage every 2 seconds to all players within approximately 10 yards of Maiden (the melee range). Does NOT affect the main tank. Melee DPS will take this entire fight — healers must keep them topped.",
+          "important": true
+        },
+        {
+          "name": "Repentance",
+          "mechanic_type": "special",
+          "targets": "raid",
+          "description": "Channels for 12 seconds, putting all non-tank players to sleep. During Repentance, players take 1000 Holy damage every 3 seconds. Everyone must be above ~4000 HP before she casts this or players will die in their sleep. Cast every ~30 seconds.",
+          "important": true
+        },
+        {
+          "name": "Holy Fire",
+          "mechanic_type": "debuff",
+          "targets": "random_player",
+          "description": "Shoots Holy Fire at a random target, dealing ~3000 Holy damage and applying a DoT. Can be dispelled (Magic). Prioritize dispelling healers.",
+          "important": false
+        },
+        {
+          "name": "Consecrate",
+          "mechanic_type": "aoe",
+          "targets": "raid",
+          "description": "Places a Consecration on the ground around her. Adds to the overall AoE pressure on melee. Combined with Holy Ground, melee damage intake is high.",
+          "important": false
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "Tank in center, melee accept Holy Ground damage. Healers keep melee topped constantly and call Repentance incoming — top everyone to full before the sleep. Dispel Holy Fire off healers. Straightforward once the healing rhythm is established.",
+          "applicable_to": ["all"],
+          "notes": "Melee DPS will be taking more damage than in most fights. This is expected — healers just need to budget mana for the sustained AoE."
+        },
+        {
+          "name": "Ranged Only",
+          "summary": "Some undergeared groups have melee stand at max range and only use ranged attacks to avoid Holy Ground entirely. DPS loss but dramatically reduces healing burden.",
+          "applicable_to": ["undergeared"],
+          "notes": "Only needed if your healers are struggling. With even moderate gear this is unnecessary."
+        }
+      ],
+      "roles": {
+        "tank": "Tank her in the center. Straightforward — Holy Ground doesn't affect you. Call out when you see Repentance casting so healers can top the raid. Use cooldowns if she hits unusually hard.",
+        "healer": "This is an active fight for healers. Melee are taking sustained Holy Ground damage the entire fight. Keep HoTs rolling on melee. Before each Repentance (every ~30s), heal everyone to full — this is non-negotiable. Dispel Holy Fire off priority targets (other healers first). Mana management matters on a long fight.",
+        "dps": "Melee: accept the Holy Ground damage and keep attacking — your healers are keeping you up. If you're dying, you may be out of position or your healers are overwhelmed. Ranged: stand outside melee range and you avoid Holy Ground entirely. Everyone: when Repentance lands, you're asleep — nothing you can do. Just make sure you're topped beforehand."
+      }
+    },
+    {
+      "name": "Opera Event",
+      "slug": "opera_event",
+      "encounter_id": 1042,
+      "summary": "The Opera Event is a random encounter with three possible performances: Romulo and Julianne, The Big Bad Wolf, and The Wizard of Oz. The active performance is randomly selected each reset. All three are moderate difficulty with distinct mechanics. Check which one is up before pulling.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Romulo and Julianne",
+          "hp_range": "Variant A",
+          "description": "Two bosses that must die within 10 seconds of each other or they resurrect. Julianne must be kept CC'd or tightly controlled while Romulo is tanked. When both are around 10-15%, burn them together. Julianne casts Blinding Passion (stun) and Eternal Affection (heal) — interrupt the heal. Romulo has a Poisoned Thrust that must be decursed.",
+          "key_mechanics": ["Shared Death Timer", "Eternal Affection", "Poisoned Thrust", "Blinding Passion"]
+        },
+        {
+          "number": 2,
+          "name": "The Big Bad Wolf",
+          "hp_range": "Variant B",
+          "description": "Single boss. His primary mechanic is transforming a random raid member into Red Riding Hood — a small, slow character that the Wolf then chases. That player must run away and kite the Wolf while the raid burns him down. Fear is cast periodically. Tanks must pick Wolf back up immediately after Fear.",
+          "key_mechanics": ["Red Riding Hood", "Fear", "Dire Howl"]
+        },
+        {
+          "number": 3,
+          "name": "The Wizard of Oz",
+          "hp_range": "Variant C",
+          "description": "Four adds plus Dorothee. Pull order: tank Tinhead (who cleaves), kill Dorothee first to despawn Tito (her dog), then Strawman (interruptible sleep), then Roar (fear), then Tinhead. Crone appears when all adds die — tank-and-spank with a cyclone.",
+          "key_mechanics": ["Rusty Axe (Tinhead cleave)", "Scarecrow Sleep (Strawman)", "Roar Fear", "Cyclone (Crone)"]
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Eternal Affection",
+          "mechanic_type": "special",
+          "targets": "self",
+          "description": "Julianne heals herself for a large amount. Must be interrupted. Assign a dedicated interrupter.",
+          "important": true
+        },
+        {
+          "name": "Poisoned Thrust",
+          "mechanic_type": "debuff",
+          "targets": "tank",
+          "description": "Romulo applies a nature damage DoT to the tank. Decurse or dispel promptly.",
+          "important": false
+        },
+        {
+          "name": "Blinding Passion",
+          "mechanic_type": "special",
+          "targets": "tank",
+          "description": "Stuns Romulo's tank briefly. OT or second tank must be ready to pick up during the stun.",
+          "important": true
+        },
+        {
+          "name": "Red Riding Hood",
+          "mechanic_type": "special",
+          "targets": "random_player",
+          "description": "Transforms a random raid member into Little Red Riding Hood. That player becomes slow and small. The Wolf fixates on them and chases. The Red Riding Hood player must run in a circle around the room while the raid continues burning the Wolf. He will kill the player if he catches them.",
+          "important": true
+        },
+        {
+          "name": "Fear (Big Bad Wolf)",
+          "mechanic_type": "debuff",
+          "targets": "raid",
+          "description": "Fears nearby players. Tank loses aggro during Fear — re-taunt immediately. Berserker Rage or Fear Ward can protect the tank.",
+          "important": true
+        },
+        {
+          "name": "Cyclone (Crone)",
+          "mechanic_type": "aoe",
+          "targets": "random_player",
+          "description": "Sends a cyclone toward a random raid member. Deals significant damage if it hits. Spread out and move away from the visual.",
+          "important": false
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Romulo and Julianne",
+          "summary": "Tank Romulo away from Julianne. CC or kite Julianne. Keep an interrupter on Eternal Affection at all times. Decurse Poisoned Thrust off the tank. When both are below 15%, stop DPS on both and coordinate a simultaneous kill. If one dies more than 10 seconds before the other, both resurrect at full HP.",
+          "applicable_to": ["romulo_julianne"],
+          "notes": "The simultaneous kill is the only real challenge. Call out HP percentages as both approach 10%."
+        },
+        {
+          "name": "The Big Bad Wolf",
+          "summary": "Tank the Wolf in the center. When Red Riding Hood transforms a player, that player immediately starts running in a large circle. Do NOT try to help them — the Wolf will fixate only on them. The rest of the raid continues burning. Re-taunt after Fear. This is largely a DPS race.",
+          "applicable_to": ["big_bad_wolf"],
+          "notes": "Red Riding Hood players need to stay calm and kite. The Wolf is fast — run in a wide circle and don't get cornered."
+        },
+        {
+          "name": "The Wizard of Oz",
+          "summary": "Pull the pack with a tank. Kill order: Dorothee first (despawns Tito), then Strawman (interrupt sleep), then Roar, then Tinhead (cleaves — tank away from raid). Crone appears after all four die. Tank Crone in place and burn. Move away from Cyclone.",
+          "applicable_to": ["wizard_of_oz"],
+          "notes": "Tinhead is the most dangerous add due to the cleave. Ensure melee stays behind him."
+        }
+      ],
+      "roles": {
+        "tank": "Romulo/Julianne: MT Romulo, OT manages Julianne or holds her loosely. Be ready for Blinding Passion. Big Bad Wolf: tank in the center, re-taunt after Fear immediately. Wizard of Oz: tank Tinhead away from the raid, be ready to pick up Crone after adds die.",
+        "healer": "Romulo/Julianne: keep both tanks up, watch for Julianne tank taking extra damage. Big Bad Wolf: heal the Red Riding Hood player if they're in range, but don't follow them — the Wolf will redirect. Wizard of Oz: steady healing, interrupt Strawman's sleep if no caster is assigned.",
+        "dps": "Romulo/Julianne: assign one caster/rogue to interrupt Eternal Affection every cast. Watch simultaneous kill timing. Big Bad Wolf: if you get Red Riding Hood, start running immediately in a large circle. Don't panic. Wizard of Oz: follow kill order, stay behind Tinhead."
+      }
+    },
+    {
+      "name": "The Curator",
+      "slug": "the_curator",
+      "encounter_id": 1046,
+      "summary": "Sustained AoE/burst fight with a predictable pattern. The Curator periodically spawns Astral Flares that must be killed before they reach him — if they reach him he heals. He regularly enters an Evocation phase (like a mage) during which he takes 200% increased damage — this is the DPS window. Between Evocations, raid damage is moderate but manageable.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Active Phase",
+          "hp_range": "Repeating until 15%",
+          "description": "The Curator periodically spawns Astral Flares. Kill each Flare before it reaches the Curator. Flares deal AoE Arcane damage to nearby players — spread slightly. The Curator also uses Hateful Bolt on the highest non-tank threat target.",
+          "key_mechanics": ["Astral Flare", "Hateful Bolt", "Arcane Infusion"]
+        },
+        {
+          "number": 2,
+          "name": "Evocation",
+          "hp_range": "Periodic channel",
+          "description": "Every ~2 minutes, the Curator channels Evocation. He stops all attacks and takes 200% bonus damage. Lust/Heroism here if available. All DPS switches to the Curator and burns hard. Ends after 20 seconds.",
+          "key_mechanics": ["Evocation (200% damage taken)"]
+        },
+        {
+          "number": 3,
+          "name": "Enrage (15%)",
+          "hp_range": "15% – 0%",
+          "description": "At 15% HP, the Curator stops spawning Flares and enters a berserk-like state dealing greatly increased damage. Burn him down quickly. Lust/Heroism if not used earlier.",
+          "key_mechanics": ["Enrage"]
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Astral Flare",
+          "mechanic_type": "special",
+          "targets": "raid",
+          "description": "Spawns an Astral Flare add every ~10 seconds that moves slowly toward the Curator. If it reaches him, he gains a 10% heal. Flares deal splash AoE damage when near players. Kill each Flare immediately. AoE kills are fine.",
+          "important": true
+        },
+        {
+          "name": "Hateful Bolt",
+          "mechanic_type": "special",
+          "targets": "random_player",
+          "description": "Fires a bolt at the highest non-tank threat player, dealing ~7000 Arcane damage. This is typically the main healer or highest DPS player. The target needs to be above 7000 HP to survive. Keep all raid members healthy.",
+          "important": true
+        },
+        {
+          "name": "Evocation",
+          "mechanic_type": "special",
+          "targets": "self",
+          "description": "The Curator channels Evocation, restoring his own mana. During this channel he takes 200% increased damage and does nothing else. This is the primary DPS window — all DPS switches to Curator immediately.",
+          "important": true
+        },
+        {
+          "name": "Arcane Infusion",
+          "mechanic_type": "aoe",
+          "targets": "raid",
+          "description": "Pulses Arcane damage to nearby players whenever he spawns a Flare. Moderate constant AoE pressure. Spread slightly to reduce splash.",
+          "important": false
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "Tank Curator in position. Assign 1-2 AoE DPS to kill Flares as they spawn — keep them dead. Everyone else DPS the Curator during Evocation only; conserve mana otherwise. At 15%, stop saving Lust and burn. Hateful Bolt target needs to be topped at all times.",
+          "applicable_to": ["all"],
+          "notes": "Mana efficiency matters here. If your DPS is burning the Curator during non-Evocation phases, healers run out of mana before the kill. Patience pays off."
+        }
+      ],
+      "roles": {
+        "tank": "Hold the Curator in place throughout. Positioning is simple — just keep him still. Call out Evocation so DPS can swap immediately. At 15%, call the enrage and expect increased damage.",
+        "healer": "Hateful Bolt is your primary reaction mechanic — whoever has highest non-tank threat needs to be kept above ~7k HP at all times. Generally this means your top healer needs their own heals topped. AoE damage from Flares is moderate — HoTs handle it. Reserve mana; this fight can go long.",
+        "dps": "Assign flare killers (usually 1 AoE class + 1 backup). During the Curator's active phase, AoE kill Flares promptly. During Evocation, immediately swap to Curator and burn as hard as possible. Don't DPS the Curator outside of Evocation unless told to — save mana. At 15%, all-in."
+      }
+    },
+    {
+      "name": "Shade of Aran",
+      "slug": "shade_of_aran",
+      "encounter_id": 1050,
+      "summary": "One of Karazhan's most complex encounters. Aran cannot be taunted and doesn't have a conventional threat table for positioning — he attacks whoever he feels like. His most dangerous mechanic is Flame Wreath: if anyone moves during it, it triggers a massive explosion that wipes the raid. He also Teleports the whole raid to the center of the room and casts Blizzard simultaneously. Managing mana (he has a mana pool) and cooldown tracking is key.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Full Fight",
+          "hp_range": "100% – 0%",
+          "description": "Aran cannot be taunted. He uses three types of spell schools — Arcane, Fire, and Frost — and interrupting one school puts him on a cooldown for other schools. He drinks when low on mana (during which he gains healing and a defense buff — do not interrupt him, let him finish). Flame Wreath, Blizzard, and Arcane Explosion are the primary deadly mechanics.",
+          "key_mechanics": ["Flame Wreath", "Blizzard", "Arcane Explosion", "Counterspell", "Drinking", "Elementals (20%)"]
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Flame Wreath",
+          "mechanic_type": "special",
+          "targets": "raid",
+          "description": "Places a ring of fire around 3 random raid members. If ANY player moves while Flame Wreath is active (including the targeted players), it detonates for ~10,000 fire damage to the entire raid — an instant wipe. Announce it loudly. Everyone stops moving the instant it appears. Wait for it to expire (~5 seconds).",
+          "important": true
+        },
+        {
+          "name": "Blizzard",
+          "mechanic_type": "aoe",
+          "targets": "raid",
+          "description": "Aran teleports the entire raid to the center of the room, then immediately casts Blizzard. The Blizzard moves in a rotating pattern. Move out of it quickly — it deals ~1500 frost damage per second. This often coincides with Flame Wreath warnings — check both before moving.",
+          "important": true
+        },
+        {
+          "name": "Arcane Explosion",
+          "mechanic_type": "aoe",
+          "targets": "raid",
+          "description": "Heavy AoE Arcane damage. Aran uses this when players are in melee range. Typically used to punish melee who stay too close. Move out if you are melee and he begins casting.",
+          "important": true
+        },
+        {
+          "name": "Counterspell",
+          "mechanic_type": "special",
+          "targets": "raid",
+          "description": "Interrupts all players currently casting a spell of the school he counters, and silences that school for 10 seconds. Casters must watch their spell school — if he Counterspells fire, don't cast fire spells for 10 seconds.",
+          "important": false
+        },
+        {
+          "name": "Drinking",
+          "mechanic_type": "special",
+          "targets": "self",
+          "description": "When Aran's mana drops low, he stops attacking and drinks. During this time he gains a defense buff and heals himself. Do NOT interrupt his drink — it replenishes mana but also ends the drink phase. Interrupting it is commonly listed as a wipe cause for new groups.",
+          "important": true
+        },
+        {
+          "name": "Summon Water Elementals",
+          "mechanic_type": "special",
+          "targets": "raid",
+          "description": "At 20% HP, Aran summons several Water Elementals. These must be AoE'd or controlled while continuing to DPS Aran. Heroism/Lust at this point to burn him before elemental damage overwhelms healers.",
+          "important": true
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard — Spread and React",
+          "summary": "No tank positioning needed. Spread the raid around the room in a loose circle. Assign a callout for Flame Wreath — a single person calls 'STOP MOVING' and everyone freezes. After teleport/Blizzard, move out of the Blizzard immediately. Don't interrupt Aran's drink. Lust at 20% when elementals spawn.",
+          "applicable_to": ["all"],
+          "notes": "Flame Wreath kills more raid groups than anything else in Karazhan. Enforce the 'STOP MOVING' rule absolutely. Even one person moving wipes the raid."
+        }
+      ],
+      "roles": {
+        "tank": "There is no tanking in the traditional sense — Aran cannot be taunted. Designate one person to call out Flame Wreath loudly. Warriors and Paladins should focus on surviving and contributing DPS/interrupts.",
+        "healer": "Spread around the room so Arcane Explosion doesn't cluster damage. React to Blizzard quickly. During Flame Wreath, stop all movement — if you need to heal, use instant-cast abilities only (don't move). The 20% elemental phase is a significant healing spike — have cooldowns ready.",
+        "dps": "When Flame Wreath is called: STOP. Do not finish your cast if it requires movement, do not strafe, do not turn. Everything stops until it expires. After teleport, immediately identify and move out of Blizzard. Do not interrupt his drink. At 20%, help AoE the elementals but keep pressure on Aran."
+      }
+    },
+    {
+      "name": "Terestian Illhoof",
+      "slug": "terestian_illhoof",
+      "encounter_id": 1048,
+      "summary": "Illhoof sacrifices a random raid member, suspending them and dealing heavy damage. The raid must kill the chains binding the player to free them before they die. Imps spawn throughout and must be managed. Kil'rek, his imp companion, reduces Illhoof's damage taken — kill Kil'rek first or have it tanked away.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Full Fight",
+          "hp_range": "100% – 0%",
+          "description": "Pull Kil'rek off Illhoof and kill him first. This removes the 25% damage reduction aura. Then engage Illhoof. He periodically sacrifices a random player — the raid burns the Chains of Kel'thuzad to free them. Imps spawn constantly — AoE them. Berserk Enrage at low HP increases urgency.",
+          "key_mechanics": ["Sacrifice", "Chains of Kel'thuzad", "Imp Swarm", "Fiendish Portal"]
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Sacrifice",
+          "mechanic_type": "special",
+          "targets": "random_player",
+          "description": "Suspends a random raid member in the air and deals ~1000 shadow damage per second to them. The player is completely helpless. The raid must immediately switch to killing the Chains of Kel'thuzad binding them. If the chains aren't killed within about 15 seconds, the sacrifice target dies.",
+          "important": true
+        },
+        {
+          "name": "Chains of Kel'thuzad",
+          "mechanic_type": "special",
+          "targets": "random_player",
+          "description": "Spawns when Sacrifice is cast. Has approximately 10,000 HP. The entire raid must switch to killing the chains immediately to free the sacrificed player. Single-target or cleave — burn them as fast as possible.",
+          "important": true
+        },
+        {
+          "name": "Fiendish Portal",
+          "mechanic_type": "special",
+          "targets": "raid",
+          "description": "Illhoof channels a portal that continuously spawns Fiendish Imps. Each imp deals moderate damage but the sheer volume is dangerous. One or two AoE DPS (warlock, mage) should be assigned to seal the portal via kills or DPS the portal itself.",
+          "important": true
+        },
+        {
+          "name": "Berserk",
+          "mechanic_type": "enrage",
+          "targets": "tank",
+          "description": "Illhoof gains a berserk buff that dramatically increases damage and attack speed at low HP. Standard burn phase — Lust/Heroism at around 20%.",
+          "important": false
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "OT grabs Kil'rek and burns him immediately. MT engages Illhoof. Assign AoE classes (Warlock, Mage) to handle the imp portal continuously. On Sacrifice, everyone switches to Chains immediately — don't let the sacrificed player die. Lust/Heroism when Illhoof is low.",
+          "applicable_to": ["all"],
+          "notes": "A Warlock's Seed of Corruption on the imp cluster is extremely effective. The biggest failure mode is ignoring the Chains — designate a loud call for 'CHAINS' so everyone switches immediately."
+        }
+      ],
+      "roles": {
+        "tank": "Main tank Illhoof, off-tank pulls Kil'rek away immediately on pull. Kill Kil'rek first. After Kil'rek dies, off-tank can help with imps or support the main tank. Use cooldowns when Illhoof berserks.",
+        "healer": "Keep the sacrificed player alive — they take ~1000/sec and can die very fast. Prioritize healing them while the raid kills chains. Imp AoE adds constant background damage to the raid — HoTs and steady heals are important.",
+        "dps": "When Sacrifice is called: immediately switch to Chains, no exceptions. The Chains die in a few GCDs with full raid DPS. Assign 1-2 AoE classes to the portal and imps at all times. Do not let the imp count spiral out of control."
+      }
+    },
+    {
+      "name": "Netherspite",
+      "slug": "netherspite",
+      "encounter_id": 1053,
+      "summary": "Netherspite alternates between a Beam Phase (complex beam positioning) and a Banish Phase (everyone stacks and waits). During Beam Phase, three colored beams must be blocked by specific players to prevent Netherspite from gaining powerful buffs. The Red Beam must be blocked by a tank to redirect the damage buff to the tank instead. Highly coordination-dependent.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Beam Phase",
+          "hp_range": "Alternating ~90s",
+          "description": "Three portals spawn beams: Red (Perseverance), Blue (Serenity), Green (Voidzone). A player standing in a beam absorbs it and gains the associated debuff/buff instead of Netherspite. Red Beam must be tanked by a plate wearer. Blue Beam should be blocked by a healer or caster to prevent Netherspite mana regen. Green Beam creates a void zone — let it hit the floor away from the raid (or have a DPS absorb it briefly).",
+          "key_mechanics": ["Red Beam (Perseverance)", "Blue Beam (Serenity)", "Green Beam (Void Zone)"]
+        },
+        {
+          "number": 2,
+          "name": "Banish Phase",
+          "hp_range": "Alternating ~30s",
+          "description": "Netherspite banishes himself, becoming immune to damage. All raid members stack in melee range and wait it out. Void Zones persist. Netherspite re-emerges and Beam Phase restarts.",
+          "key_mechanics": ["Banish", "Nether Burn (Banish proximity damage)"]
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Red Beam (Perseverance)",
+          "mechanic_type": "special",
+          "targets": "tank",
+          "description": "The Red Beam grants Netherspite massive attack power and damage. A player blocking it instead gains a stacking attack power buff and takes moderate damage. Tanks should block this beam — they gain the damage buff and their armor mitigates the beam damage. Rotate tanks if the stacks get too high.",
+          "important": true
+        },
+        {
+          "name": "Blue Beam (Serenity)",
+          "mechanic_type": "special",
+          "targets": "random_player",
+          "description": "The Blue Beam regenerates Netherspite's mana rapidly if unblocked. A caster or healer blocking it instead gains a mana regen buff. Assign a mana user to stand in it. They take damage over time — rotate if needed.",
+          "important": true
+        },
+        {
+          "name": "Green Beam (Void Zone)",
+          "mechanic_type": "special",
+          "targets": "random_player",
+          "description": "The Green Beam creates persistent Void Zones on the ground where it hits. If unblocked, it creates Void Zones under raid members. Position it to hit an open area of the floor away from the raid. A player can block it briefly but it applies a stacking debuff that reduces max HP — don't block it for more than a few seconds.",
+          "important": true
+        },
+        {
+          "name": "Nether Burn",
+          "mechanic_type": "aoe",
+          "targets": "raid",
+          "description": "Passive AoE shadow damage during the Banish Phase. Stack up in melee range and sustain through it. Not lethal with decent healing.",
+          "important": false
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard Beam Rotation",
+          "summary": "Assign beam blockers before the pull: Tank 1 on Red Beam, a mana user (healer/caster) on Blue Beam. Point the Green Beam at an open wall. Pre-assign a beam rotation — blockers swap out every ~15 seconds to manage debuff stacks. During Banish, stack up. Repeat.",
+          "applicable_to": ["all"],
+          "notes": "This fight rewards preparation over reaction. Brief the raid on beam positions and rotation before pulling. A single raid wipe from a missed beam rotation teaches the encounter faster than explanation."
+        }
+      ],
+      "roles": {
+        "tank": "Primary blocker for the Red Beam. Stand in the beam to absorb it — it gives you a damage buff but applies a stacking debuff. Swap with a second tank or DPS warrior when the debuff stacks are high (typically after 3-4 stacks). Be ready to taunt Netherspite at the start of each Beam Phase.",
+        "healer": "Assign one healer to cover the Blue Beam rotation. Keep beam blockers alive — they take sustained damage. During Banish Phase, top everyone up. Void Zones from the Green Beam reduce max HP — watch for this in your health bars.",
+        "dps": "One DPS may need to cover beam duties during swap transitions. Stay out of Void Zones. During Beam Phase, DPS Netherspite freely. During Banish, stack up and wait."
+      }
+    },
+    {
+      "name": "Chess Event",
+      "slug": "chess_event",
+      "encounter_id": 1015,
+      "summary": "A unique puzzle encounter where raid members control chess pieces. This is the easiest boss in Karazhan and provides a guaranteed piece of loot. The main mechanic is Medivh cheating — he periodically fires a meteor at a chess piece, dealing massive damage. Move your piece away when targeted.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Chess Game",
+          "hp_range": "Eliminate the King",
+          "description": "Each player controls a chess piece. Kill the enemy King. Pieces have limited movement per turn. Medivh periodically cheats by casting a Fire spell at a piece — the player controlling that piece must move it out of the area immediately. Kill enemy DPS pieces first to reduce damage to your King.",
+          "key_mechanics": ["Medivh's Cheat (Meteor)", "Piece Abilities", "King Protection"]
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Medivh's Cheat",
+          "mechanic_type": "special",
+          "targets": "random_player",
+          "description": "Medivh fires a massive fire attack at one of your chess pieces. If the piece doesn't move, it takes massive damage and is destroyed. The player controlling the targeted piece must move it out of the area. Watch for the targeting indicator.",
+          "important": true
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "Assign players to pieces — tanks/Warriors on King pieces, healers on healing pieces. Advance your front line, protect your King. When Medivh cheats (fires at a piece), that player moves their piece immediately. Focus attacks on the enemy King. This is a free loot boss — take your time.",
+          "applicable_to": ["all"],
+          "notes": "Can be won on the first attempt with no preparation. The only way to lose is if multiple players ignore the cheat mechanic."
+        }
+      ],
+      "roles": {
+        "tank": "Control the King and front-line fighter pieces. Keep the King away from enemy attacks. Move when Medivh targets your piece.",
+        "healer": "Control healer pieces to keep allied pieces alive. Prioritize healing the King.",
+        "dps": "Control DPS pieces and kill enemy pieces. Focus the enemy King when their guards are dead."
+      }
+    },
+    {
+      "name": "Prince Malchezaar",
+      "slug": "prince_malchezaar",
+      "encounter_id": 1051,
+      "summary": "Three-phase fight. Phases 1 and 3 are tank-and-spank. Phase 2 (30-60% HP) is the challenge, with Infernal adds spawning every ~45 seconds that constrain positioning. Enfeeble — reducing 5 raid members to 1 HP — is cast throughout and must be handled by affected players immediately moving away before Shadow Nova lands.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Phase 1",
+          "hp_range": "100% – 60%",
+          "description": "Standard tank-and-spank. Enfeeble hits 5 random non-tank players, reducing them to 1 HP for ~8 seconds. Those players must immediately stop attacking and move away from the raid before Shadow Nova. Healers should NOT heal Enfeebled players until the debuff falls off.",
+          "key_mechanics": ["Enfeeble", "Shadow Nova", "Shadow Word: Pain", "Sunder Armor"]
+        },
+        {
+          "number": 2,
+          "name": "Phase 2 — Infernals",
+          "hp_range": "60% – 30%",
+          "description": "At 60%, Infernals begin spawning every ~45 seconds at random positions in the room, creating an ever-shrinking usable space. The tank must reposition around active Infernals. Infernals deal AoE damage and fear nearby players. Enfeeble continues. This is the most dangerous phase.",
+          "key_mechanics": ["Enfeeble", "Shadow Nova", "Infernal Summon", "Infernal AoE"]
+        },
+        {
+          "number": 3,
+          "name": "Phase 3 — Axes",
+          "hp_range": "30% – 0%",
+          "description": "At 30%, Malchezaar releases two spectral axes that orbit the room, dealing heavy damage to anyone they pass through. Tank positioning doesn't change. Amplify Damage is applied to the tank, doubling damage taken — use cooldowns. This is a raw DPS burn — Lust/Heroism here.",
+          "key_mechanics": ["Enfeeble", "Shadow Nova", "Amplify Damage", "Axes"]
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Enfeeble",
+          "mechanic_type": "debuff",
+          "targets": "random_player",
+          "description": "Reduces 5 random non-tank players to 1 HP and sets their damage to 0 for 8 seconds. Affected players must immediately stop attacking and move away from the raid and from Prince's position. Healers should wait for the debuff to expire before healing them — healing them early wastes GCDs.",
+          "important": true
+        },
+        {
+          "name": "Shadow Nova",
+          "mechanic_type": "aoe",
+          "targets": "all",
+          "description": "Cast immediately after Enfeeble. Large AoE shadow explosion centered on Prince. Any Enfeebled player still in range dies instantly. All non-Enfeebled players with less than ~3500 HP are also at risk. Healers need to top the raid between Enfeebles.",
+          "important": true
+        },
+        {
+          "name": "Infernal Summon",
+          "mechanic_type": "special",
+          "targets": "raid",
+          "description": "Summons an Infernal at a random location every ~45 seconds during Phase 2. Infernals deal AoE fire and shadow damage and fear nearby players. The room progressively fills with Infernals. Tank must navigate around them; melee must stay aware of Infernal positions.",
+          "important": true
+        },
+        {
+          "name": "Amplify Damage",
+          "mechanic_type": "debuff",
+          "targets": "tank",
+          "description": "Doubles all damage taken by the current target for 10 seconds during Phase 3. Use defensive cooldowns (Last Stand, Shield Wall, trinkets) during Amplify Damage windows. Healers must be ready for massive incoming damage.",
+          "important": true
+        },
+        {
+          "name": "Axes (Phase 3)",
+          "mechanic_type": "positioning",
+          "targets": "raid",
+          "description": "Two spectral axes orbit the room in Phase 3, dealing ~5000 damage on contact. Watch the axes' rotation path and move to avoid them. They follow a predictable circular orbit.",
+          "important": true
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "Tank in the center of the room. On Enfeeble: affected players immediately run to the walls and stop DPS. After Shadow Nova: return to position. In Phase 2: tank navigates around Infernals; ranged spread to avoid clustering near Infernal landing zones. In Phase 3: Lust/Heroism, use defensive cooldowns for Amplify Damage.",
+          "applicable_to": ["all"],
+          "notes": "The most common wipe cause is Enfeebled players not moving quickly enough before Shadow Nova. Enforce strict 'run immediately' discipline."
+        },
+        {
+          "name": "Wall-Hug Phase 2",
+          "summary": "In Phase 2, tank Malchezaar along one wall and move only when an Infernal lands in the current position. Keeps the center of the room open for melee DPS and reduces Infernal interference.",
+          "applicable_to": ["melee-heavy"],
+          "notes": "Requires a communicative tank who calls Infernal positions. Gives melee more uptime but needs practice."
+        }
+      ],
+      "roles": {
+        "tank": "Face Malchezaar away from the raid always. You will NOT be Enfeebled. In Phase 2, announce Infernal landing zones and reposition proactively. In Phase 3, use cooldowns (Shield Wall, Last Stand) during Amplify Damage — coordinate with healers on timing.",
+        "healer": "Do NOT heal Enfeebled players until the debuff expires — it's 8 seconds and they won't die from it alone. Instead, top the non-Enfeebled raid to survive Shadow Nova. In Phase 3, have healing cooldowns ready for Amplify Damage. The tank takes double damage during those windows.",
+        "dps": "When Enfeeble lands on you: stop attacking immediately and run to the wall. Wait 8 seconds. Return. This must be a reflex. In Phase 2: be aware of Infernals — don't run through them. In Phase 3: Lust and burn, dodge axes."
+      }
+    },
+    {
+      "name": "Nightbane",
+      "slug": "nightbane",
+      "encounter_id": 1042,
+      "summary": "Optional boss summoned by using the Blackened Urn. Two-phase cycle that alternates between ground phase (tank-and-spank with AoE fear and charred earth) and air phase (aerial fire bombing). The air phase requires spreading out to minimize fire bomb clustering. High sustained damage on the tank during ground phase.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Ground Phase",
+          "hp_range": "Alternating ~60s",
+          "description": "Tank Nightbane at the back of the platform. He deals heavy melee damage plus a Charred Earth fire DoT on the tank position. Move the tank periodically when Charred Earth stacks. Tail Sweep hits anyone behind him — never stand behind Nightbane. Distracting Ash is cast on a healer reducing cast speed.",
+          "key_mechanics": ["Charred Earth", "Tail Sweep", "Smoldering Breath", "Distracting Ash"]
+        },
+        {
+          "number": 2,
+          "name": "Air Phase",
+          "hp_range": "Alternating ~30s",
+          "description": "Nightbane flies into the air. He targets random players with Fireball Barrage and drops Rain of Bones (skeletons + fire AoE) on the ground. Spread out to minimize fire bomb overlap. Kill the skeletons quickly. Nightbane returns to ground phase after ~30 seconds.",
+          "key_mechanics": ["Fireball Barrage", "Rain of Bones", "Searing Cinders"]
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Charred Earth",
+          "mechanic_type": "aoe",
+          "targets": "tank",
+          "description": "Persistent fire AoE placed under the current tank position during ground phase. Stacks over time, eventually dealing lethal damage. The tank must move every ~15-20 seconds to a clean spot. The raid should NOT stand in old Charred Earth.",
+          "important": true
+        },
+        {
+          "name": "Smoldering Breath",
+          "mechanic_type": "aoe",
+          "targets": "raid",
+          "description": "Frontal breath attack dealing fire damage to everyone in front of Nightbane. Face him away from the raid. Melee must stay behind or to his sides.",
+          "important": true
+        },
+        {
+          "name": "Tail Sweep",
+          "mechanic_type": "cleave",
+          "targets": "raid",
+          "description": "Hits anyone directly behind Nightbane for heavy damage and knockback. Never stand behind him.",
+          "important": true
+        },
+        {
+          "name": "Distracting Ash",
+          "mechanic_type": "debuff",
+          "targets": "random_player",
+          "description": "Applies a debuff that reduces cast speed by 50% and healing effectiveness. Typically targets healers. Dispel if possible.",
+          "important": false
+        },
+        {
+          "name": "Rain of Bones",
+          "mechanic_type": "special",
+          "targets": "raid",
+          "description": "During air phase, drops skeletons and a fire AoE zone at targeted locations. Skeletons must be killed or tanked. Spread out to avoid multiple fire zones overlapping.",
+          "important": true
+        },
+        {
+          "name": "Fireball Barrage",
+          "mechanic_type": "aoe",
+          "targets": "raid",
+          "description": "Rapid fire AoE barrage targeting random raid members during air phase. Moderate damage — keep the raid topped during air phase.",
+          "important": true
+        },
+        {
+          "name": "Searing Cinders",
+          "mechanic_type": "debuff",
+          "targets": "random_player",
+          "description": "Fire DoT applied to random players. Stacks and deals significant damage. Decurse/dispel if available, otherwise heal through.",
+          "important": false
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "Tank Nightbane at the back of the platform facing away from the raid. Move every ~15 seconds when Charred Earth stacks. No one stands behind him (Tail Sweep). On air phase: spread out across the platform and spread fire bomb impact zones. Kill skeletons quickly with AoE. Return to ground phase positions when he lands.",
+          "applicable_to": ["all"],
+          "notes": "Requires the Blackened Urn to summon. Drop from the Ghostly Philanthropist in Karazhan. Nightbane drops T4 legs (chest for casters) — a meaningful upgrade worth the extra effort."
+        }
+      ],
+      "roles": {
+        "tank": "Your main job is managing Charred Earth — move every 15-20 seconds to a fresh spot on the platform. Keep Nightbane facing away from the raid at all times. Call out air phase transitions so the raid spreads. During air phase, re-engage immediately when he lands.",
+        "healer": "Ground phase is steady tank healing with Charred Earth adding constant fire pressure on the tank. Dispel Distracting Ash from other healers when possible. During air phase, spread out and keep raid members topped against Fireball Barrage.",
+        "dps": "Never stand behind Nightbane — Tail Sweep is lethal. During air phase, spread across the platform to minimize fire bomb overlap. Kill skeletons as they spawn. Return to standard positions quickly when he lands."
+      }
+    }
+  ]
+}

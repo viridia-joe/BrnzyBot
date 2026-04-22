@@ -15,6 +15,7 @@ Architecture:
 
 Entry points:
     reason(context, triage_result, message, post_fn, node_status) -> str
+    annotate(skeleton, context, node_status) -> str
 """
 
 import json
@@ -239,6 +240,17 @@ def _parse_verdict(raw: str) -> CriticVerdict:
 # Escalation to Claude
 # ---------------------------------------------------------------------------
 
+def _escalate_msgs(messages: list) -> str:
+    """Send a pre-built message list to the escalation model (Claude)."""
+    log.info("Sending pre-built messages to Claude (%s)", ESCALATION_MODEL)
+    try:
+        return _litellm(ESCALATION_MODEL, messages, temperature=0.2,
+                        timeout=ESCALATION_TIMEOUT)
+    except Exception as e:
+        log.error("Claude escalation (msgs) failed: %s", e)
+        raise
+
+
 def _escalate(context_block: str, question: str,
               attempt: str = "", critic_issues: list = None) -> str:
     """Fall back to Claude when local nodes can't produce a confident answer."""
@@ -345,3 +357,67 @@ def reason(
     # check the math, not to discard the answer.
     log.info("Critic confidence %d — appending uncertainty note", verdict.confidence)
     return first_answer + UNCERTAINTY_SUFFIX
+
+
+# ---------------------------------------------------------------------------
+# Annotate — for /gearprio (deterministic list + LLM commentary)
+# ---------------------------------------------------------------------------
+
+ANNOTATOR_SYSTEM = """\
+You are BrnzyBot, a World of Warcraft gear advisor for a TBC Anniversary raid team.
+A fire robot with a gnomish tinkering pedigree — precise, dry, and encouraging.
+
+You will be given a pre-computed RANKED UPGRADE LIST produced by a gear optimizer.
+The list is authoritative: the order, the items, and the EP values are all correct.
+
+YOUR JOB:
+- Write a Discord-formatted gear priority response using this list as your structure.
+- Go through the upgrades in order (do not reorder them).
+- For each item: one concise line with where to get it, any crafting notes, and the key
+  strategic reason it matters (e.g. clean swap, set bonus interaction, hit cap room).
+- Add a brief opening line (one sentence — acknowledge overall gear state).
+- Add a short TL;DR priority order at the end.
+
+STRICT RULES:
+1. Every specific upgrade you mention MUST appear in the ranked list. No additions.
+2. Use the EP values exactly as given. Do not estimate or recalculate.
+3. If hit is overcapped, note which upgrades are extra valuable because they drop hit.
+4. If a set bonus has a breakage cost, explain the interaction briefly.
+5. Do not mention items from phases later than what is stated in the context.
+6. Discord format: no markdown tables, bold item names, bullet points are fine.
+   Target 250–350 words. Clear, not exhaustive.
+"""
+
+
+def _annotator_prompt(skeleton: str, context_block: str) -> list:
+    return [
+        {"role": "system", "content": ANNOTATOR_SYSTEM},
+        {"role": "user",   "content": "\n\n".join([
+            "## Optimizer Output (authoritative — do not change)",
+            skeleton,
+            "## Supporting Context (hit cap, set bonuses, current gear)",
+            context_block,
+            "## Task",
+            "Write the Discord gear priority response as described.",
+        ])},
+    ]
+
+
+def annotate(skeleton: str, context: GearContext, node_status=None) -> str:
+    """
+    Annotate a deterministic upgrade skeleton with LLM commentary.
+
+    The skeleton contains all decisions (what to upgrade, in what order, exact EP).
+    The LLM adds prose: source locations, crafting notes, strategic observations.
+    """
+    context_block = context.to_prompt_block()
+    msgs          = _annotator_prompt(skeleton, context_block)
+
+    try:
+        answer = _escalate_msgs(msgs)
+    except Exception as e:
+        log.error("annotate() LLM call failed: %s", e)
+        # Fall back to the raw skeleton if the LLM is unreachable
+        return f"**Gear Upgrade Priority — {context.character}**\n\n{skeleton}"
+
+    return answer or f"**Gear Upgrade Priority — {context.character}**\n\n{skeleton}"

@@ -5,29 +5,167 @@ BrnzyBot Gear Handler — callable pipelines for gear commands.
 Entry points for cogs/gear.py. Return strings — never post to Discord directly.
 
 handle_gear_list(...)     — deterministic head-to-toe gear list vs BIS (/gearcheck)
-handle_gear_question(...) — Claude-powered upgrade prioritization (/gearprio)
+handle_gear_question(...) — upgrade priority: deterministic optimizer + LLM annotation
 """
 
 import logging
 import os
 import sqlite3
+from collections import defaultdict
+from dataclasses import dataclass, field
 
 log = logging.getLogger(__name__)
 
 import config
-from core.triage import triage
 from core.gear_cache import get_gear
 from core.gear_context import build_context
-from core.gear_reasoning import reason
+from core.gear_reasoning import annotate
 from core.node_health import check_nodes
 from core.gear_optimizer import solve_upgrades, solve_bis, OptimizeParams
 from core.classifier import SPEC_ALIASES
 
 ITEM_DB_PATH = os.path.expanduser("~/.openclaw/data/tbc_items.db")
 
+_PHASE_LABELS = {1: "Phase 1", 2: "Phase 2", 3: "Phase 3", 4: "Phase 4", 5: "Phase 5"}
+_DUAL_SLOTS   = {"Ring", "Trinket"}
+
 
 # ---------------------------------------------------------------------------
-# Public entry point
+# Priority entry — one upgrade candidate, fully resolved
+# ---------------------------------------------------------------------------
+
+@dataclass
+class PriorityEntry:
+    rank:       int
+    slot:       str
+    from_name:  str
+    from_ep:    float
+    to_name:    str
+    to_ep:      float
+    net_ep:     float       # true_net after set_cost
+    raw_net:    float       # before set_cost
+    set_cost:   float
+    source:     str         # "Karazhan (Moroes)", "Crafted", etc.
+
+
+def _build_upgrade_priority(character, spec, snapshot, context) -> list[PriorityEntry]:
+    """
+    Run the optimizer and return a list of PriorityEntry objects sorted by
+    net EP gain descending. This is the single source of truth for gearprio.
+    """
+    if not os.path.exists(ITEM_DB_PATH):
+        return []
+
+    phase = getattr(config, "CURRENT_PHASE", 1)
+    params = OptimizeParams(phase=phase, include_pvp=False,
+                            include_world_boss=False, max_changes=20)
+    try:
+        item_db = sqlite3.connect(ITEM_DB_PATH)
+        try:
+            opt = solve_upgrades(character, spec, item_db, params, snapshot, max_changes=20)
+        finally:
+            item_db.close()
+    except Exception as e:
+        log.warning("solve_upgrades failed in priority build: %s", e)
+        return []
+
+    # Map slot → weakest currently equipped item (min EP).
+    # For dual slots (Ring, Trinket) we replace the weaker one.
+    slot_items: dict = defaultdict(list)
+    for g in context.gear_summary:
+        slot_items[g["slot"]].append((g["name"], g["ep"]))
+    current_ep: dict[str, tuple[str, float]] = {}
+    for slot, items in slot_items.items():
+        if slot in _DUAL_SLOTS and len(items) > 1:
+            current_ep[slot] = min(items, key=lambda x: x[1])
+        else:
+            current_ep[slot] = items[0]
+
+    equipped_names = {item["name"] for item in snapshot.gear}
+    equipped_set   = {item["name"]: item.get("set_name", "") for item in snapshot.gear}
+
+    entries = []
+    for sr in opt.slots:
+        cur_name, cur_ep = current_ep.get(sr.slot, ("", 0.0))
+        if not cur_name or cur_name == sr.item_name:
+            continue
+        if sr.item_name in equipped_names:
+            continue
+
+        raw_net  = sr.ep - cur_ep
+        set_name = equipped_set.get(cur_name, "")
+        set_cost = context.set_bonus_cost(set_name) if set_name else 0.0
+        net_ep   = raw_net - set_cost
+
+        if net_ep > 0:
+            entries.append(PriorityEntry(
+                rank=0,  # assigned after sort
+                slot=sr.slot,
+                from_name=cur_name,
+                from_ep=round(cur_ep, 1),
+                to_name=sr.item_name,
+                to_ep=round(sr.ep, 1),
+                net_ep=round(net_ep, 1),
+                raw_net=round(raw_net, 1),
+                set_cost=round(set_cost, 1),
+                source=sr.source or "",
+            ))
+
+    entries.sort(key=lambda e: e.net_ep, reverse=True)
+    for i, e in enumerate(entries, start=1):
+        e.rank = i
+    return entries
+
+
+def _format_priority_skeleton(character: str, spec_desc: str, context,
+                               entries: list[PriorityEntry]) -> str:
+    """
+    Format the deterministic upgrade list as a structured block that the LLM
+    will annotate. The LLM must not deviate from this structure.
+    """
+    hc    = context.hit_cap
+    phase = getattr(config, "CURRENT_PHASE", 1)
+
+    if hc.overcap_by > 0:
+        hit_note = f"Hit: {hc.current_rating}/{hc.cap_rating} (+{hc.overcap_by} overcapped — hit EP = 0)"
+    elif hc.uncapped_by > 0:
+        hit_note = f"Hit: {hc.current_rating}/{hc.cap_rating} ({hc.uncapped_by} short of cap)"
+    else:
+        hit_note = f"Hit: {hc.current_rating}/{hc.cap_rating} (capped)"
+
+    lines = [
+        f"CHARACTER: {character} | SPEC: {spec_desc} | {_PHASE_LABELS.get(phase, f'Phase {phase}')}",
+        f"HIT STATUS: {hit_note}",
+    ]
+
+    if context.active_set_bonuses:
+        for sb in context.active_set_bonuses:
+            cost = context.set_bonus_cost(sb.set_name)
+            lines.append(
+                f"ACTIVE SET: {sb.set_name} {sb.pieces_worn}pc (+{sb.ep_value:.0f} EP total, "
+                f"breaking one piece costs {cost:.0f} EP)"
+            )
+
+    if not entries:
+        lines.append("\nNO UPGRADES FOUND for current phase. Character is at or near BIS.")
+        return "\n".join(lines)
+
+    lines.append(f"\nRANKED UPGRADE LIST ({len(entries)} items, sorted by net EP gain):")
+    for e in entries:
+        net_str = f"+{e.net_ep:.1f} EP net"
+        if e.set_cost > 0:
+            net_str += f" (raw +{e.raw_net:.1f}, -{e.set_cost:.1f} set bonus lost)"
+        src = f" | source: {e.source}" if e.source else ""
+        lines.append(
+            f"{e.rank}. {e.slot} | {e.from_name} ({e.from_ep:.1f}) → "
+            f"{e.to_name} ({e.to_ep:.1f}) | {net_str}{src}"
+        )
+
+    return "\n".join(lines)
+
+
+# ---------------------------------------------------------------------------
+# /gearprio — deterministic optimizer + LLM annotation
 # ---------------------------------------------------------------------------
 
 def handle_gear_question(
@@ -38,10 +176,17 @@ def handle_gear_question(
     question: str = "",
 ) -> str:
     """
-    Run the full gear analysis pipeline for a character.
-    Returns a Discord-ready string. Never posts anything itself.
+    Upgrade priority pipeline:
+      1. Fetch gear from WCL (or cache).
+      2. Run MIP optimizer → sorted PriorityEntry list (the decision).
+      3. Format deterministic skeleton (rank, slot, EP delta, source).
+      4. LLM annotates the skeleton with commentary (no decisions).
+
+    The optimizer decides what to recommend and in what order.
+    The LLM only adds prose: source notes, strategic context, set bonus explanations.
     """
     spec = SPEC_ALIASES.get(spec.lower(), spec.lower())
+
     item_db = sqlite3.connect(ITEM_DB_PATH) if os.path.exists(ITEM_DB_PATH) else None
     try:
         snapshot = get_gear(character, realm, spec, region=region, item_db_conn=item_db)
@@ -56,82 +201,17 @@ def handle_gear_question(
             "Try again in a moment."
         )
 
-    context = build_context(snapshot, spec)
-    log.info("Context built for %s: hit_status=%s", character, context.hit_cap.status)
+    context  = build_context(snapshot, spec)
+    priority = _build_upgrade_priority(character, spec, snapshot, context)
+    skeleton = _format_priority_skeleton(character, context.spec_desc, context, priority)
 
-    # Run optimizer to get pre-computed upgrade EP values for all slots.
-    # These are injected into the context so Claude uses correct EP numbers
-    # instead of estimating from training knowledge.
-    try:
-        item_db2 = sqlite3.connect(ITEM_DB_PATH) if os.path.exists(ITEM_DB_PATH) else None
-        try:
-            phase = getattr(config, "CURRENT_PHASE", 1)
-            params = OptimizeParams(phase=phase, include_pvp=False,
-                                    include_world_boss=False, max_changes=8)
-            opt = solve_upgrades(character, spec, item_db2, params, snapshot, max_changes=8)
-            # Map current gear by slot for EP lookup.
-            # For dual slots (Ring, Trinket), keep a list and resolve to the
-            # weaker item (min EP) — that's the one we'd replace.
-            from collections import defaultdict
-            _DUAL_SLOTS = {"Ring", "Trinket"}
-            _slot_items: dict = defaultdict(list)
-            for g in context.gear_summary:
-                _slot_items[g["slot"]].append((g["name"], g["ep"]))
-            current_ep = {}
-            for _slot, _items in _slot_items.items():
-                if _slot in _DUAL_SLOTS and len(_items) > 1:
-                    current_ep[_slot] = min(_items, key=lambda x: x[1])
-                else:
-                    current_ep[_slot] = _items[0]
-
-            equipped_names = {item["name"] for item in snapshot.gear}
-            # Build a map from item name → set_name for currently equipped gear
-            equipped_set = {item["name"]: item.get("set_name", "")
-                            for item in snapshot.gear}
-            candidates = []
-            for sr in opt.slots:
-                cur_name, cur_ep = current_ep.get(sr.slot, ("", 0.0))
-                if not cur_name or cur_name == sr.item_name:
-                    continue
-                if sr.item_name in equipped_names:
-                    continue
-                raw_net = sr.ep - cur_ep
-                # If the current item is part of an active set bonus, swapping it
-                # breaks that bonus. Subtract the breakage cost from net EP so
-                # we don't recommend single-piece swaps that lose more from the
-                # set than they gain from the new item.
-                set_name = equipped_set.get(cur_name, "")
-                set_cost = context.set_bonus_cost(set_name) if set_name else 0.0
-                true_net = raw_net - set_cost
-                if true_net > 0:
-                    candidates.append({
-                        "slot":      sr.slot,
-                        "from_name": cur_name,
-                        "from_ep":   cur_ep,
-                        "to_name":   sr.item_name,
-                        "to_ep":     round(sr.ep, 1),
-                        "set_cost":  round(set_cost, 1),
-                    })
-            context.upgrade_candidates = candidates
-            log.info("Injected %d upgrade candidates into gear context", len(candidates))
-        finally:
-            if item_db2:
-                item_db2.close()
-    except Exception as e:
-        log.warning("Could not compute upgrade candidates for context: %s", e)
+    log.info(
+        "Priority built for %s (%s): %d upgrades, hit=%s",
+        character, spec, len(priority), context.hit_cap.status,
+    )
 
     node_status = check_nodes(post_alerts=False)
-
-    # Build a minimal triage result so reason() has what it needs
-    _character = character
-    class _TR:
-        intent = "gear_check"
-        requires_gear = True
-        character = _character
-
-    answer = reason(context, _TR(), question or f"Give me a gear check for {character}.",
-                    post_fn=lambda _: None, node_status=node_status)
-    return answer
+    return annotate(skeleton, context, node_status=node_status)
 
 
 # ---------------------------------------------------------------------------

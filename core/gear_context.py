@@ -106,7 +106,8 @@ class GearContext:
             "",
             f"**Expansion:** {self.expansion.upper()}",
             f"**Current Server Phase:** {phase_label}",
-            "  ⚠ Only recommend items available in this phase or earlier. Do NOT suggest items from later phases.",
+            "  ⚠ Items from later phases are already excluded from the upgrade candidates list below.",
+            "     Do NOT suggest any item your training data says is good if it is not in that list.",
             f"**From cache:** {'Yes (WCL unavailable)' if self.from_cache else 'No (live WCL data)'}",
             "",
             "### Hit Cap Status",
@@ -140,8 +141,15 @@ class GearContext:
         if self.upgrade_candidates:
             lines.append("")
             lines.append("### Pre-computed Upgrade Candidates")
-            lines.append("⚠ These EP values were calculated with spec weights and hit cap correction.")
-            lines.append("  Use them as ground truth. Do NOT re-calculate item EP from first principles.")
+            lines.append("⚠ CRITICAL RULES — read before generating any response:")
+            lines.append("  1. These EP values are authoritative (optimizer-computed, phase-filtered, hit-corrected).")
+            lines.append("  2. ONLY recommend items from this list as specific upgrade targets.")
+            lines.append("     Any item NOT in this list was either out of phase, already equipped,")
+            lines.append("     or a net downgrade after accounting for set bonuses. Do not suggest it.")
+            lines.append("  3. Do NOT state EP values for items not listed here. Do not guess.")
+            lines.append("  4. PvP items (Resilience gear) currently equipped are legitimate — the optimizer")
+            lines.append("     accounts for their full stat value. Do not recommend replacing them unless")
+            lines.append("     a genuine upgrade appears in this list.")
             for uc in self.upgrade_candidates:
                 raw_net = uc['to_ep'] - uc['from_ep']
                 set_cost = uc.get('set_cost', 0.0)

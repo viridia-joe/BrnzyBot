@@ -1,17 +1,20 @@
 {
-  "_note": "BOP crafted item_id → profession. Items here are excluded as upgrade suggestions unless the character already has an equipped item from the same profession (indicating they have that crafting skill).",
+  "_note": "BOP crafted item_id → profession. Items here are excluded as upgrade suggestions unless the character already has an equipped item from the same profession (indicating they have that crafting skill). BoE crafted items (Spellstrike, Girdle of Ruination, etc.) are intentionally absent — anyone can obtain them.",
 
   "21869": "Tailoring",
   "21870": "Tailoring",
   "21871": "Tailoring",
 
-  "21872": "Tailoring",
-  "21873": "Tailoring",
-  "21874": "Tailoring",
+  "21846": "Tailoring",
+  "21847": "Tailoring",
+  "21848": "Tailoring",
 
-  "21875": "Tailoring",
-  "21876": "Tailoring",
-  "21877": "Tailoring",
+  "24261": "Tailoring",
+  "24264": "Tailoring",
+
+  "29519": "Leatherworking",
+  "29520": "Leatherworking",
+  "29521": "Leatherworking",
 
   "29522": "Leatherworking",
   "29523": "Leatherworking",
@@ -24,5 +27,6 @@
   "32474": "Engineering",
   "32475": "Engineering",
   "32476": "Engineering",
+  "34847": "Engineering",
   "35182": "Engineering"
 }

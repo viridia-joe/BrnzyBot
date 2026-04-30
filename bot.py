@@ -69,6 +69,7 @@ class BrnzyBot(commands.Bot):
         """Called once before the bot connects. Load cogs and sync slash commands."""
         await self.load_extension("cogs.gear")
         await self.load_extension("cogs.strategy")
+        await self.load_extension("cogs.bossguide")
         await self.load_extension("cogs.listener")
         await self.load_extension("cogs.admin")
         await self.load_extension("cogs.onboarding")

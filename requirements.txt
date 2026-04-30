@@ -10,6 +10,9 @@ numpy>=1.24.0
 # LLM routing (LiteLLM talks to local Ollama cluster + Claude escalation)
 litellm>=1.30.0
 
+# Boss guide position diagram generation
+Pillow>=10.0.0
+
 # Already in stdlib — listed for documentation
 # sqlite3
 # asyncio

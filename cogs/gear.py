@@ -238,21 +238,15 @@ class GearCog(commands.Cog, name="Gear"):
             await thinking_msg.reply(chunk, mention_author=False)
 
     # -----------------------------------------------------------------------
-    # /gearcheck — slash command
+    # Shared gearcheck runner (used by /gearcheck and /gearcheckv)
     # -----------------------------------------------------------------------
-    @app_commands.command(
-        name="gearcheck",
-        description="Get a full gear analysis and upgrade advice for a character.",
-    )
-    @app_commands.describe(
-        character="Character name",
-        spec="Override spec (e.g. affliction, destro). Uses registered spec if omitted.",
-    )
-    async def slash_gearcheck(
+
+    async def _run_gearcheck(
         self,
         interaction: discord.Interaction,
         character: str,
-        spec: str | None = None,
+        spec: str | None,
+        verbose: bool,
     ) -> None:
         guild_id = str(interaction.guild_id)
 
@@ -276,8 +270,7 @@ class GearCog(commands.Cog, name="Gear"):
                 return
             display, reg_spec, realm, region, auto_note = auto_result
 
-        verbose = spec in ("v", "verbose")
-        resolved_spec = reg_spec if verbose else (spec or reg_spec)
+        resolved_spec = spec or reg_spec
         await interaction.response.defer(thinking=True)
         log_usage(guild_id, str(interaction.user.id), "gearcheck")
 
@@ -307,10 +300,63 @@ class GearCog(commands.Cog, name="Gear"):
             log.error("followup.send timed out for gearcheck %s", display)
 
     # -----------------------------------------------------------------------
+    # /gearcheck — slash command
+    # -----------------------------------------------------------------------
+    @app_commands.command(
+        name="gearcheck",
+        description="Head-to-toe gear check vs BiS.",
+    )
+    @app_commands.describe(
+        character="Character name",
+        spec="Override spec (e.g. affliction, destro). Uses registered spec if omitted.",
+    )
+    async def slash_gearcheck(
+        self,
+        interaction: discord.Interaction,
+        character: str,
+        spec: str | None = None,
+    ) -> None:
+        await self._run_gearcheck(interaction, character, spec, verbose=False)
+
+    # -----------------------------------------------------------------------
+    # /gearcheckv — verbose slash command (BiS item name + EP on every line)
+    # -----------------------------------------------------------------------
+    @app_commands.command(
+        name="gearcheckv",
+        description="Verbose gear check — shows BiS item name, EP, and % gap for every slot.",
+    )
+    @app_commands.describe(
+        character="Character name",
+        spec="Override spec (e.g. affliction, destro). Uses registered spec if omitted.",
+    )
+    async def slash_gearcheckv(
+        self,
+        interaction: discord.Interaction,
+        character: str,
+        spec: str | None = None,
+    ) -> None:
+        await self._run_gearcheck(interaction, character, spec, verbose=True)
+
+    # -----------------------------------------------------------------------
     # !gearcheck — prefix command (alias: !gc, !gear)
     # -----------------------------------------------------------------------
     @commands.command(name="gearcheck", aliases=["gc", "gear"])
     async def prefix_gearcheck(self, ctx: commands.Context, *args: str) -> None:
+        await self._prefix_gearcheck_impl(ctx, args, verbose=False)
+
+    # -----------------------------------------------------------------------
+    # !gearcheckv — verbose prefix command (alias: !gcv)
+    # -----------------------------------------------------------------------
+    @commands.command(name="gearcheckv", aliases=["gcv"])
+    async def prefix_gearcheckv(self, ctx: commands.Context, *args: str) -> None:
+        await self._prefix_gearcheck_impl(ctx, args, verbose=True)
+
+    async def _prefix_gearcheck_impl(
+        self,
+        ctx: commands.Context,
+        args: tuple,
+        verbose: bool,
+    ) -> None:
         raw = "gearcheck " + " ".join(args)
         intent = classify(raw, source="prefix")
 
@@ -329,8 +375,7 @@ class GearCog(commands.Cog, name="Gear"):
                 return
             display, spec, realm, region, auto_note = auto_result
 
-        verbose = spec_override in ("v", "verbose")
-        resolved_spec = spec if verbose else (spec_override or spec)
+        resolved_spec = spec_override or spec
         thinking_msg  = await ctx.reply(thinking(), mention_author=False)
 
         loop = asyncio.get_running_loop()

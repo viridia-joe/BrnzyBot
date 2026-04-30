@@ -167,6 +167,27 @@ class BossGuideCog(commands.Cog, name="BossGuide"):
             )
 
     # -----------------------------------------------------------------------
+    # /bg — short alias for /bossguide
+    # -----------------------------------------------------------------------
+
+    @app_commands.command(
+        name="bg",
+        description="Short alias for /bossguide — generate raid assignments for an SSC or TK boss.",
+    )
+    @app_commands.describe(
+        boss="Boss name (e.g. hydross, vashj, kael, kt)",
+        roster="Optional screenshot of your raid roster for auto-assignment",
+    )
+    @app_commands.autocomplete(boss=_boss_autocomplete)
+    async def slash_bg(
+        self,
+        interaction: discord.Interaction,
+        boss: str,
+        roster: discord.Attachment = None,
+    ) -> None:
+        await self.slash_bossguide(interaction, boss, roster)
+
+    # -----------------------------------------------------------------------
     # !bossguide — prefix fallback
     # -----------------------------------------------------------------------
 

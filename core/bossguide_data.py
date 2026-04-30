@@ -36,7 +36,7 @@ BOSS_DATA: Dict[str, BossEntry] = {
         raid="SSC",
         boss_num=1,
         has_diagram=True,
-        aliases=["hydross", "hydross the unstable"],
+        aliases=["hydross", "hydross the unstable", "hyd"],
         roles={"tanks": 3, "tank_healers": 4, "raid_healers": 2, "hunters": 2},
         context="""\
 FIGHT: Hydross the Unstable — SSC Boss 1
@@ -70,7 +70,7 @@ ASSIGNMENT FORMAT RULES:
         raid="SSC",
         boss_num=2,
         has_diagram=True,
-        aliases=["lurker", "lurker below", "the lurker below", "lurker-below"],
+        aliases=["lurker", "lurker below", "the lurker below", "lurker-below", "tlb"],
         roles={"tanks": 2, "tank_healers": 3, "raid_healers": 3},
         context="""\
 FIGHT: The Lurker Below — SSC Boss 2
@@ -102,7 +102,7 @@ ASSIGNMENT FORMAT RULES:
         raid="SSC",
         boss_num=3,
         has_diagram=True,
-        aliases=["morogrim", "morogrim tidewalker", "tide"],
+        aliases=["morogrim", "morogrim tidewalker", "tide", "moro", "tidewalker"],
         roles={"tanks": 2, "tank_healers": 3, "raid_healers": 3, "cc": 2},
         context="""\
 FIGHT: Morogrim Tidewalker — SSC Boss 3
@@ -134,7 +134,7 @@ ASSIGNMENT FORMAT RULES:
         raid="SSC",
         boss_num=4,
         has_diagram=True,
-        aliases=["karathress", "fathom lord", "fathom-lord karathress", "kara"],
+        aliases=["karathress", "fathom lord", "fathom-lord karathress", "fathom", "flk"],
         roles={"tanks": 4, "tank_healers": 5, "raid_healers": 2, "interrupts": 4},
         context="""\
 FIGHT: Fathom-Lord Karathress — SSC Boss 4
@@ -169,7 +169,7 @@ ASSIGNMENT FORMAT RULES:
         raid="SSC",
         boss_num=5,
         has_diagram=True,
-        aliases=["leotheras", "leo", "leotheras the blind"],
+        aliases=["leotheras", "leo", "leotheras the blind", "leothe", "the blind"],
         roles={"tanks": 2, "tank_healers": 3, "raid_healers": 3},
         context="""\
 FIGHT: Leotheras the Blind — SSC Boss 5
@@ -202,7 +202,7 @@ ASSIGNMENT FORMAT RULES:
         raid="SSC",
         boss_num=6,
         has_diagram=True,
-        aliases=["vashj", "lady vashj", "the snake lady"],
+        aliases=["vashj", "lady vashj", "the snake lady", "snake lady", "vasj"],
         roles={"tanks": 3, "tank_healers": 4, "raid_healers": 3, "cube_catchers": 4, "kiters": 1},
         context="""\
 FIGHT: Lady Vashj — SSC Boss 6 (Final)
@@ -246,7 +246,7 @@ ASSIGNMENT FORMAT RULES:
         raid="TK",
         boss_num=1,
         has_diagram=True,
-        aliases=["alar", "al'ar", "al ar", "phoenix god"],
+        aliases=["alar", "al'ar", "al ar", "phoenix god", "phoenix", "the phoenix"],
         roles={"tanks": 3, "tank_healers": 4, "raid_healers": 3},
         context="""\
 FIGHT: Al'ar — Tempest Keep Boss 1
@@ -319,7 +319,7 @@ ASSIGNMENT FORMAT RULES:
         raid="TK",
         boss_num=3,
         has_diagram=True,
-        aliases=["solarian", "high astromancer solarian", "astromancer"],
+        aliases=["solarian", "high astromancer solarian", "astromancer", "sol", "solar"],
         roles={"tanks": 2, "tank_healers": 3, "raid_healers": 3, "interrupts": 3},
         context="""\
 FIGHT: High Astromancer Solarian — Tempest Keep Boss 3
@@ -353,7 +353,7 @@ ASSIGNMENT FORMAT RULES:
         raid="TK",
         boss_num=4,
         has_diagram=True,
-        aliases=["kaelthas", "kael'thas", "kael", "kaelthas sunstrider", "kael thas"],
+        aliases=["kaelthas", "kael'thas", "kael", "kaelthas sunstrider", "kael thas", "kt", "sunstrider"],
         roles={"tanks": 4, "tank_healers": 5, "raid_healers": 3, "interrupts": 3},
         context="""\
 FIGHT: Kael'thas Sunstrider — Tempest Keep Boss 4 (Final) — 5-PHASE FIGHT

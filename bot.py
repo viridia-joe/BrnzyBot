@@ -76,10 +76,16 @@ class BrnzyBot(commands.Bot):
         await self.load_extension("cogs.billing")
         log.info("Cogs loaded")
 
-        # Sync slash commands globally
-        # For faster iteration during dev, use: await self.tree.sync(guild=discord.Object(id=GUILD_ID))
+        # Guild sync: instant propagation to home server (set HOME_GUILD_ID in .env)
+        if config.HOME_GUILD_ID:
+            home = discord.Object(id=config.HOME_GUILD_ID)
+            self.tree.copy_global_to(guild=home)
+            guild_synced = await self.tree.sync(guild=home)
+            log.info("Slash commands synced to home guild %d: %d", config.HOME_GUILD_ID, len(guild_synced))
+
+        # Global sync: propagates to all servers within ~1hr
         synced = await self.tree.sync()
-        log.info("Slash commands synced: %d", len(synced))
+        log.info("Slash commands synced globally: %d", len(synced))
 
     async def on_ready(self) -> None:
         log.info("BrnzyBot online as %s (id=%s)", self.user, self.user.id)

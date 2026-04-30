@@ -33,6 +33,10 @@ DISCORD_TOKEN: str = os.environ.get("DISCORD_BOT_TOKEN", "")
 # Command prefix for legacy !commands (slash commands are the primary path)
 COMMAND_PREFIX: str = os.environ.get("COMMAND_PREFIX", "!")
 
+# Guild ID for instant slash command sync (right-click Server → Copy Server ID).
+# When set, commands appear in this guild immediately on restart instead of waiting ~1hr.
+HOME_GUILD_ID: int | None = int(os.environ["HOME_GUILD_ID"]) if os.environ.get("HOME_GUILD_ID") else None
+
 
 # ---------------------------------------------------------------------------
 # WCL

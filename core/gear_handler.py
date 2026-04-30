@@ -375,7 +375,12 @@ def handle_gear_list(
                     )
                 else:
                     line = f"**{slot}** {cur_name}{set_tag} `{cur_ep:.1f}` {marker}"
-                vdesc = f"BiS: {sr.item_name} ({bis_ep:.0f} EP, {pct_off*100:.0f}% off{src_str})"
+
+                if gain < 0:
+                    # Equipped item is better than anything in the DB for this slot
+                    vdesc = f"BiS ✓ (DB best: {sr.item_name} at {bis_ep:.0f} EP)"
+                else:
+                    vdesc = f"BiS: {sr.item_name} ({bis_ep:.0f} EP, {pct_off*100:.0f}% off{src_str})"
 
             if verbose:
                 line = f"{line}  · _{vdesc}_"

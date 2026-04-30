@@ -412,6 +412,14 @@ def _load_candidates(
         if not slot:
             continue
 
+        # Shields: Shaman, Paladin, and Warrior can equip them in the Off Hand slot.
+        # Remap before the armor-type filter so "Off Hand" exemption applies.
+        if slot == "Shield":
+            if class_name in {"Shaman", "Paladin", "Warrior"}:
+                slot = "Off Hand"
+            else:
+                continue
+
         # Armor type filter (skip for non-armor slots)
         if (armor_types and
                 slot not in ("Neck", "Back", "Ring", "Trinket", "Main Hand",
@@ -553,6 +561,7 @@ def _build_mip(
             set_piece_counts[sn] = set_piece_counts.get(sn, 0) + 1
 
     set_bonus_vars: list[tuple[str, int, float]] = []  # (set_name, threshold, ep)
+    set_bonus_hit:  list[float] = []                    # parallel: hit rating provided by each bonus
     for set_name, count in set_piece_counts.items():
         if set_name not in set_bonuses:
             continue
@@ -562,11 +571,24 @@ def _build_mip(
                 continue
             t = int(t_str)
             ep = bonus.get("ep", 0)
-            # Apply spec-specific override if present (e.g. Beast Lord 4pc for SV/MM)
             if spec_key:
                 ep = bonus.get("spec_overrides", {}).get(spec_key, {}).get(t_str, ep)
-            if t <= count and ep > 0:
-                set_bonus_vars.append((set_name, t, ep))
+
+            bonus_stats = bonus.get("stats", {})
+            if bonus_stats:
+                # Stat-based bonus: model hit through the h variable (respects hit cap),
+                # compute non-hit EP dynamically from spec weights.
+                hit_from_b  = float(sum(v for k, v in bonus_stats.items() if k in HIT_STAT_NAMES))
+                non_hit_ep  = sum(weights.get(k, 0) * v for k, v in bonus_stats.items()
+                                  if k not in HIT_STAT_NAMES)
+            else:
+                # Proc/effect bonus: no hit component, keep static EP.
+                hit_from_b = 0.0
+                non_hit_ep = float(ep)
+
+            if t <= count and (non_hit_ep > 0 or hit_from_b > 0):
+                set_bonus_vars.append((set_name, t, non_hit_ep))
+                set_bonus_hit.append(hit_from_b)
 
     B = len(set_bonus_vars)
     total_vars = N + 1 + B   # items + h + set bonuses
@@ -633,12 +655,16 @@ def _build_mip(
         con_lb.append(-np.inf)
         con_ub.append(2.0)
 
-    # 2. Hit constraint: h ≤ Σ_i x[i] * hit[i]
-    #    → h - Σ hit[i]*x[i] ≤ 0
+    # 2. Hit constraint: h ≤ Σ_i x[i] * hit[i] + Σ_b y[b] * bonus_hit[b]
+    #    Set bonus hit flows through h so it respects the hit cap.
+    #    → h - Σ hit[i]*x[i] - Σ bonus_hit[b]*y[b] ≤ 0
     row = np.zeros(total_vars)
     row[N] = 1.0
     for i, item in enumerate(items):
         row[i] = -item["hit_rating"]
+    for b, hit_from_b in enumerate(set_bonus_hit):
+        if hit_from_b > 0:
+            row[N + 1 + b] = -hit_from_b
     A_rows.append(row)
     con_lb.append(-np.inf)
     con_ub.append(0.0)

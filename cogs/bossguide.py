@@ -33,13 +33,19 @@ log = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 def _chunks(text: str, limit: int = 1990) -> List[str]:
-    """Split text into Discord-safe chunks."""
     if len(text) <= limit:
         return [text]
     parts = []
-    while text:
-        parts.append(text[:limit])
-        text = text[limit:]
+    while len(text) > limit:
+        split_at = text.rfind('\n', 0, limit)
+        if split_at <= 0:
+            split_at = text.rfind(' ', 0, limit)
+        if split_at <= 0:
+            split_at = limit
+        parts.append(text[:split_at])
+        text = text[split_at:].lstrip('\n')
+    if text:
+        parts.append(text)
     return parts
 
 

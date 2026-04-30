@@ -57,8 +57,12 @@ def _build_upgrade_priority(character, spec, snapshot, context) -> list[Priority
         return []
 
     phase = getattr(config, "CURRENT_PHASE", 1)
+    # Draenei Heroic Presence: all TBC Alliance Shaman are Draenei
+    is_alliance_shaman = "shaman" in spec.lower() and getattr(snapshot, "faction", -1) == 1
+    racial_hit = 13 if is_alliance_shaman else 0
     params = OptimizeParams(phase=phase, include_pvp=False,
-                            include_world_boss=False, max_changes=20)
+                            include_world_boss=False, max_changes=20,
+                            racial_hit=racial_hit)
     try:
         item_db = sqlite3.connect(ITEM_DB_PATH)
         try:

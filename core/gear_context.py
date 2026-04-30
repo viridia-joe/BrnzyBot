@@ -34,6 +34,7 @@ class HitCapStatus:
     cap_rating:       int     # effective cap for this spec in this raid context
     base_cap:         int     # from spec file (no raid buffs)
     from_talents:     int     # hit% from talents (already subtracted from base)
+    from_racial:      int     # hit% from racial (e.g. Heroic Presence = 13)
     current_rating:   int     # sum of gear hit rating
     overcap_by:       int     # > 0 means wasted hit
     uncapped_by:      int     # > 0 means still needs hit
@@ -111,8 +112,17 @@ class GearContext:
             f"**From cache:** {'Yes (WCL unavailable)' if self.from_cache else 'No (live WCL data)'}",
             "",
             "### Hit Cap Status",
-            f"- Spec cap: {self.hit_cap.base_cap} rating"
-            + (f" (reduced by {self.hit_cap.from_talents} from talents" if self.hit_cap.from_talents else ""),
+        ]
+        cap_desc = f"- Spec cap: {self.hit_cap.base_cap} rating"
+        reductions = []
+        if self.hit_cap.from_talents:
+            reductions.append(f"{self.hit_cap.from_talents} from talents")
+        if getattr(self.hit_cap, "from_racial", 0):
+            reductions.append(f"{self.hit_cap.from_racial} from Heroic Presence")
+        if reductions:
+            cap_desc += f" (reduced by {', '.join(reductions)})"
+        lines += [
+            cap_desc,
             f"- Current gear hit: {self.hit_cap.current_rating} rating",
             f"- Status: **{self.hit_cap.status}**",
             f"- SpellHit EP weight to use: **{self.hit_cap.effective_weight:.2f}**",
@@ -215,7 +225,13 @@ def compute_hit_cap(snapshot, spec_data: dict) -> HitCapStatus:
     hit_cap_data = spec_data.get("hit_cap", {})
     base_cap     = hit_cap_data.get("base", 202)      # default TBC spell hit cap
     from_talents = hit_cap_data.get("from_talents", 0)
-    effective_cap = base_cap - from_talents
+    # Draenei Heroic Presence: all Alliance Shaman are Draenei in TBC
+    is_alliance_shaman = (
+        spec_data.get("class", "").lower() == "shaman"
+        and getattr(snapshot, "faction", -1) == 1
+    )
+    from_racial = 13 if is_alliance_shaman else 0
+    effective_cap = base_cap - from_talents - from_racial
 
     # Determine which hit stat applies to this spec from its weights.
     # Melee specs weight MeleeHit; ranged weight RangedHit; casters weight SpellHit.
@@ -261,6 +277,7 @@ def compute_hit_cap(snapshot, spec_data: dict) -> HitCapStatus:
         cap_rating=effective_cap,
         base_cap=base_cap,
         from_talents=from_talents,
+        from_racial=from_racial,
         current_rating=current_rating,
         overcap_by=overcap,
         uncapped_by=uncapped,

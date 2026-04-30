@@ -117,6 +117,7 @@ class OptimizeParams:
     max_changes:       int   = 99      # for upgrades mode; 99 = unrestricted
     include_pvp:       bool  = False   # include Arena / PvP Honor gear
     include_world_boss: bool = True    # include world boss drops
+    racial_hit:        int   = 0       # hit rating reduction from racial (e.g. 13 for Heroic Presence)
 
 
 @dataclass
@@ -354,7 +355,7 @@ def _load_candidates(
 
     # Hit cap from spec
     hit_cap_data = spec_data.get("hit_cap", {})
-    effective_cap = hit_cap_data.get("base", 202) - hit_cap_data.get("from_talents", 0)
+    effective_cap = hit_cap_data.get("base", 202) - hit_cap_data.get("from_talents", 0) - params.racial_hit
     if params.hit_buff_in_raid:
         effective_cap -= hit_cap_data.get("raid_buff_reduction", 0)
 
@@ -535,7 +536,7 @@ def _build_mip(
     base_cap  = hit_cap_data.get("base", 202)
     from_tal  = hit_cap_data.get("from_talents", 0)
     raid_red  = hit_cap_data.get("raid_buff_reduction", 0) if params.hit_buff_in_raid else 0
-    hit_cap   = base_cap - from_tal - raid_red
+    hit_cap   = base_cap - from_tal - raid_red - params.racial_hit
     hit_weight = weights.get("SpellHit", weights.get("MeleeHit", 0.0))
 
     N = len(candidates)

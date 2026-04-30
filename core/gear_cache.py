@@ -42,6 +42,7 @@ class GearSnapshot:
     fetched_at:  int        # Unix timestamp (seconds)
     gear:        list       # list of {slot, item_id, name, stats, set_name}
     combat_stats: dict      # hitSpell, critSpell, hasteSpell from WCL
+    faction:     int  = -1  # 0=Horde, 1=Alliance, -1=unknown
     from_cache:  bool = False
 
 
@@ -278,6 +279,7 @@ def _fetch_from_wcl(name: str, realm: str, spec: str, region: str,
             })
 
         combat_stats = {k: event.get(k, 0) for k in ["hitSpell", "hitMelee", "hitRanged", "critSpell", "hasteSpell"]}
+        faction = event.get("faction", -1)
 
         return GearSnapshot(
             character=name,
@@ -289,6 +291,7 @@ def _fetch_from_wcl(name: str, realm: str, spec: str, region: str,
             fetched_at=int(time.time()),
             gear=gear,
             combat_stats=combat_stats,
+            faction=faction,
             from_cache=False,
         )
 

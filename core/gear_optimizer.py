@@ -364,6 +364,11 @@ def _load_candidates(
     gem_data    = _load_gems()
     gem_profile = gem_data.get(_gem_profile_for_spec(spec_data), {})
 
+    # Detect character's crafting profession from currently equipped items.
+    # Used to suppress BoP crafted suggestions the character can't obtain.
+    all_professions      = _load_professions()
+    character_profession = detect_profession(list(equipped_ids))
+
     quality_filter = "quality IN ('Epic', 'Rare', 'Uncommon')"
     source_filter_parts = []
     if not params.include_pvp:
@@ -430,6 +435,13 @@ def _load_candidates(
             cr = []
         if cr and class_name and class_name not in cr:
             continue
+
+        # Profession filter: BoP crafted items require the character to have
+        # that profession. Skip non-equipped items the character can't obtain.
+        prof_required = all_professions.get(str(item_id))
+        if prof_required and item_id not in equipped_ids:
+            if character_profession != prof_required:
+                continue
 
         # Stats
         try:

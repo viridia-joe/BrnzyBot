@@ -1,5 +1,5 @@
 {
-  "_note": "BOP crafted item_id → profession. Run build_professions_db.py on jarvis to populate from tbc_items.db. IDs here are bootstrapped from known TBC data and will be overwritten/extended by the script.",
+  "_note": "BOP crafted item_id → profession. Items here are excluded as upgrade suggestions unless the character already has an equipped item from the same profession (indicating they have that crafting skill).",
 
   "21869": "Tailoring",
   "21870": "Tailoring",
@@ -11,5 +11,18 @@
 
   "21875": "Tailoring",
   "21876": "Tailoring",
-  "21877": "Tailoring"
+  "21877": "Tailoring",
+
+  "29522": "Leatherworking",
+  "29523": "Leatherworking",
+  "29524": "Leatherworking",
+
+  "29515": "Leatherworking",
+  "29516": "Leatherworking",
+  "29517": "Leatherworking",
+
+  "32474": "Engineering",
+  "32475": "Engineering",
+  "32476": "Engineering",
+  "35182": "Engineering"
 }

@@ -50,7 +50,11 @@
 
   "Cyclone Regalia": {
     "2": {"ep": 35, "desc": "Spell crit bonus +5% (Lightning Bolt, Chain Lightning, etc.)", "stats": {"SpellCrit": 35}},
-    "4": {"ep": 25, "desc": "15% chance on spell crit to reduce next Lightning Bolt cast time by 0.75 sec", "stats": {}}
+    "4": {"ep": 25, "desc": "15% chance on spell crit to reduce next Lightning Bolt cast time by 0.75 sec", "stats": {}},
+    "spec_overrides": {
+      "elemental_shaman": {"4": 40}
+    },
+    "_source": "Elemental override: 4pc is stronger than generic value on sustained fights due to LB cast time reduction enabling more CL weaving."
   },
   "Cyclone Raiment": {
     "2": {"ep": 25, "desc": "+25 healing per Lesser Healing Wave", "stats": {}},

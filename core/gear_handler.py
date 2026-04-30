@@ -238,10 +238,13 @@ def handle_gear_list(
     spec: str,
     realm: str,
     region: str = "us",
+    verbose: bool = False,
 ) -> str:
     """
     Return a deterministic head-to-toe gear list comparing equipped gear vs BIS.
     No Claude. No narrative.
+
+    verbose=True appends BiS item name, EP, and pct-off to each line.
     """
     from collections import defaultdict
     spec = SPEC_ALIASES.get(spec.lower(), spec.lower())
@@ -269,11 +272,13 @@ def handle_gear_list(
         try:
             item_db2 = sqlite3.connect(ITEM_DB_PATH)
             try:
+                is_alliance_shaman = "shaman" in spec.lower() and getattr(snapshot, "faction", -1) == 1
                 params = OptimizeParams(
                     phase=phase,
                     include_pvp=False,
                     include_world_boss=False,
                     mode="bis",
+                    racial_hit=13 if is_alliance_shaman else 0,
                 )
                 bis_result = solve_bis(character, spec, item_db2, params, snapshot=snapshot)
                 if bis_result.solver_status != "error":
@@ -341,14 +346,18 @@ def handle_gear_list(
             sr = bis_list[bi] if bi < len(bis_list) else None
             bis_idx[slot] = bi + 1
 
-            if sr is None or sr.item_name in equipped_names:
-                # No BIS data, or BIS is a unique already worn in the other slot — neutral
-                lines.append(f"**{slot}** {cur_name}{set_tag} `{cur_ep:.1f}`")
+            if sr is None:
+                line = f"**{slot}** {cur_name}{set_tag} `{cur_ep:.1f}`"
+                vdesc = "no BiS data"
             elif sr.was_equipped:
-                # Currently wearing BIS for this slot 🔥
-                lines.append(f"**{slot}** {cur_name}{set_tag} `{cur_ep:.1f}` 🔥")
+                # Currently wearing BiS 🔥 — check this BEFORE the equipped_names guard
+                line = f"**{slot}** {cur_name}{set_tag} `{cur_ep:.1f}` 🔥"
+                vdesc = "BiS ✓"
+            elif sr.item_name in equipped_names:
+                # BiS is a unique already worn in the other ring/trinket slot
+                line = f"**{slot}** {cur_name}{set_tag} `{cur_ep:.1f}`"
+                vdesc = f"BiS ({sr.item_name}) already worn"
             else:
-                # sr.ep is the EP gain over current (from solve_bis SlotResult)
                 gain = sr.ep
                 bis_ep = cur_ep + gain
                 pct_off = gain / bis_ep if bis_ep > 0 else 0
@@ -358,13 +367,19 @@ def handle_gear_list(
                     marker = ""
                 else:
                     marker = "❄️"
+                src_str = f" — {sr.source}" if sr.source else ""
                 if gain > 0.5:
-                    lines.append(
+                    line = (
                         f"**{slot}** {cur_name} `{cur_ep:.1f}` "
                         f"→ {sr.item_name} **+{gain:.1f}** {marker}"
                     )
                 else:
-                    lines.append(f"**{slot}** {cur_name}{set_tag} `{cur_ep:.1f}` {marker}")
+                    line = f"**{slot}** {cur_name}{set_tag} `{cur_ep:.1f}` {marker}"
+                vdesc = f"BiS: {sr.item_name} ({bis_ep:.0f} EP, {pct_off*100:.0f}% off{src_str})"
+
+            if verbose:
+                line = f"{line}  · _{vdesc}_"
+            lines.append(line)
         else:
             lines.append(f"**{slot}** {cur_name}{set_tag} `{cur_ep:.1f}`")
 

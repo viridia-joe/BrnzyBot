@@ -276,7 +276,8 @@ class GearCog(commands.Cog, name="Gear"):
                 return
             display, reg_spec, realm, region, auto_note = auto_result
 
-        resolved_spec = spec or reg_spec
+        verbose = spec in ("v", "verbose")
+        resolved_spec = reg_spec if verbose else (spec or reg_spec)
         await interaction.response.defer(thinking=True)
         log_usage(guild_id, str(interaction.user.id), "gearcheck")
 
@@ -289,6 +290,7 @@ class GearCog(commands.Cog, name="Gear"):
                     spec=resolved_spec,
                     realm=realm,
                     region=region or "us",
+                    verbose=verbose,
                 ),
             )
         except Exception as exc:
@@ -327,7 +329,8 @@ class GearCog(commands.Cog, name="Gear"):
                 return
             display, spec, realm, region, auto_note = auto_result
 
-        resolved_spec = spec_override or spec
+        verbose = spec_override in ("v", "verbose")
+        resolved_spec = spec if verbose else (spec_override or spec)
         thinking_msg  = await ctx.reply(thinking(), mention_author=False)
 
         loop = asyncio.get_running_loop()
@@ -339,6 +342,7 @@ class GearCog(commands.Cog, name="Gear"):
                     spec=resolved_spec,
                     realm=realm,
                     region=region or "us",
+                    verbose=verbose,
                 ),
             )
         except Exception as exc:

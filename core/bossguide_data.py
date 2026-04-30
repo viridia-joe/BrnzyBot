@@ -49,9 +49,9 @@ KEY MECHANICS:
 - Each transition spawns 4 Corrupted Elementals. Add tank picks them all up and AoEs them down.
 
 ROLES NEEDED (assign these):
-- {skull} Frost MT: 1 warrior or paladin. Tanks Hydross between the two pillars in Frost form.
-- {cross} Nature MT: 1 warrior or paladin. Taunts at ~4 stacks and moves Hydross across the flag boundary line.
-- {triangle} Add OT: 1 warrior. Picks up all 4 Corrupted Elementals each transition, holds them for AoE.
+- {square} Frost MT: 1 warrior or paladin. Tanks Hydross between the two pillars in Frost form.
+- {triangle} Nature MT: 1 warrior or paladin. Taunts at ~4 stacks and walks Hydross across the flag boundary line into Poison form.
+- {cross} Add OT: 1 warrior. Picks up all 4 Corrupted Elementals each transition, holds them for AoE.
 - Frost MT healers: 2 healers dedicated to Frost MT.
 - Nature MT healers: 2 healers dedicated to Nature MT.
 - Raid/Add healers: 1-2 healers covering the add OT and raid.
@@ -61,7 +61,7 @@ ROLES NEEDED (assign these):
   In Poison form, AoE down the 4 elementals before returning to boss.
 
 ASSIGNMENT FORMAT RULES:
-- Use {skull} for Frost MT, {cross} for Nature MT, {triangle} for Add OT.
+- Use {square} for Frost MT, {triangle} for Nature MT, {cross} for Add OT.
 - List healers grouped by who they're healing.
 - Put MD chain on its own line.
 - Include a MELEE section: where to stand and transition behavior.

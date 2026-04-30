@@ -85,6 +85,72 @@ class BossGuideCog(commands.Cog, name="BossGuide"):
         return choices[:25]
 
     # -----------------------------------------------------------------------
+    # Shared handler (called by both /bossguide and /bg)
+    # -----------------------------------------------------------------------
+
+    async def _run_bossguide(
+        self,
+        interaction: discord.Interaction,
+        boss: str,
+        roster: discord.Attachment = None,
+    ) -> None:
+        await interaction.response.defer(thinking=True)
+
+        boss_key = resolve_boss(boss)
+        if boss_key is None:
+            from core.bossguide_data import BOSS_DATA
+            names = ", ".join(e.full_name for e in BOSS_DATA.values())
+            await interaction.followup.send(
+                f"**Unknown boss:** `{boss}`\nAvailable: {names}"
+            )
+            return
+
+        image_bytes: bytes | None = None
+        image_source: str = ""
+
+        if roster is not None:
+            try:
+                image_bytes = await roster.read()
+                image_source = " (using attached roster)"
+            except Exception as e:
+                log.warning("Failed to read roster attachment: %s", e)
+
+        if image_bytes is None and interaction.channel is not None:
+            image_bytes = await _find_recent_image(interaction.channel)
+            if image_bytes:
+                image_source = " (using recent channel image)"
+
+        loop = asyncio.get_running_loop()
+        try:
+            text, diagram_png = await loop.run_in_executor(
+                None,
+                lambda: _run_handler(boss_key, image_bytes),
+            )
+        except Exception as exc:
+            log.exception("bossguide handler failed for %s", boss_key)
+            await interaction.followup.send(
+                f"Assignment generation failed: {exc}\nCheck bot logs for details."
+            )
+            return
+
+        if image_source:
+            text = text + f"\n\n*— auto-assigned{image_source}*"
+
+        chunks = _chunks(text)
+        await interaction.followup.send(chunks[0])
+        for chunk in chunks[1:]:
+            await interaction.followup.send(chunk)
+
+        if diagram_png:
+            from core.bossguide_data import BOSS_DATA
+            entry = BOSS_DATA[boss_key]
+            file = discord.File(fp=io.BytesIO(diagram_png), filename=f"{boss_key}_positions.png")
+            await interaction.followup.send(
+                content=f"*Position diagram — {entry.full_name}*",
+                file=file,
+            )
+
+    # -----------------------------------------------------------------------
     # /bossguide
     # -----------------------------------------------------------------------
 
@@ -103,68 +169,7 @@ class BossGuideCog(commands.Cog, name="BossGuide"):
         boss: str,
         roster: discord.Attachment = None,
     ) -> None:
-        await interaction.response.defer(thinking=True)
-
-        # Validate boss name up front for fast feedback
-        boss_key = resolve_boss(boss)
-        if boss_key is None:
-            from core.bossguide_data import BOSS_DATA
-            names = ", ".join(e.full_name for e in BOSS_DATA.values())
-            await interaction.followup.send(
-                f"**Unknown boss:** `{boss}`\nAvailable: {names}"
-            )
-            return
-
-        # Gather roster image bytes
-        image_bytes: bytes | None = None
-        image_source: str = ""
-
-        if roster is not None:
-            try:
-                image_bytes = await roster.read()
-                image_source = " (using attached roster)"
-            except Exception as e:
-                log.warning("Failed to read roster attachment: %s", e)
-
-        if image_bytes is None and interaction.channel is not None:
-            image_bytes = await _find_recent_image(interaction.channel)
-            if image_bytes:
-                image_source = " (using recent channel image)"
-
-        # Run handler in thread (LLM + diagram drawing are blocking)
-        loop = asyncio.get_running_loop()
-        try:
-            text, diagram_png = await loop.run_in_executor(
-                None,
-                lambda: _run_handler(boss_key, image_bytes),
-            )
-        except Exception as exc:
-            log.exception("bossguide handler failed for %s", boss_key)
-            await interaction.followup.send(
-                f"Assignment generation failed: {exc}\nCheck bot logs for details."
-            )
-            return
-
-        # Add source note if we used an image
-        if image_source:
-            text = text + f"\n\n*— auto-assigned{image_source}*"
-
-        # Post text (chunked if long)
-        chunks = _chunks(text)
-        await interaction.followup.send(chunks[0])
-        for chunk in chunks[1:]:
-            await interaction.followup.send(chunk)
-
-        # Post diagram if available
-        if diagram_png:
-            from core.bossguide_data import BOSS_DATA
-            entry = BOSS_DATA[boss_key]
-            filename = f"{boss_key}_positions.png"
-            file = discord.File(fp=io.BytesIO(diagram_png), filename=filename)
-            await interaction.followup.send(
-                content=f"*Position diagram — {entry.full_name}*",
-                file=file,
-            )
+        await self._run_bossguide(interaction, boss, roster)
 
     # -----------------------------------------------------------------------
     # /bg — short alias for /bossguide
@@ -185,7 +190,7 @@ class BossGuideCog(commands.Cog, name="BossGuide"):
         boss: str,
         roster: discord.Attachment = None,
     ) -> None:
-        await self.slash_bossguide(interaction, boss, roster)
+        await self._run_bossguide(interaction, boss, roster)
 
     # -----------------------------------------------------------------------
     # !bossguide — prefix fallback

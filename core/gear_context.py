@@ -251,20 +251,20 @@ def compute_hit_cap(snapshot, spec_data: dict) -> HitCapStatus:
     for item in snapshot.gear:
         gear_sum += int(item.get("stats", {}).get(hit_stat_item, 0))
 
-    # WCL combat stats include the character's actual rating (with gems/enchants).
-    # When available and the gap vs the item DB sum is large (>20 rating), prefer
-    # WCL as it's the ground truth for what the character actually has on.
+    # WCL combat stats are the character's actual rating from the character sheet,
+    # including gems and enchants. Always prefer this over the item DB sum.
     wcl_hit = snapshot.combat_stats.get(hit_stat_wcl, 0)
-    if wcl_hit and abs(wcl_hit - gear_sum) > 20:
-        log.info(
-            "Using WCL hit rating %d (gear DB sum %d, gap likely gems/enchants).",
-            wcl_hit, gear_sum,
-        )
+    if wcl_hit:
+        if wcl_hit != gear_sum:
+            log.info(
+                "Using WCL hit rating %d (gear DB sum %d, delta %+d from gems/enchants).",
+                wcl_hit, gear_sum, wcl_hit - gear_sum,
+            )
         current_rating = int(wcl_hit)
         gems_included  = True
     else:
         current_rating = gear_sum
-        gems_included  = bool(wcl_hit)  # WCL matched item DB closely — gems probably covered
+        gems_included  = False
 
     overcap  = max(0, current_rating - effective_cap)
     uncapped = max(0, effective_cap - current_rating)

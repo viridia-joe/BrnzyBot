@@ -130,33 +130,84 @@ def _draw_hydross(W: int, H: int) -> "Image.Image":
     d = ImageDraw.Draw(img)
     f_lg = _font(12); f_md = _font(11); f_sm = _font(10); f_xs = _font(9)
 
-    mid = H // 2
-    # Frost zone
-    _zone_rect(d, 30, 25, W-30, mid-15, FROST, FROST_B, "FROST FORM ZONE", f_sm)
-    # Pillars
-    d.rectangle((70, 55, 85, mid-30), fill=(74, 112, 144))
-    d.rectangle((W-85, 55, W-70, mid-30), fill=(74, 112, 144))
-    # Hydross
     bx = W // 2
-    _boss_circle(d, bx, 130, 24, (90, 144, 192), FROST_T, "HYDROSS", f_md)
-    # Frost MT
-    _dot(d, bx, 175, 10, BLUE, FROST_T, "[Frost MT]", "{skull}", f_sm, f_xs)
-    # Spread reminder
-    d.text((50, 80), "← Raid spreads 8 yd →", fill=MUTED, font=f_xs)
+    boundary_y = H // 2      # flag boundary line Y
+    frost_bot   = boundary_y - 18
+    poison_top  = boundary_y + 18
 
-    # Flag boundary
-    _dashed_line(d, 30, mid-5, W-30, mid-5, GOLD, width=3)
-    d.text((60, mid-16), "▶ FLAG BOUNDARY ◀", fill=GOLD, font=f_xs)
+    # ── FROST FORM PANEL ─────────────────────────────────────────
+    _zone_rect(d, 18, 26, W-18, frost_bot, FROST, FROST_B, "", f_sm)
+    d.text((28, 30), "PHASE 1 — FROST FORM", fill=FROST_T, font=f_sm)
 
-    # Nature zone
-    _zone_rect(d, 30, mid+10, W-30, H-20, NATURE, NATURE_B, "POISON FORM ZONE", f_sm)
-    # Nature MT
-    _dot(d, bx, mid+75, 10, BLUE, NATURE_T, "[Nature MT]", "{cross}", f_sm, f_xs)
-    # Add OT
-    _dot(d, 90, mid+75, 10, RED, RED, "[Add OT]", "{triangle}", f_sm, f_xs)
+    # Pillars
+    d.rectangle((52, 52, 68, frost_bot - 10), fill=(74, 112, 144))
+    d.rectangle((W-68, 52, W-52, frost_bot - 10), fill=(74, 112, 144))
+    d.text((36, frost_bot - 28), "PIL", fill=MUTED, font=f_xs)
+    d.text((W-74, frost_bot - 28), "PIL", fill=MUTED, font=f_xs)
+
+    # Hydross (upper third of frost zone)
+    frost_boss_y = 115
+    _boss_circle(d, bx, frost_boss_y, 24, (90, 144, 192), FROST_T, "HYDROSS", f_md)
+
+    # Frost MT below boss
+    frost_mt_y = frost_boss_y + 58
+    _dot(d, bx, frost_mt_y, 9, BLUE, FROST_T, "[Frost MT]", "{skull}", f_sm, f_xs)
+
+    # Melee cluster (between MT and boundary, behind boss)
+    melee_y = frost_mt_y + 48
+    for mx in [bx-36, bx-16, bx+4, bx+24, bx+44]:
+        d.ellipse((mx-5, melee_y-5, mx+5, melee_y+5), fill=ORANGE, outline=ORANGE)
+    d.text((bx-55, melee_y + 10), "MELEE — behind boss", fill=ORANGE, font=f_xs)
+
+    # Ranged spread along frost zone sides
+    ranged_y = frost_mt_y + 20
+    for rx in [105, 155, 205]:
+        d.ellipse((rx-5, ranged_y-5, rx+5, ranged_y+5), fill=GREEN, outline=GREEN)
+    for rx in [W-105, W-155, W-205]:
+        d.ellipse((rx-5, ranged_y-5, rx+5, ranged_y+5), fill=GREEN, outline=GREEN)
+    d.text((82, ranged_y - 16), "← RANGED spread 8 yd apart →", fill=GREEN, font=f_xs)
+
+    # ── FLAG BOUNDARY ────────────────────────────────────────────
+    _dashed_line(d, 18, boundary_y, W-18, boundary_y, GOLD, width=3)
+    d.text((bx - 120, boundary_y - 13), "▼ FLAG BOUNDARY — STOP ALL DAMAGE 3 SEC BEFORE ▼", fill=GOLD, font=f_xs)
+
+    # ── POISON FORM PANEL ────────────────────────────────────────
+    _zone_rect(d, 18, poison_top, W-18, H-18, NATURE, NATURE_B, "", f_sm)
+    d.text((28, poison_top + 4), "PHASE 2 — POISON FORM", fill=NATURE_T, font=f_sm)
+
+    pz_h       = H - 18 - poison_top
+    pz_cy      = poison_top + pz_h // 2
+
+    # Hydross now in poison zone
+    poison_boss_y = pz_cy - 30
+    _boss_circle(d, bx, poison_boss_y, 24, (80, 160, 96), NATURE_T, "HYDROSS", f_md)
+
+    # Nature MT below boss
+    nature_mt_y = poison_boss_y + 58
+    _dot(d, bx, nature_mt_y, 9, BLUE, NATURE_T, "[Nature MT]", "{cross}", f_sm, f_xs)
+
+    # Melee follows into poison zone
+    melee_p2_y = nature_mt_y + 45
+    for mx in [bx-30, bx-12, bx+6, bx+24]:
+        d.ellipse((mx-5, melee_p2_y-5, mx+5, melee_p2_y+5), fill=ORANGE, outline=ORANGE)
+    d.text((bx-42, melee_p2_y + 10), "MELEE — follow boss", fill=ORANGE, font=f_xs)
+
+    # Add OT + elementals (left side)
+    add_x = 90
+    _dot(d, add_x, pz_cy - 10, 9, RED, RED, "[Add OT]", "{triangle}", f_sm, f_xs)
+    for ex, ey in [(138, pz_cy - 22), (150, pz_cy), (140, pz_cy + 18)]:
+        d.ellipse((ex-5, ey-5, ex+5, ey+5), fill=(180, 80, 80), outline=RED)
+    d.text((125, pz_cy + 28), "AoE adds!", fill=RED, font=f_xs)
+
+    # Ranged / healers — stay back, spread
+    d.text((W-190, pz_cy - 16), "RANGED / HEALS:", fill=GREEN, font=f_xs)
+    d.text((W-190, pz_cy - 4),  "stay center room,", fill=GREEN, font=f_xs)
+    d.text((W-190, pz_cy + 8),  "spread 8 yd apart", fill=GREEN, font=f_xs)
+    for rx, ry in [(W-130, pz_cy+30), (W-100, pz_cy+28), (W-70, pz_cy+32)]:
+        d.ellipse((rx-5, ry-5, rx+5, ry+5), fill=GREEN, outline=GREEN)
 
     # Title
-    d.text((30, 8), "Hydross the Unstable — Position Map", fill=GOLD, font=f_lg)
+    d.text((28, 8), "Hydross the Unstable — Position Map", fill=GOLD, font=f_lg)
     return img
 
 
@@ -485,9 +536,10 @@ _DRAW_FNS = {
 }
 
 _SIZES = {
-    "vashj":   (620, 620),
-    "kaelthas":(620, 580),
-    "default": (620, 500),
+    "hydross":  (620, 640),
+    "vashj":    (620, 620),
+    "kaelthas": (620, 580),
+    "default":  (620, 500),
 }
 
 

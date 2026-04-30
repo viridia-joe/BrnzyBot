@@ -56,11 +56,15 @@ ROLES NEEDED (assign these):
 - Nature MT healers: 2 healers dedicated to Nature MT.
 - Raid/Add healers: 1-2 healers covering the add OT and raid.
 - Misdirect hunters: 2 hunters — one MDs for Frost MT pull, one MDs for first transition taunt.
+- Melee: Stay behind boss at all times. On transition, STOP ALL DAMAGE AND DOTS 3 sec before.
+  Follow the boss across the boundary line — move with the Nature MT after the taunt.
+  In Poison form, AoE down the 4 elementals before returning to boss.
 
 ASSIGNMENT FORMAT RULES:
 - Use {skull} for Frost MT, {cross} for Nature MT, {triangle} for Add OT.
 - List healers grouped by who they're healing.
 - Put MD chain on its own line.
+- Include a MELEE section: where to stand and transition behavior.
 - End with 4-5 short bullet rules.
 """,
     ),

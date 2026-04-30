@@ -44,16 +44,20 @@ FORMATTING RULES (strictly follow these):
    {square} = sixth role
 2. Open with:  ━━━ {skull} <Boss Name> {skull} ━━━
 3. Follow with raid/boss identifier line: <Raid> · Boss N of M
-4. Use ALL-CAPS section headers with no decoration: TANKS, HEALS, MD CHAIN, INTERRUPTS, SPECIALTY, RULES
+4. Use ALL-CAPS section headers with no decoration: TANKS, HEALS, MELEE, MD CHAIN, INTERRUPTS, SPECIALTY, RULES
 5. Each TANKS line: <marker> <Role Label>: <Name>
 6. Each HEALS line: <Role Label>: <Name1>  <Name2>
-7. RULES: bullet points starting with •, 4–6 lines max. Be specific and action-oriented.
-8. Separate sections with a blank line. No markdown, no bold, no asterisks.
-9. If a role is empty / not needed for this fight, omit that section entirely.
-10. Keep the whole output under 1800 characters so it fits in Discord messages.
+7. MELEE: 1–2 lines covering where melee stands, when to move, and add/phase priority.
+8. RULES: bullet points starting with •, 4–6 lines max. Be specific and action-oriented.
+9. Separate sections with a blank line. No markdown, no bold, no asterisks.
+10. If a role is empty / not needed for this fight, omit that section entirely.
+11. Keep the whole output under 1800 characters so it fits in Discord messages.
 
 WOW MARKER USAGE: Only use the markers listed in the boss context's ASSIGNMENT FORMAT RULES.
 Do not invent markers for roles that don't call for them.
+
+SPELL NAMES: Never reference specific spell names (e.g. Seed of Corruption, Blizzard, Chaos Blast).
+Use generic terms only: "AoE adds", "interrupt heals", "fire resist set", "AoE down fast", etc.
 
 If using roster data from an image: assign specific player names. Fill ALL named roles.
 If no roster (template mode): use descriptive placeholders like [Frost MT], [Healer 1], [MD Hunter].

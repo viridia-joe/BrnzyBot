@@ -65,12 +65,14 @@ import numpy as np
 from scipy.optimize import LinearConstraint, milp, Bounds
 from scipy.sparse import csc_matrix
 
+import config
+
 log = logging.getLogger(__name__)
 
-WEIGHTS_DIR      = os.path.expanduser("~/.openclaw/data/weights")
-SET_BONUSES_PATH = os.path.expanduser("~/.openclaw/data/set_bonuses.json")
-PROFESSIONS_PATH = os.path.expanduser("~/.openclaw/data/professions.json")
-GEMS_PATH        = os.path.expanduser("~/.openclaw/data/gems.json")
+WEIGHTS_DIR      = config.WEIGHTS_DIR
+SET_BONUSES_PATH = config.SET_BONUSES_PATH
+PROFESSIONS_PATH = config.PROFESSIONS_PATH
+GEMS_PATH        = config.GEMS_PATH
 
 # Slots that allow two items simultaneously
 DUAL_SLOTS = {"Ring", "Trinket"}
@@ -118,6 +120,7 @@ class OptimizeParams:
     include_pvp:       bool  = False   # include Arena / PvP Honor gear
     include_world_boss: bool = True    # include world boss drops
     racial_hit:        int   = 0       # hit rating reduction from racial (e.g. 13 for Heroic Presence)
+    gem_hit_weight:    float = -1.0   # effective hit weight for gem valuation; -1 = use spec default
 
 
 @dataclass
@@ -359,8 +362,12 @@ def _load_candidates(
     if params.hit_buff_in_raid:
         effective_cap -= hit_cap_data.get("raid_buff_reduction", 0)
 
-    # Nominal hit weight (used for socket gem calculations)
-    nominal_hit_weight = weights.get("SpellHit", weights.get("MeleeHit", 0.0))
+    # Hit weight for gem calculations: use the caller-supplied effective weight when
+    # available (0 if at/over cap) so hit gems aren't over-valued for capped characters.
+    nominal_hit_weight = (
+        params.gem_hit_weight if params.gem_hit_weight >= 0
+        else weights.get("SpellHit", weights.get("MeleeHit", 0.0))
+    )
 
     gem_data    = _load_gems()
     gem_profile = gem_data.get(_gem_profile_for_spec(spec_data), {})
@@ -575,14 +582,14 @@ def _build_mip(
                 ep = bonus.get("spec_overrides", {}).get(spec_key, {}).get(t_str, ep)
 
             bonus_stats = bonus.get("stats", {})
-            if bonus_stats:
-                # Stat-based bonus: model hit through the h variable (respects hit cap),
-                # compute non-hit EP dynamically from spec weights.
-                hit_from_b  = float(sum(v for k, v in bonus_stats.items() if k in HIT_STAT_NAMES))
-                non_hit_ep  = sum(weights.get(k, 0) * v for k, v in bonus_stats.items()
-                                  if k not in HIT_STAT_NAMES)
+            if bonus_stats and all(k in HIT_STAT_NAMES for k in bonus_stats):
+                # Pure-hit stat bonus (e.g. Mana-Etched 2pc): route through h variable
+                # so hit past cap doesn't count. No flat EP contribution.
+                hit_from_b = float(sum(bonus_stats.values()))
+                non_hit_ep = 0.0
             else:
-                # Proc/effect bonus: no hit component, keep static EP.
+                # Non-hit or proc bonus (e.g. Cyclone 2pc SpellCrit, T5 proc):
+                # keep static EP from spec_overrides or the ep field.
                 hit_from_b = 0.0
                 non_hit_ep = float(ep)
 
@@ -629,7 +636,15 @@ def _build_mip(
 
     for slot, idxs in slots_seen.items():
         if slot in HAND_SLOTS:
-            continue   # handled by hand constraint below
+            # Each hand slot TYPE is capped at 1 (prevents 2 Main Hand items).
+            # The unified hand budget constraint below further limits total to ≤ 2.
+            row = np.zeros(total_vars)
+            for i in idxs:
+                row[i] = 1.0
+            A_rows.append(row)
+            con_lb.append(-np.inf)
+            con_ub.append(1.0)
+            continue
         cap = 2 if slot in DUAL_SLOTS else 1
         row = np.zeros(total_vars)
         for i in idxs:

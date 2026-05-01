@@ -19,11 +19,13 @@ import os
 from dataclasses import dataclass, field
 from typing import Optional
 
+import config
+
 log = logging.getLogger(__name__)
 
-WEIGHTS_DIR    = os.path.expanduser("~/.openclaw/data/weights")
-SET_BONUSES_PATH = os.path.expanduser("~/.openclaw/data/set_bonuses.json")
-RULINGS_PATH   = os.path.expanduser("~/.openclaw/workspace/gear_rulings.md")
+WEIGHTS_DIR      = config.WEIGHTS_DIR
+SET_BONUSES_PATH = config.SET_BONUSES_PATH
+RULINGS_PATH     = os.path.expanduser("~/.openclaw/workspace/gear_rulings.md")
 
 
 # ---------------------------------------------------------------------------

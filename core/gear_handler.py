@@ -62,7 +62,8 @@ def _build_upgrade_priority(character, spec, snapshot, context) -> list[Priority
     racial_hit = 13 if is_alliance_shaman else 0
     params = OptimizeParams(phase=phase, include_pvp=False,
                             include_world_boss=False, max_changes=20,
-                            racial_hit=racial_hit)
+                            racial_hit=racial_hit,
+                            gem_hit_weight=context.hit_cap.effective_weight)
     try:
         item_db = sqlite3.connect(ITEM_DB_PATH)
         try:
@@ -279,12 +280,15 @@ def handle_gear_list(
                     include_world_boss=False,
                     mode="bis",
                     racial_hit=13 if is_alliance_shaman else 0,
+                    gem_hit_weight=context.hit_cap.effective_weight,
                 )
                 bis_result = solve_bis(character, spec, item_db2, params, snapshot=snapshot)
                 if bis_result.solver_status != "error":
                     for sr in bis_result.slots:
                         bis_by_slot.setdefault(sr.slot, []).append(sr)
                     bis_ok = True
+                    log.info("BIS solve slots for %s (%s): %s", character, spec,
+                             {k: [r.item_name for r in v] for k, v in bis_by_slot.items()})
             finally:
                 item_db2.close()
         except Exception as e:
@@ -348,7 +352,25 @@ def handle_gear_list(
 
             if sr is None:
                 line = f"**{slot}** {cur_name}{set_tag} `{cur_ep:.1f}`"
-                vdesc = "no BiS data"
+                if slot in ("Main Hand", "Off Hand"):
+                    two_hand = bis_by_slot.get("Two-Hand", []) or bis_by_slot.get("Weapon", [])
+                    one_hand  = bis_by_slot.get("One Hand", [])
+                    if two_hand:
+                        vdesc = f"N/A — BiS uses 2H ({two_hand[0].item_name})"
+                    elif one_hand and slot == "Off Hand":
+                        # "One Hand" weapon placed in Off Hand slot by optimizer
+                        oh_sr = one_hand[0]
+                        oh_label = "🔥" if oh_sr.was_equipped else f"→ {oh_sr.item_name}"
+                        line = (
+                            f"**{slot}** {cur_name}{set_tag} `{cur_ep:.1f}` {oh_label}"
+                            if oh_sr.was_equipped
+                            else f"**{slot}** {cur_name} `{cur_ep:.1f}` → {oh_sr.item_name}"
+                        )
+                        vdesc = "BiS ✓" if oh_sr.was_equipped else f"BiS: {oh_sr.item_name} ({oh_sr.source})"
+                    else:
+                        vdesc = "no BiS data"
+                else:
+                    vdesc = "no BiS data"
             elif sr.was_equipped:
                 # Currently wearing BiS 🔥 — check this BEFORE the equipped_names guard
                 line = f"**{slot}** {cur_name}{set_tag} `{cur_ep:.1f}` 🔥"
@@ -378,7 +400,7 @@ def handle_gear_list(
 
                 if gain < 0:
                     # Equipped item is better than anything in the DB for this slot
-                    vdesc = f"BiS ✓ (DB best: {sr.item_name} at {bis_ep:.0f} EP)"
+                    vdesc = f"BiS ✓ (best in DB is {sr.item_name} at {bis_ep:.0f} EP — already better)"
                 else:
                     vdesc = f"BiS: {sr.item_name} ({bis_ep:.0f} EP, {pct_off*100:.0f}% off{src_str})"
 

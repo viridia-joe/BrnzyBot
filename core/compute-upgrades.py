@@ -25,11 +25,12 @@ from datetime import datetime, timezone
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
-DB_PATH        = os.path.expanduser("~/.openclaw/data/tbc_items.db")
-WEIGHTS_DIR    = os.path.expanduser("~/.openclaw/data/weights")
-WORKSPACE      = os.path.expanduser("~/.openclaw/workspace")
-SET_BONUSES_PATH = os.path.expanduser("~/.openclaw/data/set_bonuses.json")
-OUTPUT = os.path.join(WORKSPACE, "GEAR-STATUS.md")
+_REPO_ROOT       = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DB_PATH          = os.path.expanduser("~/.openclaw/data/tbc_items.db")
+WEIGHTS_DIR      = os.path.join(_REPO_ROOT, "data", "weights")
+WORKSPACE        = os.path.expanduser("~/.openclaw/workspace")
+SET_BONUSES_PATH = os.path.join(_REPO_ROOT, "data", "set_bonuses.json")
+OUTPUT           = os.path.join(WORKSPACE, "GEAR-STATUS.md")
 
 # Effort scores by source type
 EFFORT_SCORES = {

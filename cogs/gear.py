@@ -300,36 +300,17 @@ class GearCog(commands.Cog, name="Gear"):
             log.error("followup.send timed out for gearcheck %s", display)
 
     # -----------------------------------------------------------------------
-    # /gearcheck — slash command
+    # /gearcheck — slash command (always verbose: BiS item, EP, % gap per slot)
     # -----------------------------------------------------------------------
     @app_commands.command(
         name="gearcheck",
-        description="Head-to-toe gear check vs BiS.",
+        description="Head-to-toe gear check vs BiS — shows BiS item, EP, and % gap for every slot.",
     )
     @app_commands.describe(
         character="Character name",
         spec="Override spec (e.g. affliction, destro). Uses registered spec if omitted.",
     )
     async def slash_gearcheck(
-        self,
-        interaction: discord.Interaction,
-        character: str,
-        spec: str | None = None,
-    ) -> None:
-        await self._run_gearcheck(interaction, character, spec, verbose=False)
-
-    # -----------------------------------------------------------------------
-    # /gearcheckv — verbose slash command (BiS item name + EP on every line)
-    # -----------------------------------------------------------------------
-    @app_commands.command(
-        name="gearcheckv",
-        description="Verbose gear check — shows BiS item name, EP, and % gap for every slot.",
-    )
-    @app_commands.describe(
-        character="Character name",
-        spec="Override spec (e.g. affliction, destro). Uses registered spec if omitted.",
-    )
-    async def slash_gearcheckv(
         self,
         interaction: discord.Interaction,
         character: str,
@@ -342,13 +323,6 @@ class GearCog(commands.Cog, name="Gear"):
     # -----------------------------------------------------------------------
     @commands.command(name="gearcheck", aliases=["gc", "gear"])
     async def prefix_gearcheck(self, ctx: commands.Context, *args: str) -> None:
-        await self._prefix_gearcheck_impl(ctx, args, verbose=False)
-
-    # -----------------------------------------------------------------------
-    # !gearcheckv — verbose prefix command (alias: !gcv)
-    # -----------------------------------------------------------------------
-    @commands.command(name="gearcheckv", aliases=["gcv"])
-    async def prefix_gearcheckv(self, ctx: commands.Context, *args: str) -> None:
         await self._prefix_gearcheck_impl(ctx, args, verbose=True)
 
     async def _prefix_gearcheck_impl(

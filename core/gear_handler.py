@@ -331,6 +331,8 @@ def handle_gear_list(
     # Consume dual-slot entries in order
     slot_idx: dict[str, int] = {}
     bis_idx:  dict[str, int] = {}
+    cur_ep_by_slot = {g["slot"]: g["ep"] for g in context.gear_summary}
+    _shown_2h_name: str | None = None  # set when MH already displayed the 2H upgrade
 
     for slot in _SLOT_ORDER:
         items = equipped_by_slot.get(slot, [])
@@ -355,8 +357,30 @@ def handle_gear_list(
                 if slot in ("Main Hand", "Off Hand"):
                     two_hand = bis_by_slot.get("Two-Hand", []) or bis_by_slot.get("Weapon", [])
                     one_hand  = bis_by_slot.get("One Hand", [])
-                    if two_hand:
-                        vdesc = f"N/A — BiS uses 2H ({two_hand[0].item_name})"
+                    if two_hand and slot == "Main Hand":
+                        # Treat MH+OH as a stat-stick pair; compare combined EP vs 2H
+                        two_h_sr = two_hand[0]
+                        oh_ep = cur_ep_by_slot.get("Off Hand", 0.0)
+                        combined_gain = two_h_sr.ep - oh_ep
+                        pct_off = combined_gain / two_h_sr.ep if two_h_sr.ep > 0 else 0
+                        marker = "❄️" if pct_off > 0.20 else ("" if pct_off > 0.10 else "🔥")
+                        if combined_gain > 0.5:
+                            line = (
+                                f"**{slot}** {cur_name} `{cur_ep:.1f}` "
+                                f"→ {two_h_sr.item_name} (2H) **+{combined_gain:.1f}** {marker}"
+                            )
+                            src_str = f" — {two_h_sr.source}" if two_h_sr.source else ""
+                            vdesc = (
+                                f"BiS: {two_h_sr.item_name} ({two_h_sr.ep:.0f} EP, "
+                                f"+{combined_gain:.1f} over MH+OH pair{src_str})"
+                            )
+                        else:
+                            line = f"**{slot}** {cur_name} `{cur_ep:.1f}` {marker or '🔥'}"
+                            vdesc = f"BiS ✓ ({two_h_sr.item_name} 2H is not a meaningful upgrade over MH+OH pair)"
+                        _shown_2h_name = two_h_sr.item_name
+                    elif two_hand and slot == "Off Hand":
+                        ref = f" ({_shown_2h_name})" if _shown_2h_name else f" ({two_hand[0].item_name})"
+                        vdesc = f"N/A — replaced by 2H{ref}, see Main Hand"
                     elif one_hand and slot == "Off Hand":
                         # "One Hand" weapon placed in Off Hand slot by optimizer
                         oh_sr = one_hand[0]

@@ -186,6 +186,7 @@ class GearCog(commands.Cog, name="Gear"):
                     realm=realm,
                     region=region or "us",
                     question=f"Give me prioritized upgrade advice for {display}.",
+                    guild_id=guild_id,
                 ),
             )
         except Exception as exc:
@@ -226,6 +227,7 @@ class GearCog(commands.Cog, name="Gear"):
                     realm=realm,
                     region=region or "us",
                     question=f"Give me prioritized upgrade advice for {display}.",
+                    guild_id=guild_id,
                 ),
             )
         except Exception as exc:
@@ -284,6 +286,7 @@ class GearCog(commands.Cog, name="Gear"):
                     realm=realm,
                     region=region or "us",
                     verbose=verbose,
+                    guild_id=guild_id,
                 ),
             )
         except Exception as exc:
@@ -362,6 +365,7 @@ class GearCog(commands.Cog, name="Gear"):
                     realm=realm,
                     region=region or "us",
                     verbose=verbose,
+                    guild_id=guild_id,
                 ),
             )
         except Exception as exc:

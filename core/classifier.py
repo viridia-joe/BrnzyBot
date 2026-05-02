@@ -21,6 +21,7 @@ Callers:
 
 from __future__ import annotations
 
+import difflib
 import json
 import logging
 import re
@@ -35,56 +36,143 @@ log = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 SPEC_ALIASES: dict[str, str] = {
     # Warlock
-    "destro":       "destro_warlock",
-    "destruction":  "destro_warlock",
-    "afflic":       "affliction_warlock",
-    "affliction":   "affliction_warlock",
-    "demo":         "demonology_warlock",
-    "demonology":   "demonology_warlock",
+    "destro":           "destro_warlock",
+    "destruction":      "destro_warlock",
+    "afflic":           "affliction_warlock",
+    "affliction":       "affliction_warlock",
+    "firedestro":       "fire_destro_warlock",
+    "fire_destro":      "fire_destro_warlock",
     # Shaman
-    "ele":          "ele_shaman",
-    "elemental":    "ele_shaman",
-    "enh":          "enh_shaman",
-    "enhance":      "enh_shaman",
-    "enhancement":  "enh_shaman",
-    "resto":        "resto_shaman",
+    "ele":              "ele_shaman",
+    "elemental":        "ele_shaman",
+    "enh":              "enh_shaman",
+    "enhance":          "enh_shaman",
+    "enhancement":      "enh_shaman",
+    "rsham":            "resto_shaman",
+    "restosham":        "resto_shaman",
+    "restoshaman":      "resto_shaman",
     # Hunter
-    "bm":           "bm_hunter",
-    "beast":        "bm_hunter",
-    "beastmastery": "bm_hunter",
-    "mm":           "mm_hunter",
-    "marks":        "mm_hunter",
-    "marksmanship": "mm_hunter",
-    "surv":         "survival_hunter",
-    "survival":     "survival_hunter",
+    "bm":               "bm_hunter",
+    "beast":            "bm_hunter",
+    "beastmastery":     "bm_hunter",
+    "mm":               "mm_hunter",
+    "marks":            "mm_hunter",
+    "marksmanship":     "mm_hunter",
+    "surv":             "survival_hunter",
+    "survival":         "survival_hunter",
     # Mage
-    "fire":         "fire_mage",
-    "frost":        "frost_mage",
-    "arcane":       "arcane_mage",
+    "fire":             "fire_mage",
+    "frost":            "frost_mage",
+    "arcane":           "arcane_mage",
     # Priest
-    "shadow":       "shadow_priest",
-    "holy":         "holy_priest",
+    "shadow":           "shadow_priest",
+    "spriest":          "shadow_priest",
+    "shadowpriest":     "shadow_priest",
+    "holy":             "holy_priest",
     # Druid
-    "balance":      "balance_druid",
-    "boomkin":      "balance_druid",
-    "feral":        "feral_cat_druid",
-    "bear":         "feral_bear_druid",
-    "restod":       "resto_druid",
+    "balance":          "balance_druid",
+    "boomkin":          "balance_druid",
+    "boomie":           "balance_druid",
+    "boomy":            "balance_druid",
+    "feral":            "feral_cat_druid",
+    "cat":              "feral_cat_druid",
+    "bear":             "feral_bear_druid",
+    "guardian":         "feral_bear_druid",
+    "tree":             "resto_druid",
+    "rdruid":           "resto_druid",
+    "restodruid":       "resto_druid",
+    "restod":           "resto_druid",
+    "restoration":      "resto_druid",   # resto_shaman users should type rsham/restosham
     # Paladin
-    "ret":          "ret_paladin",
-    "retrib":       "ret_paladin",
-    "retribution":  "ret_paladin",
-    "prot":         "prot_paladin",
-    "holyp":        "holy_paladin",
+    "ret":              "ret_paladin",
+    "retrib":           "ret_paladin",
+    "retribution":      "ret_paladin",
+    "prot":             "prot_paladin",
+    "holyp":            "holy_paladin",
+    "holypal":          "holy_paladin",
+    "holypaladin":      "holy_paladin",
     # Warrior
-    "fury":         "fury_warrior",
-    "arms":         "arms_warrior",
-    "protw":        "prot_warrior",
+    "fury":             "fury_warrior",
+    "arms":             "arms_warrior",
+    "protw":            "prot_warrior",
+    "tankwarrior":      "prot_warrior",
     # Rogue
-    "assassin":     "assassination_rogue",
-    "assassination":"assassination_rogue",
-    "combat":       "combat_rogue",
+    "assassin":         "assassination_rogue",
+    "assassination":    "assassination_rogue",
+    "combat":           "combat_rogue",
 }
+
+# Canonical spec keys that have weight files (accepted for registration).
+VALID_SPECS: frozenset[str] = frozenset({
+    "affliction_warlock", "arcane_mage", "arms_warrior", "assassination_rogue",
+    "balance_druid", "bm_hunter", "combat_rogue", "destro_warlock", "fire_destro_warlock",
+    "ele_shaman", "enh_shaman", "feral_bear_druid", "feral_cat_druid",
+    "fire_mage", "frost_mage", "fury_warrior", "holy_paladin", "holy_priest",
+    "mm_hunter", "prot_paladin", "prot_warrior", "resto_druid", "resto_shaman",
+    "ret_paladin", "shadow_priest", "survival_hunter",
+})
+
+# Human-readable spec labels grouped by class (for /listspecs output).
+SPEC_BY_CLASS: dict[str, list[tuple[str, list[str]]]] = {
+    "Druid":   [
+        ("balance_druid",    ["balance", "boomkin", "boomie"]),
+        ("feral_cat_druid",  ["feral", "cat"]),
+        ("feral_bear_druid", ["bear", "guardian"]),
+        ("resto_druid",      ["tree", "rdruid", "restod", "restoration"]),
+    ],
+    "Hunter":  [
+        ("bm_hunter",       ["bm", "beast"]),
+        ("mm_hunter",       ["mm", "marks"]),
+        ("survival_hunter", ["surv", "survival"]),
+    ],
+    "Mage":    [
+        ("arcane_mage", ["arcane"]),
+        ("fire_mage",   ["fire"]),
+        ("frost_mage",  ["frost"]),
+    ],
+    "Paladin": [
+        ("holy_paladin", ["holyp", "holypal"]),
+        ("prot_paladin", ["prot"]),
+        ("ret_paladin",  ["ret", "retrib", "retribution"]),
+    ],
+    "Priest":  [
+        ("holy_priest",   ["holy"]),
+        ("shadow_priest", ["shadow", "spriest"]),
+    ],
+    "Rogue":   [
+        ("assassination_rogue", ["assassin", "assassination"]),
+        ("combat_rogue",        ["combat"]),
+    ],
+    "Shaman":  [
+        ("ele_shaman",   ["ele", "elemental"]),
+        ("enh_shaman",   ["enh", "enhance", "enhancement"]),
+        ("resto_shaman", ["rsham", "restosham"]),
+    ],
+    "Warlock": [
+        ("affliction_warlock",  ["afflic", "affliction"]),
+        ("destro_warlock",      ["destro", "destruction"]),
+        ("fire_destro_warlock", ["firedestro", "fire_destro"]),
+    ],
+    "Warrior": [
+        ("arms_warrior", ["arms"]),
+        ("fury_warrior", ["fury"]),
+        ("prot_warrior", ["protw", "tankwarrior"]),
+    ],
+}
+
+
+def fuzzy_suggest_spec(raw: str) -> list[str]:
+    """Return up to 3 canonical spec suggestions for an unrecognized input."""
+    candidates = list(SPEC_ALIASES.keys()) + list(VALID_SPECS)
+    close = difflib.get_close_matches(raw.lower(), candidates, n=5, cutoff=0.45)
+    seen: dict[str, None] = {}
+    for m in close:
+        canon = SPEC_ALIASES.get(m, m)
+        if canon in VALID_SPECS:
+            seen[canon] = None
+        if len(seen) >= 3:
+            break
+    return list(seen.keys())
 
 # Prefix/alias forms for each command
 COMMAND_PATTERNS: dict[str, list[str]] = {

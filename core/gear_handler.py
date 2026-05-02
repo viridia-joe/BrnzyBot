@@ -23,8 +23,9 @@ from core.gear_reasoning import annotate
 from core.node_health import check_nodes
 from core.gear_optimizer import solve_upgrades, solve_bis, OptimizeParams
 from core.classifier import SPEC_ALIASES
+from db.server_config import get_guild_phase
 
-ITEM_DB_PATH = os.path.expanduser("~/.openclaw/data/tbc_items.db")
+ITEM_DB_PATH = config.ITEM_DB_PATH
 
 _PHASE_LABELS = {1: "Phase 1", 2: "Phase 2", 3: "Phase 3", 4: "Phase 4", 5: "Phase 5"}
 _DUAL_SLOTS   = {"Ring", "Trinket"}
@@ -48,15 +49,13 @@ class PriorityEntry:
     source:     str         # "Karazhan (Moroes)", "Crafted", etc.
 
 
-def _build_upgrade_priority(character, spec, snapshot, context) -> list[PriorityEntry]:
+def _build_upgrade_priority(character, spec, snapshot, context, phase: int = 1) -> list[PriorityEntry]:
     """
     Run the optimizer and return a list of PriorityEntry objects sorted by
     net EP gain descending. This is the single source of truth for gearprio.
     """
     if not os.path.exists(ITEM_DB_PATH):
         return []
-
-    phase = getattr(config, "CURRENT_PHASE", 1)
     # Draenei Heroic Presence: all TBC Alliance Shaman are Draenei
     is_alliance_shaman = "shaman" in spec.lower() and getattr(snapshot, "faction", -1) == 1
     racial_hit = 13 if is_alliance_shaman else 0
@@ -123,13 +122,12 @@ def _build_upgrade_priority(character, spec, snapshot, context) -> list[Priority
 
 
 def _format_priority_skeleton(character: str, spec_desc: str, context,
-                               entries: list[PriorityEntry]) -> str:
+                               entries: list[PriorityEntry], phase: int = 1) -> str:
     """
     Format the deterministic upgrade list as a structured block that the LLM
     will annotate. The LLM must not deviate from this structure.
     """
-    hc    = context.hit_cap
-    phase = getattr(config, "CURRENT_PHASE", 1)
+    hc = context.hit_cap
 
     if hc.overcap_by > 0:
         hit_note = f"Hit: {hc.current_rating}/{hc.cap_rating} (+{hc.overcap_by} overcapped — hit EP = 0)"
@@ -179,6 +177,7 @@ def handle_gear_question(
     realm: str,
     region: str = "us",
     question: str = "",
+    guild_id: str = "global",
 ) -> str:
     """
     Upgrade priority pipeline:
@@ -206,9 +205,10 @@ def handle_gear_question(
             "Try again in a moment."
         )
 
+    phase    = get_guild_phase(guild_id)
     context  = build_context(snapshot, spec)
-    priority = _build_upgrade_priority(character, spec, snapshot, context)
-    skeleton = _format_priority_skeleton(character, context.spec_desc, context, priority)
+    priority = _build_upgrade_priority(character, spec, snapshot, context, phase=phase)
+    skeleton = _format_priority_skeleton(character, context.spec_desc, context, priority, phase=phase)
 
     log.info(
         "Priority built for %s (%s): %d upgrades, hit=%s",
@@ -240,6 +240,7 @@ def handle_gear_list(
     realm: str,
     region: str = "us",
     verbose: bool = False,
+    guild_id: str = "global",
 ) -> str:
     """
     Return a deterministic head-to-toe gear list comparing equipped gear vs BIS.
@@ -264,7 +265,7 @@ def handle_gear_list(
         )
 
     context = build_context(snapshot, spec)
-    phase = getattr(config, "CURRENT_PHASE", 1)
+    phase   = get_guild_phase(guild_id)
 
     # Run BIS solve for per-slot comparison
     bis_by_slot: dict[str, list] = {}

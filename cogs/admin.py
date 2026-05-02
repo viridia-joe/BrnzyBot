@@ -5,29 +5,33 @@ All commands here require Manage Guild permission or administrator.
 These are slash-only — admin config doesn't need prefix fallback.
 
 Commands:
-    /setup realm <slug> [region]    — set guild's WoW realm
-    /verbosity <mode> [channel]     — set channel verbosity
-    /response <target> [channel]    — set response target (channel/ephemeral/dm)
-    /addchar <name> <spec> [realm]  — register a character
-    /removechar <name>              — deregister a character
-    /listchars                      — list registered characters
+    /setup realm <slug> [region]       — set guild's WoW realm
+    /verbosity <mode> [channel]        — set channel verbosity
+    /response <target> [channel]       — set response target (channel/ephemeral/dm)
+    /addchar <name> [spec] [realm]     — register a character (spec auto-detected from WCL if omitted)
+    /removechar <name>                 — deregister a character
+    /listchars                         — list registered characters
 """
 
 from __future__ import annotations
 
+import asyncio
 import logging
 
 import discord
 from discord import app_commands
 from discord.ext import commands
 
-from core.classifier import SPEC_ALIASES
+from core.classifier import SPEC_ALIASES, VALID_SPECS, SPEC_BY_CLASS, fuzzy_suggest_spec
+from core.gear_cache import fetch_character_spec, WCL_CLASS_NAME
+from core.gear_handler import handle_gear_list
 import config
 from db.server_config import (
     add_character,
     get_character,
     get_guild_config,
     list_characters,
+    log_usage,
     remove_character,
     set_guild_config,
     set_guild_phase,
@@ -35,6 +39,24 @@ from db.server_config import (
     set_response_target,
     set_verbosity,
 )
+
+DISCORD_MAX = 2000
+
+
+def _chunks(text: str, limit: int = DISCORD_MAX) -> list[str]:
+    if len(text) <= limit:
+        return [text]
+    parts = []
+    while text:
+        if len(text) <= limit:
+            parts.append(text)
+            break
+        split = text.rfind("\n", 0, limit)
+        if split == -1:
+            split = limit
+        parts.append(text[:split])
+        text = text[split:].lstrip("\n")
+    return parts
 
 log = logging.getLogger(__name__)
 
@@ -178,11 +200,11 @@ class AdminCog(commands.Cog, name="Admin"):
     # -----------------------------------------------------------------------
     @app_commands.command(
         name="addchar",
-        description="Register a character so BrnzyBot can look them up.",
+        description="Register a character. Omit spec to auto-detect from WCL.",
     )
     @app_commands.describe(
         name="Character name (as it appears in WCL)",
-        spec="Spec (e.g. destro, ele, bm, fury). Run /listspecs to see all options.",
+        spec="Spec — e.g. tree, ele, fury, shadow. Leave blank to auto-detect from WCL.",
         realm="Realm slug. Defaults to guild's configured realm.",
         region="Region: us, eu, kr, tw (default: us)",
     )
@@ -190,33 +212,102 @@ class AdminCog(commands.Cog, name="Admin"):
         self,
         interaction: discord.Interaction,
         name: str,
-        spec: str,
+        spec: str | None = None,
         realm: str | None = None,
         region: str = "us",
     ) -> None:
         guild_id = str(interaction.guild_id)
 
-        # Resolve spec alias
-        resolved_spec = SPEC_ALIASES.get(spec.lower(), spec.lower())
-
         # Fall back to guild realm if not specified
         if not realm:
             guild_cfg = get_guild_config(guild_id)
             realm = guild_cfg["server_slug"] if guild_cfg else config.DEFAULT_REALM
+        realm = realm.lower()
+        region = region.lower()
+
+        # ── Spec provided: validate before deferring ────────────────────────
+        if spec is not None:
+            resolved_spec = SPEC_ALIASES.get(spec.lower(), spec.lower())
+            if resolved_spec not in VALID_SPECS:
+                suggestions = fuzzy_suggest_spec(spec)
+                hint = (
+                    f"Did you mean: {', '.join(f'`{s}`' for s in suggestions)}?"
+                    if suggestions else
+                    "Run `/listspecs` to see all valid options."
+                )
+                await interaction.response.send_message(
+                    f"Unknown spec **`{spec}`**. {hint}",
+                    ephemeral=True,
+                )
+                return
+            display_name = name
+            detected_spec = resolved_spec
+            reg_note = (
+                f"*Registered **{display_name}** as `{detected_spec}` "
+                f"on {realm} ({region.upper()}).*"
+            )
+        else:
+            display_name = None
+            detected_spec = None
+            reg_note = None
+
+        # Defer publicly — gearcheck result goes to the channel
+        await interaction.response.defer(thinking=True)
+        loop = asyncio.get_running_loop()
+
+        # ── No spec: auto-detect from WCL ───────────────────────────────────
+        if detected_spec is None:
+            result = await loop.run_in_executor(
+                None, lambda: fetch_character_spec(name, realm, region)
+            )
+            if result is None:
+                await interaction.followup.send(
+                    f"Couldn't find **{name}** on WCL for realm `{realm}` ({region.upper()}).\n"
+                    f"Try `/addchar {name} <spec>` with a spec — run `/listspecs` for options.",
+                    ephemeral=True,
+                )
+                return
+            display_name, detected_spec, class_id = result
+            class_name = WCL_CLASS_NAME.get(class_id, "Unknown")
+            reg_note = (
+                f"*Auto-registered **{display_name}** as `{detected_spec}` "
+                f"({class_name} on {realm}) from WCL. "
+                f"Wrong spec? `/addchar {display_name} <spec>` — see `/listspecs`.*"
+            )
 
         add_character(
             guild_id=guild_id,
-            name=name,
-            spec=resolved_spec,
-            realm=realm.lower(),
-            region=region.lower(),
+            name=display_name,
+            spec=detected_spec,
+            realm=realm,
+            region=region,
             added_by=str(interaction.user.id),
         )
-        await interaction.response.send_message(
-            f"Registered **{name}** as `{resolved_spec}` on {realm} ({region.upper()}).\n"
-            f"Use `/gearprio {name}` to run the optimizer.",
-            ephemeral=True,
-        )
+        log_usage(guild_id, str(interaction.user.id), "addchar")
+
+        # ── Run gearcheck and post result publicly ──────────────────────────
+        try:
+            result_text = await loop.run_in_executor(
+                None,
+                lambda: handle_gear_list(
+                    character=display_name,
+                    spec=detected_spec,
+                    realm=realm,
+                    region=region or "us",
+                    verbose=True,
+                    guild_id=guild_id,
+                ),
+            )
+        except Exception as exc:
+            log.exception("gearcheck failed after addchar for %s", display_name)
+            result_text = f"Registered **{display_name}** but gear check failed: {exc}"
+
+        result_text = result_text + "\n\n" + reg_note
+        try:
+            for chunk in _chunks(result_text):
+                await asyncio.wait_for(interaction.followup.send(chunk), timeout=15)
+        except asyncio.TimeoutError:
+            log.error("followup timed out for addchar gearcheck %s", display_name)
 
     # -----------------------------------------------------------------------
     # /removechar
@@ -271,15 +362,13 @@ class AdminCog(commands.Cog, name="Admin"):
         description="Show all valid spec aliases for /addchar.",
     )
     async def listspecs(self, interaction: discord.Interaction) -> None:
-        # Group aliases by canonical spec
-        canonical_to_aliases: dict[str, list[str]] = {}
-        for alias, canon in SPEC_ALIASES.items():
-            canonical_to_aliases.setdefault(canon, []).append(alias)
-
-        lines = ["**Valid spec aliases for `/addchar`:**", ""]
-        for canon, aliases in sorted(canonical_to_aliases.items()):
-            lines.append(f"`{canon}` — also: {', '.join(aliases)}")
-
+        lines = ["**Specs for `/addchar`** — use any alias shown:", ""]
+        for class_name, specs in SPEC_BY_CLASS.items():
+            lines.append(f"**{class_name}**")
+            for canon, aliases in specs:
+                lines.append(f"  `{canon}` — {', '.join(aliases)}")
+        lines.append("")
+        lines.append("_Example: `/addchar Bibblebubble tree` or just `/addchar Bibblebubble` to auto-detect._")
         await interaction.response.send_message("\n".join(lines), ephemeral=True)
 
 

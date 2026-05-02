@@ -169,9 +169,15 @@ class GearCog(commands.Cog, name="Gear"):
             return
 
         display, spec, realm, region = _resolve_character(character, guild_id)
+        auto_note = None
         if display is None:
-            await interaction.response.send_message(spec, ephemeral=True)
-            return
+            auto_result = await _try_auto_register(
+                character, guild_id, added_by=str(interaction.user.id)
+            )
+            if auto_result is None:
+                await interaction.response.send_message(spec, ephemeral=True)
+                return
+            display, spec, realm, region, auto_note = auto_result
 
         await interaction.response.defer(thinking=True)
         log_usage(guild_id, str(interaction.user.id), "gearprio")
@@ -192,6 +198,9 @@ class GearCog(commands.Cog, name="Gear"):
         except Exception as exc:
             log.exception("gearprio failed for %s", display)
             result_text = f"Gear priority failed for **{display}**: {exc}"
+
+        if auto_note:
+            result_text = result_text + "\n\n" + auto_note
 
         try:
             for chunk in _chunks(result_text):

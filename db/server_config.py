@@ -32,12 +32,29 @@ VALID_RESPONSE_TARGET = {"channel", "ephemeral", "dm"}
 # ---------------------------------------------------------------------------
 
 def init_db(path: str = DB_PATH) -> None:
-    """Create tables if they don't exist. Safe to call on every startup."""
+    """Create tables and apply column migrations. Safe to call on every startup."""
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(SCHEMA_PATH) as f:
         schema = f.read()
     with sqlite3.connect(path) as conn:
         conn.executescript(schema)
+        _migrate(conn)
+
+
+# Columns added after initial deploy — ALTER TABLE is idempotent via try/except.
+_MIGRATIONS = [
+    "ALTER TABLE guild_config ADD COLUMN current_phase INTEGER NOT NULL DEFAULT 1",
+    "ALTER TABLE guild_config ADD COLUMN interest_threshold INTEGER NOT NULL DEFAULT 5",
+    "ALTER TABLE server_config ADD COLUMN recap_channel_id TEXT",
+]
+
+
+def _migrate(conn: sqlite3.Connection) -> None:
+    for stmt in _MIGRATIONS:
+        try:
+            conn.execute(stmt)
+        except sqlite3.OperationalError:
+            pass  # column already exists
 
 
 @contextmanager

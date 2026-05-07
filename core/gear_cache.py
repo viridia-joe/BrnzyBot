@@ -57,6 +57,11 @@ _WEAPON_SUBCLASS: dict[int, str] = {
     13: "Fist Weapon", 15: "Dagger", 16: "Thrown", 18: "Crossbow", 19: "Wand",
 }
 
+# Wowhead source id → source_type string
+_WOWHEAD_SOURCE_TYPE: dict[int, str] = {
+    1: "Crafted", 2: "Drop", 3: "PvP", 4: "Quest", 5: "Vendor",
+}
+
 # Tooltip text variants → our canonical stat name (only overrides needed)
 _TOOLTIP_STAT_NORM: dict[str, str] = {
     "Spell Damage and Healing":         "Spell Power",
@@ -170,9 +175,22 @@ def _wowhead_lookup(item_id: int) -> dict | None:
     tooltip = item_el.findtext("htmlTooltip", "")
     stats = _parse_tooltip_stats(tooltip)
 
+    # Source type from JSON fragment
+    source_type = ""
+    json_text = item_el.findtext("json", "")
+    if json_text:
+        try:
+            wh_json = json.loads("{" + json_text + "}")
+            sources = wh_json.get("source", [])
+            if sources:
+                source_type = _WOWHEAD_SOURCE_TYPE.get(sources[0], "")
+        except (json.JSONDecodeError, ValueError, TypeError, IndexError):
+            pass
+
     return {
         "name": name, "slot": slot, "quality": quality, "ilvl": ilvl,
         "stats": stats, "armor_type": armor_type, "weapon_type": weapon_type,
+        "source_type": source_type,
     }
 
 
@@ -186,13 +204,16 @@ def _insert_unknown_item(item_id: int, item_db_conn: sqlite3.Connection) -> dict
     if data is None:
         return None
 
+    source_type = data.get("source_type", "")
+    source_name = source_type  # use type as name until manually refined
+
     try:
         item_db_conn.execute(
             """INSERT OR IGNORE INTO items
                (item_id, name, slot, phase, quality, ilvl, armor_type, weapon_type,
                 set_name, is_unique, class_restriction, stats, sockets, socket_bonus,
                 source_type, source_name, drop_rate, effort_score)
-               VALUES (?, ?, ?, 0, ?, ?, ?, ?, '', 0, '[]', ?, '[]', '{}', '', '', 0, 0)""",
+               VALUES (?, ?, ?, 0, ?, ?, ?, ?, '', 0, '[]', ?, '[]', '{}', ?, ?, 0, 0)""",
             (
                 item_id,
                 data["name"],
@@ -202,12 +223,14 @@ def _insert_unknown_item(item_id: int, item_db_conn: sqlite3.Connection) -> dict
                 data["armor_type"],
                 data["weapon_type"],
                 json.dumps(data["stats"]),
+                source_type,
+                source_name,
             ),
         )
         item_db_conn.commit()
         log.info(
-            "Auto-inserted item %d (%s) from Wowhead — slot=%s stats=%s",
-            item_id, data["name"], data["slot"], data["stats"],
+            "Auto-inserted item %d (%s) from Wowhead — slot=%s source=%s stats=%s",
+            item_id, data["name"], data["slot"], source_type, data["stats"],
         )
     except Exception as e:
         log.warning("Failed to insert item %d into DB: %s", item_id, e)

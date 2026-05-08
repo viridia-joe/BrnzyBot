@@ -39,8 +39,7 @@ PART 1 — ASSIGNMENTS (before the ---)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Each line will be sent as a /ra (raid alert) command in WoW. Rules:
 1. Open with:  ━━━ {skull} <Boss Name> {skull} ━━━
-2. Follow with:  <Raid> · Boss N of M
-3. Use ALL-CAPS section headers: TANKS, HEALS, MD CHAIN, INTERRUPTS, SPECIALTY
+2. Use ALL-CAPS section headers: TANKS, HEALS, MD CHAIN, INTERRUPTS, SPECIALTY
 4. Each TANKS line: <marker> <Role Label>: <Name or [Placeholder]>
 5. Each HEALS line: <Role Label>: <Name1>  <Name2>
 6. NO explanations, NO dashes, NO "— tanks between pillars" text. Names/roles only.

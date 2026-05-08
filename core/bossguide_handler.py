@@ -32,32 +32,35 @@ log = logging.getLogger(__name__)
 ASSIGNMENT_SYSTEM = """\
 You are BrnzyBot, a World of Warcraft TBC raid assignment generator for an experienced raid leader.
 
-Generate concise, copy-pasteable raid assignments in WoW macro format.
+Your output has TWO parts separated by a line containing only "---".
 
-FORMATTING RULES (strictly follow these):
-1. Use WoW raid target markers where indicated by the boss context:
-   {skull} = main tank marker
-   {cross} = second tank / kill target
-   {triangle} = add tank / third position
-   {moon} = fourth tank
-   {star} = fifth role
-   {square} = sixth role
-2. Open with:  ━━━ {skull} <Boss Name> {skull} ━━━
-3. Follow with raid/boss identifier line: <Raid> · Boss N of M
-4. Use ALL-CAPS section headers with no decoration: TANKS, HEALS, MELEE, MD CHAIN, INTERRUPTS, SPECIALTY, RULES
-5. Each TANKS line: <marker> <Role Label>: <Name>
-6. Each HEALS line: <Role Label>: <Name1>  <Name2>
-7. MELEE: 1–2 lines covering where melee stands, when to move, and add/phase priority.
-8. RULES: bullet points starting with •, 4–6 lines max. Be specific and action-oriented.
-9. Separate sections with a blank line. No markdown, no bold, no asterisks.
-10. If a role is empty / not needed for this fight, omit that section entirely.
-11. Keep the whole output under 1800 characters so it fits in Discord messages.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PART 1 — ASSIGNMENTS (before the ---)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Each line will be sent as a /ra (raid alert) command in WoW. Rules:
+1. Open with:  ━━━ {skull} <Boss Name> {skull} ━━━
+2. Follow with:  <Raid> · Boss N of M
+3. Use ALL-CAPS section headers: TANKS, HEALS, MD CHAIN, INTERRUPTS, SPECIALTY
+4. Each TANKS line: <marker> <Role Label>: <Name or [Placeholder]>
+5. Each HEALS line: <Role Label>: <Name1>  <Name2>
+6. NO explanations, NO dashes, NO "— tanks between pillars" text. Names/roles only.
+7. Keep every line under 80 characters (WoW chat limit).
+8. Blank lines between sections are fine.
+9. Omit sections not relevant to this fight.
 
-WOW MARKER USAGE: Only use the markers listed in the boss context's ASSIGNMENT FORMAT RULES.
-Do not invent markers for roles that don't call for them.
+WoW markers (use only those specified in boss context):
+   {skull} {cross} {triangle} {moon} {star} {square} {circle} {diamond}
 
-SPELL NAMES: Never reference specific spell names (e.g. Seed of Corruption, Blizzard, Chaos Blast).
-Use generic terms only: "AoE adds", "interrupt heals", "fire resist set", "AoE down fast", etc.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PART 2 — NOTES (after the ---)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Plain text for the raid leader's reference. Include:
+- MELEE: 1–2 sentences on positioning, movement, add/phase priority.
+- RULES: bullet points starting with •, 4–6 lines. Specific and action-oriented.
+No /ra prefix here. No markdown, no bold, no asterisks.
+
+SPELL NAMES: Never reference specific spell names.
+Use generic terms: "AoE adds", "fire resist set", "AoE down fast", etc.
 
 If using roster data from an image: assign specific player names. Fill ALL named roles.
 If no roster (template mode): use descriptive placeholders like [Frost MT], [Healer 1], [MD Hunter].
@@ -220,15 +223,45 @@ def _generate_assignments(entry: BossEntry, roster: dict) -> str:
     """Call Claude to produce formatted WoW assignments."""
     prompt = _build_assignment_prompt(entry, roster)
     try:
-        return _call_llm(
+        raw = _call_llm(
             messages=[{"role": "user", "content": prompt}],
             system=ASSIGNMENT_SYSTEM,
             temperature=0.2,
             timeout=60,
         )
+        return _format_ra_output(raw)
     except Exception as e:
         log.error("Assignment generation failed for %s: %s", entry.full_name, e)
         return _fallback_template(entry)
+
+
+def _format_ra_output(raw: str) -> str:
+    """
+    Split LLM output on '---' separator, prefix assignment lines with /ra,
+    and append the notes block as plain text.
+    Returns the final Discord-ready string.
+    """
+    # Split on the separator line (allow surrounding whitespace/newlines)
+    parts = raw.split("\n---\n", 1)
+    if len(parts) == 1:
+        # No separator found — try looser split
+        parts = raw.split("---", 1)
+
+    assignments_raw = parts[0].strip()
+    notes_raw = parts[1].strip() if len(parts) > 1 else ""
+
+    # Prefix every non-empty assignment line with /ra
+    ra_lines = []
+    for line in assignments_raw.splitlines():
+        if line.strip():
+            ra_lines.append(f"/ra {line}")
+        # skip blank lines — no empty /ra commands
+
+    ra_block = "\n".join(ra_lines)
+
+    if notes_raw:
+        return ra_block + "\n\n" + notes_raw
+    return ra_block
 
 
 def _fallback_template(entry: BossEntry) -> str:

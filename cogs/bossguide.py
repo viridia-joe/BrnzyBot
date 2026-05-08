@@ -139,13 +139,20 @@ class BossGuideCog(commands.Cog, name="BossGuide"):
             )
             return
 
-        if image_source:
-            text = text + f"\n\n*— auto-assigned{image_source}*"
+        # Split /ra assignment block from plain-text notes at the blank-line boundary
+        ra_block, _, notes_block = text.partition("\n\n")
+        if not notes_block:
+            ra_block = text
+            notes_block = ""
 
-        chunks = _chunks(text)
-        await interaction.followup.send(chunks[0])
-        for chunk in chunks[1:]:
+        if image_source:
+            notes_block = (notes_block + f"\n\n*— auto-assigned{image_source}*").strip()
+
+        for chunk in _chunks(ra_block):
             await interaction.followup.send(chunk)
+        if notes_block:
+            for chunk in _chunks(notes_block):
+                await interaction.followup.send(chunk)
 
         if diagram_png:
             from core.bossguide_data import BOSS_DATA
@@ -243,10 +250,18 @@ class BossGuideCog(commands.Cog, name="BossGuide"):
             await thinking_msg.edit(content=f"Assignment generation failed: {exc}")
             return
 
-        chunks = _chunks(text)
+        ra_block, _, notes_block = text.partition("\n\n")
+        if not notes_block:
+            ra_block = text
+            notes_block = ""
+
+        chunks = _chunks(ra_block)
         await thinking_msg.edit(content=chunks[0])
         for chunk in chunks[1:]:
             await thinking_msg.reply(chunk, mention_author=False)
+        if notes_block:
+            for chunk in _chunks(notes_block):
+                await thinking_msg.reply(chunk, mention_author=False)
 
         if diagram_png:
             from core.bossguide_data import BOSS_DATA

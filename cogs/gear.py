@@ -151,11 +151,15 @@ class GearCog(commands.Cog, name="Gear"):
     )
     @app_commands.describe(
         character="Character name (must be registered with /addchar)",
+        spec="Spec override (e.g. elemental, destro, shadow). Uses registered spec if omitted.",
+        phase="Phase to optimize for (1–5). Defaults to guild's current phase.",
     )
     async def slash_gearprio(
         self,
         interaction: discord.Interaction,
         character: str,
+        spec: str | None = None,
+        phase: int | None = None,
     ) -> None:
         guild_id = str(interaction.guild_id)
 
@@ -168,16 +172,24 @@ class GearCog(commands.Cog, name="Gear"):
             )
             return
 
-        display, spec, realm, region = _resolve_character(character, guild_id)
+        if phase is not None and not (1 <= phase <= 5):
+            await interaction.response.send_message(
+                "Phase must be between 1 and 5.", ephemeral=True
+            )
+            return
+
+        display, reg_spec, realm, region = _resolve_character(character, guild_id)
         auto_note = None
         if display is None:
             auto_result = await _try_auto_register(
                 character, guild_id, added_by=str(interaction.user.id)
             )
             if auto_result is None:
-                await interaction.response.send_message(spec, ephemeral=True)
+                await interaction.response.send_message(reg_spec, ephemeral=True)
                 return
-            display, spec, realm, region, auto_note = auto_result
+            display, reg_spec, realm, region, auto_note = auto_result
+
+        resolved_spec = spec or reg_spec
 
         await interaction.response.defer(thinking=True)
         log_usage(guild_id, str(interaction.user.id), "gearprio")
@@ -188,11 +200,12 @@ class GearCog(commands.Cog, name="Gear"):
                 None,
                 lambda: handle_gear_question(
                     character=display,
-                    spec=spec,
+                    spec=resolved_spec,
                     realm=realm,
                     region=region or "us",
                     question=f"Give me prioritized upgrade advice for {display}.",
                     guild_id=guild_id,
+                    phase_override=phase,
                 ),
             )
         except Exception as exc:
@@ -258,6 +271,7 @@ class GearCog(commands.Cog, name="Gear"):
         character: str,
         spec: str | None,
         verbose: bool,
+        phase: int | None = None,
     ) -> None:
         guild_id = str(interaction.guild_id)
 
@@ -296,6 +310,7 @@ class GearCog(commands.Cog, name="Gear"):
                     region=region or "us",
                     verbose=verbose,
                     guild_id=guild_id,
+                    phase_override=phase,
                 ),
             )
         except Exception as exc:
@@ -321,14 +336,16 @@ class GearCog(commands.Cog, name="Gear"):
     @app_commands.describe(
         character="Character name",
         spec="Override spec (e.g. affliction, destro). Uses registered spec if omitted.",
+        phase="Phase to optimize for (1–5). Defaults to guild's current phase.",
     )
     async def slash_gearcheck(
         self,
         interaction: discord.Interaction,
         character: str,
         spec: str | None = None,
+        phase: int | None = None,
     ) -> None:
-        await self._run_gearcheck(interaction, character, spec, verbose=True)
+        await self._run_gearcheck(interaction, character, spec, verbose=True, phase=phase)
 
     # -----------------------------------------------------------------------
     # !gearcheck — prefix command (alias: !gc, !gear)

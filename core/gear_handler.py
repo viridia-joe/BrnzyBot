@@ -178,6 +178,7 @@ def handle_gear_question(
     region: str = "us",
     question: str = "",
     guild_id: str = "global",
+    phase_override: int | None = None,
 ) -> str:
     """
     Upgrade priority pipeline:
@@ -205,7 +206,7 @@ def handle_gear_question(
             "Try again in a moment."
         )
 
-    phase    = get_guild_phase(guild_id)
+    phase    = phase_override if phase_override is not None else get_guild_phase(guild_id)
     context  = build_context(snapshot, spec)
     priority = _build_upgrade_priority(character, spec, snapshot, context, phase=phase)
     skeleton = _format_priority_skeleton(character, context.spec_desc, context, priority, phase=phase)
@@ -241,6 +242,7 @@ def handle_gear_list(
     region: str = "us",
     verbose: bool = False,
     guild_id: str = "global",
+    phase_override: int | None = None,
 ) -> str:
     """
     Return a deterministic head-to-toe gear list comparing equipped gear vs BIS.
@@ -265,7 +267,7 @@ def handle_gear_list(
         )
 
     context = build_context(snapshot, spec)
-    phase   = get_guild_phase(guild_id)
+    phase   = phase_override if phase_override is not None else get_guild_phase(guild_id)
 
     # Run BIS solve for per-slot comparison
     bis_by_slot: dict[str, list] = {}

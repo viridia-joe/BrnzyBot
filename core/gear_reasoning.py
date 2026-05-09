@@ -403,14 +403,15 @@ def _annotator_prompt(skeleton: str, context_block: str) -> list:
     ]
 
 
-def annotate(skeleton: str, context: GearContext, node_status=None) -> str:
+def annotate(skeleton: str, context: GearContext, node_status=None,
+             phase: int | None = None) -> str:
     """
     Annotate a deterministic upgrade skeleton with LLM commentary.
 
     The skeleton contains all decisions (what to upgrade, in what order, exact EP).
     The LLM adds prose: source locations, crafting notes, strategic observations.
     """
-    context_block = context.to_prompt_block()
+    context_block = context.to_prompt_block(phase=phase)
     msgs          = _annotator_prompt(skeleton, context_block)
 
     try:

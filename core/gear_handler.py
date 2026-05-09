@@ -217,7 +217,7 @@ def handle_gear_question(
     )
 
     node_status = check_nodes(post_alerts=False)
-    return annotate(skeleton, context, node_status=node_status)
+    return annotate(skeleton, context, node_status=node_status, phase=phase)
 
 
 # ---------------------------------------------------------------------------

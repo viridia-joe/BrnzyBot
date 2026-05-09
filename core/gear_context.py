@@ -93,10 +93,10 @@ class GearContext:
                 return ep_at_n - ep_at_n_minus_1
         return 0.0
 
-    def to_prompt_block(self) -> str:
+    def to_prompt_block(self, phase: int | None = None) -> str:
         """Render this context as a structured block for injection into model prompts."""
         import config as _cfg
-        current_phase = getattr(_cfg, "CURRENT_PHASE", 1)
+        current_phase = phase if phase is not None else getattr(_cfg, "CURRENT_PHASE", 1)
         phase_labels = {1: "Phase 1 (Karazhan / Gruul's Lair / Magtheridon)",
                         2: "Phase 2 (SSC / TK)",
                         3: "Phase 3 (Hyjal / Black Temple)",

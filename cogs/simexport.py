@@ -108,6 +108,7 @@ class SimExportCog(commands.Cog, name="SimExport"):
         has_enchants = meta["has_enchants"]
         has_gems     = meta["has_gems"]
         from_cache   = meta["from_cache"]
+        skipped      = meta.get("skipped", [])
 
         json_bytes = json.dumps(export_dict, indent=2).encode("utf-8")
         filename = f"{display.lower()}_{resolved_spec}_p{phase}_sim.json"
@@ -118,6 +119,11 @@ class SimExportCog(commands.Cog, name="SimExport"):
         lines.append("")
         lines.append("**What's included:** item IDs, spec defaults, EP weights, buffs/debuffs")
         lines.append("**What to fill in after import:** talent string, any adjusted consumables")
+        if skipped:
+            lines.append("")
+            lines.append("⚠ **Cross-class set items zeroed out** (wowsims crashes on these — add via gear picker instead):")
+            for s in skipped:
+                lines.append(f"  • {s}")
         if from_cache:
             lines.append("⚠ Gear from cache — enchants and gems may be missing. "
                          "Run `/gearprio` to refresh from WCL, then re-export.")

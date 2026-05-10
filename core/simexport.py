@@ -450,11 +450,57 @@ def _ep_array(spec: str) -> list[float]:
 
 
 # ---------------------------------------------------------------------------
+# Cross-class set crash guard (wowsims issue #1102)
+#
+# wowsims set-bonus callbacks use unsafe type assertions — if a non-warlock
+# wears a Warlock T5 piece (e.g. Corruptor Raiment legs, BiS for ele shaman),
+# wowsims panics: "ElementalShaman is not WarlockAgent: missing method GetWarlock".
+# We zero out those slots in the export and warn the user to add them manually
+# via the wowsims gear picker (which skips cross-class set bonuses correctly).
+# ---------------------------------------------------------------------------
+
+_CLASS_LOCKED_SETS: dict[str, str] = {
+    # Warlock tier
+    "Voidheart Raiment":     "ClassWarlock",
+    "Corruptor Raiment":     "ClassWarlock",
+    "Malefic Raiment":       "ClassWarlock",
+    # Hunter tier
+    "Beast Lord Armor":      "ClassHunter",
+    "Rift Stalker Armor":    "ClassHunter",
+    "Gronnstalker's Armor":  "ClassHunter",
+    # Druid tier
+    "Malorne Raiment":       "ClassDruid",
+    "Malorne Harness":       "ClassDruid",
+    "Malorne Regalia":       "ClassDruid",
+    "Nordrassil Regalia":    "ClassDruid",
+    "Nordrassil Harness":    "ClassDruid",
+    "Nordrassil Raiment":    "ClassDruid",
+    "Thunderheart Regalia":  "ClassDruid",
+    "Thunderheart Harness":  "ClassDruid",
+    # Rogue tier
+    "Netherblade":           "ClassRogue",
+    "Deathmantle":           "ClassRogue",
+    "Slayer's Armor":        "ClassRogue",
+    # Paladin tier
+    "Justicar Armor":        "ClassPaladin",
+    "Crystalforge Armor":    "ClassPaladin",
+    "Lightbringer Armor":    "ClassPaladin",
+    # Warrior tier
+    "Warbringer Armor":      "ClassWarrior",
+    "Destroyer Armor":       "ClassWarrior",
+    "Onslaught Armor":       "ClassWarrior",
+}
+
+
+# ---------------------------------------------------------------------------
 # Equipment builder
 # ---------------------------------------------------------------------------
 
-def _build_items(gear: list) -> list[dict]:
-    """Map snapshot gear list to a 17-element wowsims items array (index = slot)."""
+def _build_items(gear: list, class_str: str) -> tuple[list[dict], list[str]]:
+    """
+    Map snapshot gear list to a 17-element wowsims items array (index = slot).
+    Returns (items, skipped) where skipped lists items zeroed due to cross-class sets.
+    """
     by_slot: dict[str, list] = {}
     for item in gear:
         slot = item["slot"]
@@ -469,7 +515,8 @@ def _build_items(gear: list) -> list[dict]:
         by_slot.pop("Off Hand", None)
 
     ring_idx = trinket_idx = 0
-    items = []
+    items: list[dict] = []
+    skipped: list[str] = []
 
     for slot_name in _WOWSIMS_SLOT_ORDER:
         slot_items = by_slot.get(slot_name, [])
@@ -487,6 +534,15 @@ def _build_items(gear: list) -> list[dict]:
             items.append({})
             continue
 
+        # Crash guard: zero out items whose set bonus code is class-locked to another class
+        set_name = item.get("set_name", "")
+        if set_name:
+            locked_to = _CLASS_LOCKED_SETS.get(set_name)
+            if locked_to and locked_to != class_str:
+                skipped.append(f"{item['name']} ({slot_name}) — {set_name}")
+                items.append({})
+                continue
+
         entry: dict = {"id": item["item_id"]}
         enchant = item.get("enchant", 0) or 0
         gems    = [g for g in item.get("gems", []) if g]
@@ -496,7 +552,7 @@ def _build_items(gear: list) -> list[dict]:
             entry["gems"] = gems
         items.append(entry)
 
-    return items
+    return items, skipped
 
 
 # ---------------------------------------------------------------------------
@@ -521,18 +577,21 @@ def build_simexport(snapshot, spec: str, guild_id: str,
     has_enchants = any(item.get("enchant") for item in snapshot.gear)
     has_gems     = any(item.get("gems")    for item in snapshot.gear)
 
+    items, skipped = _build_items(snapshot.gear, class_str)
+
     meta = {
-        "phase":       phase,
-        "from_cache":  snapshot.from_cache,
+        "phase":        phase,
+        "from_cache":   snapshot.from_cache,
         "has_enchants": has_enchants,
-        "has_gems":    has_gems,
+        "has_gems":     has_gems,
+        "skipped":      skipped,
     }
 
     player = {
         "name":      snapshot.character,
         "race":      race_str,
         "class":     class_str,
-        "equipment": {"items": _build_items(snapshot.gear)},
+        "equipment": {"items": items},
         "consumes":  _SPEC_CONSUMES.get(spec_key, _DEFAULT_CONSUMES),
         "bonusStats":    [0] * _STAT_ARRAY_LEN,
         "buffs": {

@@ -103,14 +103,15 @@ class SimExportCog(commands.Cog, name="SimExport"):
             )
             return
 
-        json_bytes = json.dumps(export_dict, indent=2).encode("utf-8")
-        filename = f"{display.lower()}_{resolved_spec}_p{export_dict['settings']['phase']}_sim.json"
-        file = discord.File(fp=io.BytesIO(json_bytes), filename=filename)
+        export_dict, meta = export_dict  # _build_export returns (dict, meta)
+        phase        = meta["phase"]
+        has_enchants = meta["has_enchants"]
+        has_gems     = meta["has_gems"]
+        from_cache   = meta["from_cache"]
 
-        note = export_dict.get("_brnzybot", {}).get("note", "")
-        has_enchants = export_dict.get("_brnzybot", {}).get("has_enchants", False)
-        has_gems     = export_dict.get("_brnzybot", {}).get("has_gems", False)
-        from_cache   = export_dict.get("_brnzybot", {}).get("from_cache", False)
+        json_bytes = json.dumps(export_dict, indent=2).encode("utf-8")
+        filename = f"{display.lower()}_{resolved_spec}_p{phase}_sim.json"
+        file = discord.File(fp=io.BytesIO(json_bytes), filename=filename)
 
         lines = [f"**WowSims export — {display} ({resolved_spec})**"]
         lines.append("Import at <https://wowsims.github.io/tbc/>  →  Settings → Import")

@@ -504,12 +504,12 @@ def _build_items(gear: list) -> list[dict]:
 # ---------------------------------------------------------------------------
 
 def build_simexport(snapshot, spec: str, guild_id: str,
-                    phase_override: int | None = None) -> dict:
+                    phase_override: int | None = None) -> tuple[dict, dict]:
     """
     Build a wowsims-compatible settings dict from a GearSnapshot.
 
-    Returns a dict ready for json.dumps(). Talent string is left blank —
-    user fills it in wowsims after import.
+    Returns (export_dict, meta) where export_dict is pure wowsims JSON
+    (no unknown keys) and meta carries warnings for the Discord message.
     """
     phase       = phase_override if phase_override is not None else get_guild_phase(guild_id)
     faction_str = "Alliance" if snapshot.faction == 1 else "Horde"
@@ -520,6 +520,13 @@ def build_simexport(snapshot, spec: str, guild_id: str,
 
     has_enchants = any(item.get("enchant") for item in snapshot.gear)
     has_gems     = any(item.get("gems")    for item in snapshot.gear)
+
+    meta = {
+        "phase":       phase,
+        "from_cache":  snapshot.from_cache,
+        "has_enchants": has_enchants,
+        "has_gems":    has_gems,
+    }
 
     player = {
         "name":      snapshot.character,
@@ -540,20 +547,6 @@ def build_simexport(snapshot, spec: str, guild_id: str,
     }
 
     return {
-        "_brnzybot": {
-            "character":   snapshot.character,
-            "spec":        spec,
-            "phase":       phase,
-            "from_cache":  snapshot.from_cache,
-            "has_enchants": has_enchants,
-            "has_gems":    has_gems,
-            "note": (
-                "Talent string is blank — paste yours into wowsims after import. "
-                "Buffs/consumes are spec defaults; adjust as needed."
-                + ("" if has_enchants else " Enchant data unavailable (cached snapshot) — add manually.")
-                + ("" if has_gems     else " Gem data unavailable (cached snapshot) — add manually.")
-            ),
-        },
         "settings": {
             "iterations": 3000,
             "phase":      phase,
@@ -585,4 +578,4 @@ def build_simexport(snapshot, spec: str, guild_id: str,
             }],
         },
         "epWeights": _ep_array(spec),
-    }
+    }, meta

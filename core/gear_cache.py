@@ -489,15 +489,22 @@ def _fetch_from_wcl(name: str, realm: str, spec: str, region: str,
             if slot == "Wand" and row and row[3] in ("Ranged", "Totem"):
                 slot = row[3]
 
+            enchant = gear_item.get("permanentEnchant", 0) or 0
+            gems    = [g["id"] for g in gear_item.get("gems", [])
+                       if isinstance(g, dict) and g.get("id", 0)]
+
             gear.append({
                 "slot":     slot,
                 "item_id":  item_id,
                 "name":     item_name,
                 "stats":    stats,
                 "set_name": set_name or "",
+                "enchant":  enchant,
+                "gems":     gems,
             })
 
         combat_stats = {k: event.get(k, 0) for k in ["hitSpell", "hitMelee", "hitRanged", "critSpell", "hasteSpell"]}
+        combat_stats["race"] = event.get("race", 0)
         faction = event.get("faction", -1)
 
         return GearSnapshot(

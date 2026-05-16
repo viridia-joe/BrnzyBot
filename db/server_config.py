@@ -16,6 +16,7 @@ from __future__ import annotations
 import json
 import os
 import sqlite3
+import time
 from contextlib import contextmanager
 from datetime import datetime, timedelta
 from typing import Optional
@@ -46,6 +47,8 @@ _MIGRATIONS = [
     "ALTER TABLE guild_config ADD COLUMN current_phase INTEGER NOT NULL DEFAULT 1",
     "ALTER TABLE guild_config ADD COLUMN interest_threshold INTEGER NOT NULL DEFAULT 5",
     "ALTER TABLE server_config ADD COLUMN recap_channel_id TEXT",
+    "ALTER TABLE guild_config ADD COLUMN officer_role_id TEXT",
+    "ALTER TABLE guild_config ADD COLUMN botduel_log_channel_id TEXT",
 ]
 
 
@@ -395,7 +398,8 @@ def delete_guild_data(guild_id: str, path: str = DB_PATH) -> None:
     """Hard-delete all stored data for a guild."""
     with _conn(path) as conn:
         for table in ("server_config", "guild_config", "characters",
-                      "pending_intents", "usage_log", "subscriptions", "user_weights"):
+                      "pending_intents", "usage_log", "subscriptions", "user_weights",
+                      "duels", "gold_ledger"):
             conn.execute(f"DELETE FROM {table} WHERE guild_id=?", (guild_id,))
 
 
@@ -423,3 +427,176 @@ def purge_expired_intents(path: str = DB_PATH) -> int:
             "DELETE FROM pending_intents WHERE expires_at <= ?", (now,)
         )
     return cur.rowcount
+
+
+# ---------------------------------------------------------------------------
+# BotDuel — guild config extras
+# ---------------------------------------------------------------------------
+
+def set_officer_role(guild_id: str, role_id: str, path: str = DB_PATH) -> None:
+    with _conn(path) as conn:
+        conn.execute(
+            """INSERT INTO guild_config (guild_id, officer_role_id) VALUES (?, ?)
+               ON CONFLICT (guild_id) DO UPDATE SET officer_role_id=excluded.officer_role_id""",
+            (guild_id, role_id),
+        )
+
+
+def get_officer_role(guild_id: str, path: str = DB_PATH) -> Optional[str]:
+    with _conn(path) as conn:
+        row = conn.execute(
+            "SELECT officer_role_id FROM guild_config WHERE guild_id=?", (guild_id,)
+        ).fetchone()
+    return row["officer_role_id"] if row else None
+
+
+def set_botduel_log_channel(guild_id: str, channel_id: str, path: str = DB_PATH) -> None:
+    with _conn(path) as conn:
+        conn.execute(
+            """INSERT INTO guild_config (guild_id, botduel_log_channel_id) VALUES (?, ?)
+               ON CONFLICT (guild_id) DO UPDATE SET botduel_log_channel_id=excluded.botduel_log_channel_id""",
+            (guild_id, channel_id),
+        )
+
+
+def get_botduel_log_channel(guild_id: str, path: str = DB_PATH) -> Optional[str]:
+    with _conn(path) as conn:
+        row = conn.execute(
+            "SELECT botduel_log_channel_id FROM guild_config WHERE guild_id=?", (guild_id,)
+        ).fetchone()
+    return row["botduel_log_channel_id"] if row else None
+
+
+# ---------------------------------------------------------------------------
+# BotDuel — duel lifecycle
+# ---------------------------------------------------------------------------
+
+def create_duel(
+    guild_id: str,
+    challenger: str,
+    opponent: str,
+    gold_stake: int,
+    created_at: int,
+    expires_at: int,
+    path: str = DB_PATH,
+) -> int:
+    with _conn(path) as conn:
+        cur = conn.execute(
+            """INSERT INTO duels (guild_id, challenger, opponent, gold_stake, created_at, expires_at)
+               VALUES (?, ?, ?, ?, ?, ?)""",
+            (guild_id, challenger, opponent, gold_stake, created_at, expires_at),
+        )
+        return cur.lastrowid
+
+
+def get_duel(duel_id: int, guild_id: Optional[str] = None, path: str = DB_PATH) -> Optional[dict]:
+    with _conn(path) as conn:
+        if guild_id:
+            row = conn.execute(
+                "SELECT * FROM duels WHERE id=? AND guild_id=?", (duel_id, guild_id)
+            ).fetchone()
+        else:
+            row = conn.execute("SELECT * FROM duels WHERE id=?", (duel_id,)).fetchone()
+    return dict(row) if row else None
+
+
+def update_duel(duel_id: int, path: str = DB_PATH, **fields) -> None:
+    if not fields:
+        return
+    set_clause = ", ".join(f"{k}=?" for k in fields)
+    values = list(fields.values()) + [duel_id]
+    with _conn(path) as conn:
+        conn.execute(f"UPDATE duels SET {set_clause} WHERE id=?", values)
+
+
+def get_open_duels(
+    guild_id: str,
+    user_id: Optional[str] = None,
+    status: Optional[str] = None,
+    path: str = DB_PATH,
+) -> list[dict]:
+    terminal = ("completed", "declined", "expired")
+    with _conn(path) as conn:
+        if status:
+            if user_id:
+                rows = conn.execute(
+                    """SELECT * FROM duels WHERE guild_id=? AND status=?
+                       AND (challenger=? OR opponent=?) ORDER BY id DESC""",
+                    (guild_id, status, user_id, user_id),
+                ).fetchall()
+            else:
+                rows = conn.execute(
+                    "SELECT * FROM duels WHERE guild_id=? AND status=? ORDER BY id DESC",
+                    (guild_id, status),
+                ).fetchall()
+        elif user_id:
+            rows = conn.execute(
+                """SELECT * FROM duels WHERE guild_id=? AND status NOT IN (?,?,?)
+                   AND (challenger=? OR opponent=?) ORDER BY id DESC""",
+                (guild_id, *terminal, user_id, user_id),
+            ).fetchall()
+        else:
+            rows = conn.execute(
+                "SELECT * FROM duels WHERE guild_id=? AND status NOT IN (?,?,?) ORDER BY id DESC",
+                (guild_id, *terminal),
+            ).fetchall()
+    return [dict(r) for r in rows]
+
+
+# ---------------------------------------------------------------------------
+# BotDuel — gold ledger
+# ---------------------------------------------------------------------------
+
+def add_ledger_entry(
+    guild_id: str,
+    user_id: str,
+    delta: int,
+    reason: str,
+    duel_id: Optional[int] = None,
+    path: str = DB_PATH,
+) -> None:
+    now = int(time.time())
+    with _conn(path) as conn:
+        conn.execute(
+            """INSERT INTO gold_ledger (guild_id, user_id, delta, reason, duel_id, created_at)
+               VALUES (?, ?, ?, ?, ?, ?)""",
+            (guild_id, user_id, delta, reason, duel_id, now),
+        )
+
+
+def get_gold_balance(guild_id: str, user_id: str, path: str = DB_PATH) -> int:
+    with _conn(path) as conn:
+        row = conn.execute(
+            "SELECT COALESCE(SUM(delta), 0) AS bal FROM gold_ledger WHERE guild_id=? AND user_id=?",
+            (guild_id, user_id),
+        ).fetchone()
+    return row["bal"] if row else 0
+
+
+def get_leaderboard(guild_id: str, limit: int = 10, path: str = DB_PATH) -> list[dict]:
+    with _conn(path) as conn:
+        rows = conn.execute(
+            """SELECT user_id, SUM(delta) AS net_gold
+               FROM gold_ledger WHERE guild_id=?
+               GROUP BY user_id ORDER BY net_gold DESC LIMIT ?""",
+            (guild_id, limit),
+        ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def get_player_record(guild_id: str, user_id: str, path: str = DB_PATH) -> dict:
+    with _conn(path) as conn:
+        wins = conn.execute(
+            "SELECT COUNT(*) AS n FROM duels WHERE guild_id=? AND winner=? AND status='completed'",
+            (guild_id, user_id),
+        ).fetchone()["n"]
+        total = conn.execute(
+            """SELECT COUNT(*) AS n FROM duels
+               WHERE guild_id=? AND status='completed' AND (challenger=? OR opponent=?)""",
+            (guild_id, user_id, user_id),
+        ).fetchone()["n"]
+        bal_row = conn.execute(
+            "SELECT COALESCE(SUM(delta), 0) AS bal FROM gold_ledger WHERE guild_id=? AND user_id=?",
+            (guild_id, user_id),
+        ).fetchone()
+    return {"wins": wins, "losses": total - wins, "net_gold": bal_row["bal"]}

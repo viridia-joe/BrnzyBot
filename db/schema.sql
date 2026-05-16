@@ -76,3 +76,40 @@ CREATE TABLE IF NOT EXISTS pending_intents (
     expires_at      TEXT NOT NULL,   -- ISO8601; stale entries are ignored
     created_at      TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+-- ---------------------------------------------------------------------------
+-- BotDuel — Crashin' Thrashin' Robot betting system
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS duels (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id     TEXT    NOT NULL,
+    challenger   TEXT    NOT NULL,   -- Discord user ID
+    opponent     TEXT    NOT NULL,   -- Discord user ID
+    gold_stake   INTEGER NOT NULL DEFAULT 0,
+    -- pending | active | pending_confirm | completed | declined | expired | disputed
+    status       TEXT    NOT NULL DEFAULT 'pending',
+    winner       TEXT,               -- Discord user ID; NULL until resolved
+    reported_by  TEXT,               -- user ID who called /botduel result
+    confirmed_by TEXT,               -- user ID who confirmed (or admin who resolved)
+    message_id   TEXT,               -- Discord message ID of the challenge post
+    channel_id   TEXT,               -- channel the challenge was posted in
+    created_at   INTEGER NOT NULL,   -- Unix timestamp
+    expires_at   INTEGER NOT NULL,   -- challenge expiry (Unix timestamp)
+    resolved_at  INTEGER             -- when completed/declined/expired (Unix)
+);
+
+CREATE INDEX IF NOT EXISTS idx_duels_guild_status ON duels (guild_id, status);
+CREATE INDEX IF NOT EXISTS idx_duels_participants ON duels (guild_id, challenger, opponent);
+
+CREATE TABLE IF NOT EXISTS gold_ledger (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id   TEXT    NOT NULL,
+    user_id    TEXT    NOT NULL,   -- Discord user ID
+    delta      INTEGER NOT NULL,   -- positive = gained, negative = lost
+    reason     TEXT    NOT NULL,   -- 'duel_win' | 'duel_loss' | 'admin_adjust: <text>'
+    duel_id    INTEGER,            -- FK -> duels.id; NULL for admin adjustments
+    created_at INTEGER NOT NULL    -- Unix timestamp
+);
+
+CREATE INDEX IF NOT EXISTS idx_gold_ledger_user ON gold_ledger (guild_id, user_id);

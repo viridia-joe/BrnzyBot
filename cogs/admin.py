@@ -33,9 +33,11 @@ from db.server_config import (
     list_characters,
     log_usage,
     remove_character,
+    set_botduel_log_channel,
     set_guild_config,
     set_guild_phase,
     get_guild_phase,
+    set_officer_role,
     set_response_target,
     set_verbosity,
 )
@@ -103,6 +105,36 @@ class AdminCog(commands.Cog, name="Admin"):
         await interaction.response.send_message(
             f"Content phase set to **Phase {phase}**. "
             "Gear recommendations will now filter by phase-appropriate sources.",
+            ephemeral=True,
+        )
+
+    @setup_group.command(
+        name="officerole",
+        description="Set the officer role used for CTR duel dispute resolution.",
+    )
+    @app_commands.describe(role="Role that can resolve disputed duels and adjust gold balances")
+    @_require_manage_guild()
+    async def setup_officerole(
+        self, interaction: discord.Interaction, role: discord.Role
+    ) -> None:
+        set_officer_role(str(interaction.guild_id), str(role.id))
+        await interaction.response.send_message(
+            f"Officer role for duel disputes set to {role.mention}.",
+            ephemeral=True,
+        )
+
+    @setup_group.command(
+        name="botduellog",
+        description="Set the channel where CTR duel results are logged for bragging rights.",
+    )
+    @app_commands.describe(channel="Channel that will receive all duel history")
+    @_require_manage_guild()
+    async def setup_botduellog(
+        self, interaction: discord.Interaction, channel: discord.TextChannel
+    ) -> None:
+        set_botduel_log_channel(str(interaction.guild_id), str(channel.id))
+        await interaction.response.send_message(
+            f"CTR duel log channel set to {channel.mention}.",
             ephemeral=True,
         )
 

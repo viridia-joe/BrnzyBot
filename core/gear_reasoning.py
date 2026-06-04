@@ -410,7 +410,13 @@ def annotate(skeleton: str, context: GearContext, node_status=None,
 
     The skeleton contains all decisions (what to upgrade, in what order, exact EP).
     The LLM adds prose: source locations, crafting notes, strategic observations.
+
+    When the LLM layer is disabled, the skeleton IS the answer — every decision is
+    already deterministic, so we return it directly with a header.
     """
+    if not config.ENABLE_LLM:
+        return f"**Gear Upgrade Priority — {context.character}**\n\n{skeleton}"
+
     context_block = context.to_prompt_block(phase=phase)
     msgs          = _annotator_prompt(skeleton, context_block)
 

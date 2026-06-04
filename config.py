@@ -69,6 +69,24 @@ STRATEGY_DATA_DIR = os.path.join(REPO_DATA_DIR, "strategy")
 # ---------------------------------------------------------------------------
 # LiteLLM / inference
 # ---------------------------------------------------------------------------
+
+def _envflag(name: str, default: bool = False) -> bool:
+    """Parse a boolean-ish environment variable."""
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in ("1", "true", "yes", "on")
+
+
+# Master switch for every LLM-backed feature. When False (the default), the bot
+# runs in deterministic-only mode: the gear optimizer, gear lists, strategy
+# lookups, and boss-guide templates all work without contacting any model, and
+# nothing reaches out to LiteLLM / the GPU fleet. This is the default for the
+# resource-constrained GCP e2-micro deployment. Flip ENABLE_LLM=true (and start
+# the litellm container with `docker compose --profile llm up -d`) to restore the
+# conversational layer.
+ENABLE_LLM: bool = _envflag("ENABLE_LLM", False)
+
 LITELLM_BASE_URL: str = os.environ.get("LITELLM_BASE_URL", "http://10.0.0.186:4000")
 LITELLM_API_KEY:  str = os.environ.get("LITELLM_API_KEY", "sk-1234")
 
@@ -77,6 +95,9 @@ MODEL_TRIAGE:     str = os.environ.get("MODEL_TRIAGE",     "ollama/qwen2.5:14b")
 MODEL_GEAR_GEN:   str = os.environ.get("MODEL_GEAR_GEN",   "gear-generator")
 MODEL_GEAR_CRITIC:str = os.environ.get("MODEL_GEAR_CRITIC","gear-critic")
 MODEL_ESCALATION: str = os.environ.get("MODEL_ESCALATION", "gear-escalation")
+
+# Back-compat alias used by the legacy core/triage.py path.
+OLLAMA_MODEL:     str = os.environ.get("OLLAMA_MODEL", MODEL_TRIAGE)
 
 
 # ---------------------------------------------------------------------------

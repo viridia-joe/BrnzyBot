@@ -165,8 +165,9 @@ class StrategyContext:
         if phases:
             lines += ["", "### Phases"]
             for p in phases:
+                pname = p.get("name") or f"Phase {p.get('number', '')}"
                 lines.append(
-                    f"**{p.get('name', f'Phase {p[\"number\"]}')} "
+                    f"**{pname} "
                     f"({p.get('hp_range', '')}):** {p.get('description', '')}"
                 )
 

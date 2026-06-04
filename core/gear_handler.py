@@ -216,7 +216,7 @@ def handle_gear_question(
         character, spec, len(priority), context.hit_cap.status,
     )
 
-    node_status = check_nodes(post_alerts=False)
+    node_status = check_nodes(post_alerts=False) if config.ENABLE_LLM else None
     return annotate(skeleton, context, node_status=node_status, phase=phase)
 
 

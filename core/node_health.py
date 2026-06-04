@@ -173,6 +173,12 @@ def check_nodes(post_alerts: bool = True) -> NodeStatus:
     Poll all nodes and return a NodeStatus.
     If post_alerts=True, posts Discord messages for any unavailable nodes.
     """
+    # Deterministic mode: the GPU fleet is irrelevant when the LLM layer is off.
+    # Skip polling entirely — the nodes live on a LAN that isn't routable from
+    # the cloud host, so each poll would just burn its full timeout.
+    if not config.ENABLE_LLM:
+        return NodeStatus()
+
     status = NodeStatus()
     alerts = []
 

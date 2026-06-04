@@ -353,25 +353,35 @@ Only use "unknown" if the message has nothing to do with WoW or raiding.
 
 def triage_with_llm(text: str, source: str = "nl") -> Intent:
     """
-    Use local LLM to extract intent from natural language.
-    Falls back to Intent.unknown() on any failure.
+    Use the configured LLM to extract intent from natural language.
+    Talks to the LiteLLM proxy over plain HTTP (OpenAI-compatible) — no heavy
+    SDK dependency. Falls back to Intent.unknown() on any failure.
     """
     try:
-        import litellm  # type: ignore
+        import json as _json
+        import urllib.request
         import config
 
-        response = litellm.completion(
-            model=config.MODEL_TRIAGE,
-            api_base=config.LITELLM_BASE_URL,
-            api_key=config.LITELLM_API_KEY,
-            messages=[
+        payload = {
+            "model":       config.MODEL_TRIAGE,
+            "messages":    [
                 {"role": "system", "content": _TRIAGE_SYSTEM},
                 {"role": "user", "content": text},
             ],
-            max_tokens=256,
-            temperature=0.1,
+            "max_tokens":  256,
+            "temperature": 0.1,
+        }
+        headers = {"Content-Type": "application/json"}
+        if config.LITELLM_API_KEY:
+            headers["Authorization"] = f"Bearer {config.LITELLM_API_KEY}"
+
+        url = f"{config.LITELLM_BASE_URL}/chat/completions"
+        req = urllib.request.Request(
+            url, data=_json.dumps(payload).encode(), headers=headers, method="POST"
         )
-        raw = response.choices[0].message.content.strip()
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            response = _json.loads(resp.read())
+        raw = response["choices"][0]["message"]["content"].strip()
 
         # Strip markdown code fences if present
         raw = re.sub(r"^```(?:json)?\s*", "", raw)
@@ -411,8 +421,12 @@ def classify(text: str, source: str = "unknown", use_llm: bool = True) -> Intent
     if intent is not None:
         return intent
 
-    # LLM triage for natural language
+    # LLM triage for natural language — only when the model layer is enabled.
     if use_llm:
+        import config
+        if not config.ENABLE_LLM:
+            log.debug("Deterministic parse failed and LLM disabled — returning unknown: %r", text[:80])
+            return Intent.unknown(raw=text, source=source)
         log.debug("Deterministic parse failed, trying LLM triage: %r", text[:80])
         return triage_with_llm(text, source=source)
 

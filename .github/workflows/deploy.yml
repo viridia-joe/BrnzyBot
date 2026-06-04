@@ -40,6 +40,9 @@ jobs:
             git fetch origin master
             git reset --hard origin/master
 
+            # Restore secrets file (lives outside repo, survives deploys)
+            cp ~/brnzybot.env ~/brnzybot-git/.env
+
             docker compose up --build -d
             echo "Deploy complete at $(date)"
           '

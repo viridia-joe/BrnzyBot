@@ -16,7 +16,7 @@ services:
     depends_on:
       - litellm
 
-  # ── LiteLLM proxy — routes model aliases to Claude API ───────────────────
+  # ── LiteLLM proxy — routes model aliases to Claude API ──────────────────
   # gear-triage / gear-generator / gear-critic → Claude Haiku (cheap, fast)
   # gear-escalation → Claude Sonnet (smart)
   litellm:

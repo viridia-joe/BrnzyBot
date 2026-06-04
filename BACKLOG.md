@@ -1,5 +1,23 @@
 # Backlog
 
+## Raid Audit (`/audit <warcraftlogs-url>`)
+
+**Priority:** High
+**Effort:** High (phased — Preparation-only first cut is Medium)
+
+Deterministic per-raider analysis of a WCL report, scored against a spec's
+"ideal behaviors" rubric across **Baseline / Execution / Preparation** — the
+three-section scorecard the team writes by hand today. Pulls parse %, rotation
+(flagging off-spec spells like Earth Shock for ele), activity %, movement spread,
+consumes, enchants, and gems straight from Warcraft Logs.
+
+Design + WCL data map: [`docs/RAID_AUDIT.md`](docs/RAID_AUDIT.md).
+Scaffold landed in `core/audit/` (result model, `ELE_SHAMAN` profile, pure
+checks, render). Remaining work is marked `# TODO(wcl)` in `core/audit/report.py`
+— mostly normalizing `get_combatant_info` and adding a `table(dataType: Casts)`
+query. Start with the Preparation checks (enchants/gems/consumes): highest value,
+no new WCL queries needed beyond CombatantInfo.
+
 ## Spec Override Flag
 
 **Priority:** High

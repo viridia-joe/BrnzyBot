@@ -9,57 +9,101 @@ on:
       - ".gitignore"
   workflow_dispatch:   # allow manual deploys from the Actions tab
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
+# Build the image once on GitHub's runners, then have the e2-micro just *pull*
+# it. The 1 GB VM can't reliably run `docker build` (numpy/scipy + image layers
+# repeatedly OOM-thrashed and timed out), so we keep the build off the box.
+env:
+  IMAGE: ghcr.io/${{ github.repository_owner }}/brnzybot
 
+jobs:
+  build:
+    name: Build & push image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:latest
+            ${{ env.IMAGE }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    name: Deploy to VM
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.GCE_SSH_KEY }}
 
-      - name: Add GCE host to known_hosts
+      - name: Check the VM is reachable
+        env:
+          GCE_HOST: ${{ secrets.GCE_HOST }}
         run: |
-          ssh-keyscan -H ${{ secrets.GCE_HOST }} >> ~/.ssh/known_hosts
+          if ! timeout 6 bash -c "</dev/tcp/${GCE_HOST}/22" 2>/dev/null; then
+            echo "::error::GCE VM is not reachable on port 22 — is the 'brnzybot' instance RUNNING? See docs/DEPLOYMENT.md."
+            exit 1
+          fi
+          mkdir -p ~/.ssh
+          ssh-keyscan -H "${GCE_HOST}" >> ~/.ssh/known_hosts 2>/dev/null || true
 
-      - name: Deploy
+      - name: Deploy (pull prebuilt image)
         env:
           GCE_HOST: ${{ secrets.GCE_HOST }}
           GCE_USER: ${{ secrets.GCE_USER }}
         run: |
-          ssh ${GCE_USER}@${GCE_HOST} '
-            set -e
+          ssh "${GCE_USER}@${GCE_HOST}" bash -s <<EOF
+          set -e
 
-            # First-time setup: clone the repo if it is not already a git repo
-            if [ ! -d ~/brnzybot-git/.git ]; then
-              rm -rf ~/brnzybot-git
-              git clone https://github.com/viridia-joe/BrnzyBot.git ~/brnzybot-git
-            fi
+          # Keep the repo checkout in sync (compose file, litellm config, etc.)
+          if [ ! -d ~/brnzybot-git/.git ]; then
+            rm -rf ~/brnzybot-git
+            git clone https://github.com/viridia-joe/BrnzyBot.git ~/brnzybot-git
+          fi
+          cd ~/brnzybot-git
+          git fetch origin master
+          git reset --hard origin/master
 
-            cd ~/brnzybot-git
-            git fetch origin master
-            git reset --hard origin/master
+          # Restore secrets (live outside the repo, survive deploys)
+          if [ ! -f ~/brnzybot.env ]; then
+            echo "ERROR: ~/brnzybot.env is missing on the VM. Create it from .env.example."
+            exit 1
+          fi
+          cp ~/brnzybot.env ~/brnzybot-git/.env
 
-            # Restore secrets file (lives outside repo, survives deploys)
-            if [ ! -f ~/brnzybot.env ]; then
-              echo "ERROR: ~/brnzybot.env is missing on the VM. Create it with the"
-              echo "required secrets (see .env.example) before deploying."
-              exit 1
-            fi
-            cp ~/brnzybot.env ~/brnzybot-git/.env
-
-            # Deterministic mode (default): only the bot is built/started. To run
-            # the optional LLM proxy, set ENABLE_LLM=true and use --profile llm.
-            docker compose up --build -d
-            echo "Deploy complete at $(date)"
-          '
+          # Pull the freshly built image and (re)start — no build on the box.
+          echo '${{ secrets.GITHUB_TOKEN }}' | docker login ghcr.io -u '${{ github.actor }}' --password-stdin
+          export BRNZYBOT_IMAGE='${{ env.IMAGE }}:${{ github.sha }}'
+          docker compose pull
+          docker compose up -d
+          docker image prune -f
+          echo "Deploy complete"
+          EOF
 
       - name: Verify health
         env:
           GCE_HOST: ${{ secrets.GCE_HOST }}
           GCE_USER: ${{ secrets.GCE_USER }}
         run: |
-          sleep 15
-          ssh ${GCE_USER}@${GCE_HOST} 'curl -sf http://localhost:8081/health && echo " bot OK"'
+          sleep 10
+          ssh "${GCE_USER}@${GCE_HOST}" 'curl -sf http://localhost:8081/health && echo " bot OK"'

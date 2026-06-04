@@ -30,8 +30,9 @@ jobs:
           ssh ${GCE_USER}@${GCE_HOST} '
             set -e
 
-            # First-time setup: clone the repo if it does not exist yet
+            # First-time setup: clone the repo if it is not already a git repo
             if [ ! -d ~/brnzybot-git/.git ]; then
+              rm -rf ~/brnzybot-git
               git clone https://github.com/viridia-joe/BrnzyBot.git ~/brnzybot-git
             fi
 

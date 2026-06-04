@@ -12,3 +12,11 @@ venv/
 b64_*.txt
 brnzybot_b64.txt
 brnzybot_plan_revised.txt
+
+# Terraform state and local config (never commit these)
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/terraform.tfstate.*.backup
+terraform/*.tfvars

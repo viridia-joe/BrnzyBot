@@ -1,0 +1,53 @@
+services:
+
+  # ── Discord bot ────────────────────────────────────────────────────────────
+  brnzybot:
+    build: .
+    restart: unless-stopped
+    environment:
+      # Point to the litellm sidecar instead of the local LAN proxy.
+      # These override any values in .env for this service only.
+      - LITELLM_BASE_URL=http://litellm:4000
+      - LITELLM_API_KEY=sk-brnzybot
+      # Route the triage model through the proxy alias (not the raw ollama:// name)
+      - MODEL_TRIAGE=gear-triage
+    env_file:
+      - .env
+    volumes:
+      - /home/brnz/openclaw-data:/root/.openclaw/data
+      - /home/brnz/openclaw-logs:/root/.openclaw/logs
+    depends_on:
+      - litellm
+
+  # ── Stripe webhook server ─────────────────────────────────────────────────
+  brnzybot-webhook:
+    build: .
+    restart: unless-stopped
+    command: python webhook_server.py
+    env_file:
+      - .env
+    volumes:
+      - /home/brnz/openclaw-data:/root/.openclaw/data
+      - /home/brnz/openclaw-logs:/root/.openclaw/logs
+
+  # ── LiteLLM proxy — routes model aliases to Claude API ───────────────────
+  # gear-triage / gear-generator / gear-critic → Claude Haiku (cheap, fast)
+  # gear-escalation → Claude Sonnet (smart)
+  litellm:
+    image: ghcr.io/berriai/litellm:main-latest
+    restart: unless-stopped
+    command: --config /app/litellm_config.yaml --port 4000 --host 0.0.0.0
+    volumes:
+      - ./litellm_config.yaml:/app/litellm_config.yaml:ro
+    env_file:
+      - .env
+
+  # ── Cloudflare Tunnel — exposes webhook to Stripe without opening firewall ports
+  cloudflare-tunnel:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    # CF_TUNNEL_TOKEN comes from .env
+    # The tunnel is configured in Cloudflare Zero Trust to route to brnzybot-webhook:8080
+    command: tunnel --no-autoupdate run --token ${CF_TUNNEL_TOKEN}
+    depends_on:
+      - brnzybot-webhook

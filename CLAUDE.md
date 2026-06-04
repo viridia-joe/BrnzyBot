@@ -98,10 +98,11 @@ the flag or it adds seconds of timeout latency to every gear/strategy command.
   python3 -m compileall -q .
   ```
   If you add tests, put them under `tests/` and wire them into `ci.yml`.
-- **Deploy:** pushing to `master` triggers `.github/workflows/deploy.yml`, which
-  SSHes to the GCE VM and runs `docker compose up --build -d`. The health step
-  curls `localhost:8081/health`. Deploy can also be run manually via the Actions
-  "Run workflow" button (`workflow_dispatch`).
+- **Deploy:** pushing to `master` triggers `.github/workflows/deploy.yml`. It
+  builds the image on GitHub's runners, pushes it to GHCR, then SSHes to the GCE
+  VM and `docker compose pull && up -d` (the 1 GB box never runs `docker build`).
+  The health step curls `localhost:8081/health`. Can also be run manually via the
+  Actions "Run workflow" button (`workflow_dispatch`).
 
 ## Conventions
 

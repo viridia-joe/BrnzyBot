@@ -2,6 +2,10 @@ services:
 
   # ── Discord bot ────────────────────────────────────────────────────────────
   brnzybot:
+    # In production the CI pipeline builds and pushes this image to GHCR and the
+    # VM pulls it (BRNZYBOT_IMAGE is set to the :<sha> tag by the deploy job).
+    # Locally, `docker compose up --build` builds it from this directory instead.
+    image: ${BRNZYBOT_IMAGE:-ghcr.io/viridia-joe/brnzybot:latest}
     build: .
     restart: unless-stopped
     environment:

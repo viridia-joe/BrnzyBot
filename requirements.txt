@@ -7,11 +7,11 @@ discord.py>=2.3.0
 scipy>=1.11.0
 numpy>=1.24.0
 
-# LLM routing (LiteLLM talks to local Ollama cluster + Claude escalation)
-litellm>=1.30.0
-
 # Boss guide position diagram generation
 Pillow>=10.0.0
+
+# NOTE: the optional LLM layer (ENABLE_LLM=true) talks to the LiteLLM proxy
+# container over plain HTTP, so no LLM SDK is needed in the bot image itself.
 
 # Already in stdlib — listed for documentation
 # sqlite3

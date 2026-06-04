@@ -220,6 +220,8 @@ def _build_assignment_prompt(entry: BossEntry, roster: dict) -> str:
 
 def _generate_assignments(entry: BossEntry, roster: dict) -> str:
     """Call Claude to produce formatted WoW assignments."""
+    if not config.ENABLE_LLM:
+        return _fallback_template(entry)
     prompt = _build_assignment_prompt(entry, roster)
     try:
         raw = _call_llm(
@@ -276,7 +278,8 @@ def _fallback_template(entry: BossEntry) -> str:
         f"{entry.raid} · Boss {entry.boss_num}\n\n"
         f"TANKS\n{tank_lines}\n\n"
         f"HEALS\n  [Healer 1]  [Healer 2]  [Healer 3]\n\n"
-        f"(Assignment generation unavailable — check bot logs)"
+        f"_Template assignments — fill in the placeholders. "
+        f"AI roster auto-assignment is currently off._"
     )
 
 
@@ -310,9 +313,9 @@ def handle_bossguide(boss_name: str,
     entry = BOSS_DATA[boss_key]
     log.info("bossguide: %s (image=%s)", boss_key, image_bytes is not None)
 
-    # Parse roster image if provided
+    # Parse roster image if provided (requires Claude Vision — LLM-only).
     roster: dict = {}
-    if image_bytes:
+    if image_bytes and config.ENABLE_LLM:
         roster = _parse_roster_image(image_bytes)
         log.info("bossguide roster parse: tanks=%s healers=%s dps=%s",
                  roster.get("tanks"), roster.get("healers"), roster.get("dps"))

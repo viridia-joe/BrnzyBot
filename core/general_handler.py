@@ -100,6 +100,17 @@ def handle_general_question(question: str, guild_id: str = "") -> str:
     Enriches with gear or strategy context when detectable.
     Returns a Discord-ready string.
     """
+    import config
+    if not config.ENABLE_LLM:
+        return (
+            "Open-ended Q&A is powered by an AI model that's currently switched off "
+            "to save resources. I can still help with these commands:\n"
+            "• `/gearprio <character>` — prioritized upgrade list\n"
+            "• `/gearcheck <character>` — head-to-toe gear vs BiS\n"
+            "• `/strat <boss>` — boss strategy and mechanics\n"
+            "• `/bossguide <boss>` — raid assignment template + position diagram"
+        )
+
     context_parts = []
 
     # Try to find a character context

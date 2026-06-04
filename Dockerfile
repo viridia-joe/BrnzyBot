@@ -2,11 +2,9 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# scipy/numpy need these at build time on slim
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc \
-    && rm -rf /var/lib/apt/lists/*
-
+# numpy / scipy / Pillow / discord.py all ship manylinux wheels for cp311, so
+# nothing is compiled from source — no build toolchain needed. This keeps the
+# image small and the build fast enough to finish on a free-tier e2-micro.
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 

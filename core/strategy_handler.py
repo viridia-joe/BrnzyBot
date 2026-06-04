@@ -6,15 +6,15 @@ Returns a string — never posts to Discord directly.
 
 Pipeline:
   strategy_context (DB lookup + deterministic render)
-  → gear_reasoning._escalate (Claude with context as ground truth)
+  → if ENABLE_LLM: Claude narrates the context block via LiteLLM
+    else:          return the deterministic context block directly
   → str
 """
 
 import logging
 
+import config
 from core.strategy_context import get_strategy_context
-from core.gear_reasoning import _escalate, GENERATOR_SYSTEM
-from core.node_health import check_nodes
 
 log = logging.getLogger(__name__)
 
@@ -39,6 +39,15 @@ Keep answers under 400 words unless the question requires detail across multiple
 """
 
 
+def _render_deterministic(context_block: str) -> str:
+    """
+    Turn the strategy context block into a Discord-ready answer without a model.
+    The block is already structured markdown (Discord renders ## headers), so we
+    just strip the prompt-oriented "Strategy Context:" framing from the title.
+    """
+    return context_block.replace("## Strategy Context: ", "## ", 1)
+
+
 def handle_strategy_question(question: str) -> str:
     """
     Run the strategy pipeline for a given question.
@@ -53,7 +62,11 @@ def handle_strategy_question(question: str) -> str:
             "Currently I cover: **Karazhan**, **Gruul's Lair**, and **Magtheridon**."
         )
 
-    node_status = check_nodes(post_alerts=False)
+    # Deterministic mode: the strategy context block is already a complete,
+    # human-readable boss writeup (summary, phases, abilities, strategy variants,
+    # role notes). Return it directly instead of having a model narrate it.
+    if not config.ENABLE_LLM:
+        return _render_deterministic(context_block)
 
     prompt_parts = [context_block, "", f"**Question:** {question}"]
     messages = [

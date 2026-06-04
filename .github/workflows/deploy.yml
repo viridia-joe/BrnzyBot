@@ -5,7 +5,9 @@ on:
     branches: [master]
     paths-ignore:
       - "*.md"
+      - "docs/**"
       - ".gitignore"
+  workflow_dispatch:   # allow manual deploys from the Actions tab
 
 jobs:
   deploy:
@@ -41,8 +43,15 @@ jobs:
             git reset --hard origin/master
 
             # Restore secrets file (lives outside repo, survives deploys)
+            if [ ! -f ~/brnzybot.env ]; then
+              echo "ERROR: ~/brnzybot.env is missing on the VM. Create it with the"
+              echo "required secrets (see .env.example) before deploying."
+              exit 1
+            fi
             cp ~/brnzybot.env ~/brnzybot-git/.env
 
+            # Deterministic mode (default): only the bot is built/started. To run
+            # the optional LLM proxy, set ENABLE_LLM=true and use --profile llm.
             docker compose up --build -d
             echo "Deploy complete at $(date)"
           '

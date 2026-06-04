@@ -1,150 +1,144 @@
-# TBC Gear Advisor for OpenClaw
+# BrnzyBot
 
-A local-first World of Warcraft TBC gear and strategy advisory system for [OpenClaw](https://github.com/openclaw/openclaw) bots. Computes EP-based upgrade recommendations from a local item database, with current gear pulled from Warcraft Logs. Includes boss strategy guides for all Phase 1 content.
+A Discord bot for World of Warcraft **TBC Classic** raid teams. It computes
+EP-based gear recommendations from a local item database, pulls live gear from
+Warcraft Logs, serves boss strategies, generates raid assignments, and runs a
+few guild utilities (subscriptions, a 1v1 betting minigame).
 
-**Zero API cost for routine queries.** All gear data and boss strategies are local. External calls (WCL API) only happen on gear refresh — max 3 requests, max 1x/day.
+The bot is **deterministic-first**: every core command runs on local data
+(SQLite + a MIP optimizer) with no LLM in the loop. An optional conversational
+layer (natural-language routing, free-form Q&A, AI raid assignments) can be
+switched on with a single flag. See [Runtime modes](#runtime-modes).
 
-## What It Does
+> **Maintained by code assistants.** If you're an AI assistant working in this
+> repo, start with [`CLAUDE.md`](CLAUDE.md) — it has the architecture map,
+> conventions, and gotchas you need before editing.
 
-Three Discord commands, powered by local scripts — no LLM reasoning required:
+---
 
-```
-!strat <boss or raid>        — Boss strategy: abilities, what kills people, prep
-!gearcheck <character>       — Current gear with EP values from WCL
-!gearprio <character> <raid> — Top 3 upgrades available from a specific raid
-```
+## Commands
 
-## Prerequisites
+All commands are available as Discord **slash commands**; the most common ones
+also have `!` prefix aliases.
 
-- **OpenClaw** installed and running with Discord channel configured
-- **Python 3.8+** (stdlib only — no pip packages)
-- **curl** and **bash**
-- **Ollama** with **Qwen 2.5 7B** (recommended model for tool calling)
-- **Warcraft Logs v2 API client** (free — [get one here](https://www.warcraftlogs.com/api/docs))
+### Gear
+| Command | What it does |
+|---|---|
+| `/gearprio <character> [spec] [phase]` | Ranked upgrade priority list (EP-net, with source) |
+| `/gearcheck <character> [spec] [phase]` | Head-to-toe gear vs BiS, with hit-cap and set-bonus analysis |
+| `/simexport <character> [spec] [phase]` | Export a WowSims-importable JSON from the character's latest WCL gear |
 
-### Model Requirements
+### Strategy & raid
+| Command | What it does |
+|---|---|
+| `/strat <boss or question>` | Boss strategy: phases, abilities, role notes |
+| `/abilities <boss>` | List a boss's abilities and mechanics |
+| `/bossguide <boss> [roster image]` | WoW-ready `/ra` raid assignments + a position diagram |
 
-The bot needs a local model that reliably calls OpenClaw's `exec` tool:
+### Guild admin (requires *Manage Guild*)
+`/setup realm <slug> [region]`, `/setup officerole`, `/setup botduellog`,
+`/verbosity <mode> [channel]`, `/response <target> [channel]`,
+`/addchar`, `/removechar`, `/listchars`, `/listspecs`.
 
-| Model | Tool Calling | Recommended |
-|-------|-------------|-------------|
-| **Qwen 2.5 7B** | Works | **Yes** |
-| Mistral 7B | Narrates tool calls as text | No |
-| Llama 3.1 8B | Inconsistent tool invocation | No |
+### Subscriptions & data (GDPR)
+`/subscribe`, `/subscription`, `/cancel`, `/setweights`, `/myweights`,
+`/clearweights`, `/deletedata`, `/deletemydata`.
 
-## Quick Start
+### BotDuel (Crashin' Thrashin' Robot 1v1 betting)
+`/botduel challenge|accept|decline|result|confirm|dispute|status|leaderboard|record`,
+plus officer-only `/botduel resolve|adjust`.
 
-```bash
-git clone <repo-url> tbc-gear-advisor
-cd tbc-gear-advisor
-bash setup.sh
-```
+---
 
-The setup script prompts for WCL API credentials, downloads WowSims item data, builds the SQLite database, enriches items with sources from Wowhead (~15 min), and applies boss loot tables and tier token mappings.
+## Runtime modes
 
-Then copy workspace templates:
+The bot reads one master switch, **`ENABLE_LLM`** (default `false`):
 
-```bash
-cp workspace-templates/AGENTS.md ~/.openclaw/workspace/
-cp workspace-templates/SOUL.md ~/.openclaw/workspace/
-cp workspace-templates/TOOLS.md ~/.openclaw/workspace/
-cp workspace-templates/TBC.md ~/.openclaw/workspace/
-cp workspace-templates/USER.md ~/.openclaw/workspace/
-```
+- **Deterministic mode (`ENABLE_LLM=false`)** — the default, and what the
+  free-tier GCP box runs. The optimizer, gear lists, strategy lookups, and
+  boss-guide templates all work with no model and no network calls to any LLM.
+  Natural-language chat and free-form Q&A degrade to a short "use a command"
+  hint. **No `ANTHROPIC_API_KEY` and no litellm container are needed.**
+- **LLM mode (`ENABLE_LLM=true`)** — adds the conversational layer: NL intent
+  routing, free-form WoW Q&A, prose annotation on `/gearprio`, narrated
+  strategy answers, and AI-generated raid assignments (incl. roster screenshot
+  parsing). Requires the LiteLLM proxy (`docker compose --profile llm up -d`)
+  and `ANTHROPIC_API_KEY`.
 
-Edit `USER.md` with your info. Restart the bot.
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the exact LLM-dependency
+map.
 
-### Critical: Keep AGENTS.md Minimal
+---
 
-The working `AGENTS.md` is ~20 lines. This is intentional. 7B models cannot follow complex multi-page instructions. The command table must be the most prominent thing in the file. Don't bloat it.
+## Quick start (local)
 
-### Critical: Session Reset After Config Changes
-
-OpenClaw sessions persist model and tool config from session creation. After changing the model or AGENTS.md:
-
-1. Archive session files: `mv ~/.openclaw/agents/main/sessions/*.jsonl ~/.openclaw/agents/main/sessions/archived/`
-2. Reset metadata in `sessions.json`: clear `sessionFile`, set `systemSent: false`
-3. Restart: `systemctl --user restart openclaw-gateway.service`
-
-Just restarting is NOT enough.
-
-## Architecture
-
-```
-!strat Prince → LLM calls exec → strat.py reads boss_strats.json → posts to Discord
-!gearprio Thrall Kara → LLM calls exec → gearprio.py queries WCL + SQLite → posts ranked upgrades
-!gearcheck Thrall → LLM calls exec → gearcheck.py queries WCL + SQLite → posts current gear
-```
-
-The LLM's only job is recognizing the `!command` pattern and calling `exec`. All data processing happens in Python with a local SQLite database.
-
-## What's Included
-
-- **4500+ item SQLite database** with full stats from WowSims
-- **26 spec weight files** — every TBC PvE spec, all classes and roles
-- **13 boss strategies** — all Phase 1 (Karazhan, Gruul's Lair, Magtheridon's Lair)
-- **Source enrichment** — boss names, tier token mappings, crafted/rep/badge tagging
-- **Class restriction filtering** — won't recommend wrong-class tier pieces
-- **Phase awareness** — auto-detects current phase from WCL activity
-
-## Repo Structure
-
-```
-tbc-gear-advisor/
-├── scripts/
-│   ├── strat.py                # !strat — boss strategy lookup
-│   ├── gearcheck.py            # !gearcheck — current gear with EP
-│   ├── gearprio.py             # !gearprio — top upgrades from a raid
-│   ├── cmd-strat.sh            # Shell wrappers
-│   ├── cmd-gearcheck.sh
-│   ├── cmd-gearprio.sh
-│   ├── compute-upgrades.py     # Full upgrade report → GEAR-STATUS.md
-│   ├── check-phase.sh          # Detect current TBC phase
-│   ├── import-items.py         # One-time: WowSims → SQLite
-│   ├── enrich-items.py         # One-time: Wowhead source classification
-│   ├── enrich-boss-drops.py    # One-time: boss loot table mapping
-│   └── enrich-tier-tokens.py   # One-time: tier token → boss mapping
-├── data/
-│   ├── boss_strats.json        # Boss strategy database
-│   └── weights/                # 26 spec weight files
-├── hooks/
-│   └── wow-commands/           # Optional message logging hook
-├── workspace-templates/        # OpenClaw workspace files
-├── setup.sh                    # One-command setup
-└── README.md
-```
-
-## Adding a Spec
-
-Create `data/weights/<spec_name>.json`. See existing files for format. Then use: `!gearprio CharName Raid`
-
-## Adding a Boss
-
-Add an entry to `data/boss_strats.json` with name, raid, phase, type, aliases, summary, abilities, killers, prep, and tips. Then use: `!strat BossName`
-
-## When a New Phase Drops
+Requirements: **Python 3.11**, the deps in [`requirements.txt`](requirements.txt)
+(`discord.py`, `scipy`, `numpy`, `Pillow`), and a
+[Warcraft Logs v2 API client](https://www.warcraftlogs.com/api/docs).
 
 ```bash
-curl -sL "https://raw.githubusercontent.com/wowsims/tbc/master/sim/core/items/all_items.go" -o /tmp/all_items.go
-python3 scripts/import-items.py
-python3 scripts/enrich-items.py
-python3 scripts/enrich-boss-drops.py
-python3 scripts/enrich-tier-tokens.py
-# Add new bosses to data/boss_strats.json
+git clone https://github.com/viridia-joe/BrnzyBot.git
+cd BrnzyBot
+pip install -r requirements.txt
+
+cp .env.example ~/.openclaw/data/.env   # then fill in the required values
+
+# Build the local databases (item DB, strategy DB) into the data dir:
+python3 scripts/import-items.py     # → tbc_items.db
+python3 build_strategy_db.py        # → tbc_strategy.db
+
+python3 bot.py
 ```
 
-## Lessons Learned
+Required environment variables (see [`.env.example`](.env.example) for the full
+list): `DISCORD_BOT_TOKEN`, `WCL_CLIENT_ID`, `WCL_CLIENT_SECRET`. `ANTHROPIC_API_KEY`
+is only needed when `ENABLE_LLM=true`.
 
-- **7B models can't follow complex instructions.** Keep AGENTS.md to a command table and nothing else.
-- **Qwen 2.5 7B is the only tested model that reliably calls OpenClaw's exec tool.**
-- **OpenClaw sessions persist model config.** Must clear session files when changing models.
-- **OpenClaw's `before_dispatch` hook doesn't fire for user-created hooks** (as of v2026.4.2). Commands go through the LLM's exec tool, not hooks.
-- **Qwen 2.5 is bilingual and will code-switch to Chinese.** Pin English in SOUL.md.
+### Run with Docker
 
-## Dependencies
+```bash
+docker compose up --build -d                 # deterministic mode (bot only)
+docker compose --profile llm up --build -d   # also start the LiteLLM proxy
+```
 
-Python 3.8+ (stdlib only), curl, bash, Ollama, OpenClaw. No pip packages, no Docker.
+The bot exposes a liveness endpoint at `http://localhost:8081/health`.
+
+---
+
+## Deployment
+
+Production runs on a **Google Compute Engine `e2-micro`** (free tier),
+provisioned by Terraform and deployed by GitHub Actions on every push to
+`master`. The full runbook — including the one-time step of building the
+databases into the data volume — is in
+[`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
+
+---
+
+## Repository layout
+
+```
+bot.py                 — entry point: logging, health server, cog loading
+config.py              — env vars, paths, ENABLE_LLM flag, model routing
+cogs/                  — Discord command surface (one cog per feature area)
+core/                  — pure logic: optimizer, WCL client, caches, handlers
+db/                    — per-server config SQLite (schema + accessors)
+data/                  — version-controlled static data (spec weights, gems, …)
+scripts/               — one-off DB build/enrichment + standalone CLI tools
+terraform/             — GCP infrastructure (VM, static IP, firewall)
+docker-compose.yml     — bot + optional litellm proxy
+.github/workflows/     — ci.yml (checks) and deploy.yml (GCE deploy)
+docs/                  — ARCHITECTURE.md, DEPLOYMENT.md
+CLAUDE.md              — guide for code assistants maintaining this repo
+```
+
+> **Legacy:** `workspace-templates/` and `hooks/` date from an earlier design
+> where the bot ran inside [OpenClaw](https://github.com/openclaw/openclaw) with
+> a local Ollama model. The current bot is a standalone `discord.py` process and
+> does not use them. They're kept for reference; see `CLAUDE.md`.
 
 ## License
 
 MIT
+</content>
+</invoke>

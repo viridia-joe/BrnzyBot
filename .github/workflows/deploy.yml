@@ -5,7 +5,9 @@ on:
     branches: [master]
     paths-ignore:
       - "*.md"
+      - "docs/**"
       - ".gitignore"
+  workflow_dispatch:   # allow manual deploys from the Actions tab
 
 jobs:
   deploy:

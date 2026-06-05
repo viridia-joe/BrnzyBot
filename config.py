@@ -37,6 +37,13 @@ COMMAND_PREFIX: str = os.environ.get("COMMAND_PREFIX", "!")
 # When set, commands appear in this guild immediately on restart instead of waiting ~1hr.
 HOME_GUILD_ID: int | None = int(os.environ["HOME_GUILD_ID"]) if os.environ.get("HOME_GUILD_ID") else None
 
+# Dev-only: when true (set on a dev box alongside HOME_GUILD_ID), slash commands
+# sync to the home guild ONLY — instant, no ~1hr global wait. Leave false in
+# production so commands sync globally to every server. Never sync both scopes
+# for the same guild: a guild-scoped copy AND a global copy both resolve there,
+# so Discord lists every command twice (see issue #4).
+DEV_GUILD_SYNC: bool = os.environ.get("DEV_GUILD_SYNC", "").strip().lower() in ("1", "true", "yes", "on")
+
 
 # ---------------------------------------------------------------------------
 # WCL

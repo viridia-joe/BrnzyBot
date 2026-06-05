@@ -79,16 +79,28 @@ class BrnzyBot(commands.Bot):
         await self.load_extension("cogs.heartbeat")
         log.info("Cogs loaded")
 
-        # Guild sync: instant propagation to home server (set HOME_GUILD_ID in .env)
-        if config.HOME_GUILD_ID:
-            home = discord.Object(id=config.HOME_GUILD_ID)
+        # Slash-command sync — pick exactly ONE scope per server. If the same
+        # command is registered both guild-scoped and globally, both resolve in
+        # that guild and Discord lists every command twice (issue #4).
+        home = discord.Object(id=config.HOME_GUILD_ID) if config.HOME_GUILD_ID else None
+        if config.DEV_GUILD_SYNC and home is not None:
+            # Dev: instant home-guild sync, and drop the global set so it can't
+            # double up. copy_global_to must run before we clear the globals.
             self.tree.copy_global_to(guild=home)
-            guild_synced = await self.tree.sync(guild=home)
-            log.info("Slash commands synced to home guild %d: %d", config.HOME_GUILD_ID, len(guild_synced))
-
-        # Global sync: propagates to all servers within ~1hr
-        synced = await self.tree.sync()
-        log.info("Slash commands synced globally: %d", len(synced))
+            synced = await self.tree.sync(guild=home)
+            self.tree.clear_commands(guild=None)
+            await self.tree.sync()
+            log.info("Slash commands synced to home guild %d (dev, global cleared): %d",
+                     config.HOME_GUILD_ID, len(synced))
+        else:
+            # Production: global sync only. First clear any guild-scoped copies a
+            # previous dev run may have left in the home guild, so they don't
+            # linger as duplicates alongside the global set.
+            if home is not None:
+                self.tree.clear_commands(guild=home)
+                await self.tree.sync(guild=home)
+            synced = await self.tree.sync()
+            log.info("Slash commands synced globally: %d", len(synced))
 
     async def on_ready(self) -> None:
         log.info("BrnzyBot online as %s (id=%s)", self.user, self.user.id)

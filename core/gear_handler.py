@@ -31,6 +31,18 @@ _PHASE_LABELS = {1: "Phase 1", 2: "Phase 2", 3: "Phase 3", 4: "Phase 4", 5: "Pha
 _DUAL_SLOTS   = {"Ring", "Trinket"}
 
 
+def _bis_marker(item_phase: int | None, current_phase: int) -> str:
+    """
+    Front marker for a slot where the player is already wearing best-in-slot:
+      🥇 = BiS from an *earlier* phase (still the best pick — much Phase-1 gear
+           stays BiS deep into later tiers)
+      🔥 = BiS from the *current* tier
+    """
+    if item_phase and current_phase and item_phase < current_phase:
+        return "🥇"
+    return "🔥"
+
+
 # ---------------------------------------------------------------------------
 # Priority entry — one upgrade candidate, fully resolved
 # ---------------------------------------------------------------------------
@@ -328,6 +340,9 @@ def handle_gear_list(
     if snapshot.from_cache:
         lines.append("_⚠ Gear from cache — WCL was unavailable_")
 
+    if verbose:
+        lines.append("_🥇 BiS from an earlier phase (still best) · 🔥 current-tier BiS · ➡️ minor upgrade · ❄️ sizable upgrade_")
+
     lines.append("")
 
     # Names of all currently equipped items — used to skip BIS that's already worn
@@ -395,7 +410,7 @@ def handle_gear_list(
                     elif one_hand and slot == "Off Hand":
                         oh_sr = one_hand[0]
                         if oh_sr.was_equipped:
-                            line = f"🔥 **{slot}** {cur_name}{set_tag} `{cur_ep:.1f}`"
+                            line = f"{_bis_marker(oh_sr.phase, phase)} **{slot}** {cur_name}{set_tag} `{cur_ep:.1f}`"
                         else:
                             line = f"➡️ **{slot}** {cur_name} `{cur_ep:.1f}` → {oh_sr.item_name}"
                         vdesc = "BiS ✓" if oh_sr.was_equipped else f"BiS: {oh_sr.item_name} ({oh_sr.source})"
@@ -404,10 +419,10 @@ def handle_gear_list(
                 else:
                     vdesc = "no BiS data"
             elif sr.was_equipped:
-                line = f"🔥 **{slot}** {cur_name}{set_tag} `{cur_ep:.1f}`"
+                line = f"{_bis_marker(sr.phase, phase)} **{slot}** {cur_name}{set_tag} `{cur_ep:.1f}`"
                 vdesc = "BiS ✓"
             elif sr.item_name in equipped_names:
-                line = f"🔥 **{slot}** {cur_name}{set_tag} `{cur_ep:.1f}`"
+                line = f"{_bis_marker(sr.phase, phase)} **{slot}** {cur_name}{set_tag} `{cur_ep:.1f}`"
                 vdesc = f"BiS ({sr.item_name}) already worn"
             else:
                 gain = sr.ep

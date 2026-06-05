@@ -132,6 +132,7 @@ class SlotResult:
     set_name:    str
     source:      str
     was_equipped: bool = False   # True if this item was in the snapshot
+    phase:        int  = 1       # content phase the item is from (for tier markers)
 
 
 @dataclass
@@ -505,6 +506,7 @@ def _load_candidates(
             "source_type": source_type or "",
             "source_name": source_name or "",
             "equipped":   item_id in equipped_ids,
+            "phase":      phase,
         })
 
     log.info("Loaded %d candidate items for %s (phase %d)",
@@ -821,6 +823,7 @@ def _solve(problem: dict, candidates: list[dict], spec_data: dict,
                 set_name=item["set_name"],
                 source=(item["source_name"] or item["source_type"] or ""),
                 was_equipped=item["equipped"],
+                phase=item["phase"],
             ))
 
     slots_result.sort(key=lambda r: r.slot)

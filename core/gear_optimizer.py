@@ -117,8 +117,8 @@ class OptimizeParams:
     fight_length_sec:  int   = 120     # 2 min default; affects healer objective weighting
     mode:              str   = "bis"   # "bis" or "upgrades"
     max_changes:       int   = 99      # for upgrades mode; 99 = unrestricted
-    include_pvp:       bool  = False   # include Arena (rated) AND PvP Honor gear
-    include_arena:     bool  = False   # include Arena (rated) gear but still skip Honor gear
+    include_pvp:       bool  = False   # include PvP Honor (battleground) gear
+    include_arena:     bool  = True    # include Arena (rated) gear; personal opt-out turns it off
     include_world_boss: bool = True    # include world boss drops
     racial_hit:        int   = 0       # hit rating reduction from racial (e.g. 13 for Heroic Presence)
     gem_hit_weight:    float = -1.0   # effective hit weight for gem valuation; -1 = use spec default
@@ -382,8 +382,8 @@ def _load_candidates(
     quality_filter = "quality IN ('Epic', 'Rare', 'Uncommon')"
     source_filter_parts = []
     # Arena (rated) gear is gated by include_pvp OR include_arena; Honor gear only
-    # by include_pvp. So a PvE guild can opt into S2 arena BiS without pulling in
-    # battleground honor gear.
+    # by include_pvp. Arena defaults on (an individual can opt out per-call), but
+    # battleground honor gear stays excluded unless include_pvp is set.
     if params.include_pvp:
         excluded_sources = []
     elif params.include_arena:
@@ -982,6 +982,7 @@ def solve_upgrades(
         mode="upgrades",
         max_changes=max_changes,
         include_pvp=params.include_pvp,
+        include_arena=params.include_arena,
         include_world_boss=params.include_world_boss,
     )
     return solve_bis(character, spec, db, p, snapshot)

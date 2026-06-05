@@ -60,8 +60,11 @@ When a phase ships (e.g. Phase 2 — SSC / The Eye / Ogri'la / Season 2 arena):
 2. **Flip each guild forward** in Discord: `/setup phase 2`. The optimizer then
    considers Phase 1 **and** 2 gear, so still-BiS Phase-1 pieces stay in the pool
    (shown with 🥇 in `/gearcheck`, vs 🔥 for current-tier BiS).
-3. **(optional)** `/setup arena true` to let `/gearcheck` and `/gearprio` consider
-   Season-2 rated arena gear in BiS (battleground honor gear stays excluded).
+
+Rated **arena** gear is considered in BiS by default (battleground honor gear is
+not). Arena participation is a personal call, so it's a per-command toggle, not a
+guild setting: anyone who doesn't do arena can pass `arena:false` on their own
+`/gearcheck` or `/gearprio` to exclude it.
 
 ## Deploying
 

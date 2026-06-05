@@ -153,6 +153,7 @@ class GearCog(commands.Cog, name="Gear"):
         character="Character name (must be registered with /addchar)",
         spec="Spec override (e.g. elemental, destro, shadow). Uses registered spec if omitted.",
         phase="Phase to optimize for (1–5). Defaults to guild's current phase.",
+        arena="Consider rated arena gear (default on). Set false if you don't do arena.",
     )
     async def slash_gearprio(
         self,
@@ -160,6 +161,7 @@ class GearCog(commands.Cog, name="Gear"):
         character: str,
         spec: str | None = None,
         phase: int | None = None,
+        arena: bool = True,
     ) -> None:
         guild_id = str(interaction.guild_id)
 
@@ -206,6 +208,7 @@ class GearCog(commands.Cog, name="Gear"):
                     question=f"Give me prioritized upgrade advice for {display}.",
                     guild_id=guild_id,
                     phase_override=phase,
+                    include_arena=arena,
                 ),
             )
         except Exception as exc:
@@ -272,6 +275,7 @@ class GearCog(commands.Cog, name="Gear"):
         spec: str | None,
         verbose: bool,
         phase: int | None = None,
+        arena: bool = True,
     ) -> None:
         guild_id = str(interaction.guild_id)
 
@@ -311,6 +315,7 @@ class GearCog(commands.Cog, name="Gear"):
                     verbose=verbose,
                     guild_id=guild_id,
                     phase_override=phase,
+                    include_arena=arena,
                 ),
             )
         except Exception as exc:
@@ -337,6 +342,7 @@ class GearCog(commands.Cog, name="Gear"):
         character="Character name",
         spec="Override spec (e.g. affliction, destro). Uses registered spec if omitted.",
         phase="Phase to optimize for (1–5). Defaults to guild's current phase.",
+        arena="Consider rated arena gear (default on). Set false if you don't do arena.",
     )
     async def slash_gearcheck(
         self,
@@ -344,8 +350,9 @@ class GearCog(commands.Cog, name="Gear"):
         character: str,
         spec: str | None = None,
         phase: int | None = None,
+        arena: bool = True,
     ) -> None:
-        await self._run_gearcheck(interaction, character, spec, verbose=True, phase=phase)
+        await self._run_gearcheck(interaction, character, spec, verbose=True, phase=phase, arena=arena)
 
     # -----------------------------------------------------------------------
     # !gearcheck — prefix command (alias: !gc, !gear)

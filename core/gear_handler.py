@@ -23,7 +23,7 @@ from core.gear_reasoning import annotate
 from core.node_health import check_nodes
 from core.gear_optimizer import solve_upgrades, solve_bis, OptimizeParams
 from core.classifier import SPEC_ALIASES
-from db.server_config import get_guild_phase, get_include_arena
+from db.server_config import get_guild_phase
 
 ITEM_DB_PATH = config.ITEM_DB_PATH
 
@@ -62,7 +62,7 @@ class PriorityEntry:
 
 
 def _build_upgrade_priority(character, spec, snapshot, context, phase: int = 1,
-                            include_arena: bool = False) -> list[PriorityEntry]:
+                            include_arena: bool = True) -> list[PriorityEntry]:
     """
     Run the optimizer and return a list of PriorityEntry objects sorted by
     net EP gain descending. This is the single source of truth for gearprio.
@@ -193,6 +193,7 @@ def handle_gear_question(
     question: str = "",
     guild_id: str = "global",
     phase_override: int | None = None,
+    include_arena: bool = True,
 ) -> str:
     """
     Upgrade priority pipeline:
@@ -223,7 +224,7 @@ def handle_gear_question(
     phase    = phase_override if phase_override is not None else get_guild_phase(guild_id)
     context  = build_context(snapshot, spec)
     priority = _build_upgrade_priority(character, spec, snapshot, context, phase=phase,
-                                       include_arena=get_include_arena(guild_id))
+                                       include_arena=include_arena)
     skeleton = _format_priority_skeleton(character, context.spec_desc, context, priority, phase=phase)
 
     log.info(
@@ -261,6 +262,7 @@ def handle_gear_list(
     verbose: bool = False,
     guild_id: str = "global",
     phase_override: int | None = None,
+    include_arena: bool = True,
 ) -> str:
     """
     Return a deterministic head-to-toe gear list comparing equipped gear vs BIS.
@@ -298,7 +300,7 @@ def handle_gear_list(
                 params = OptimizeParams(
                     phase=phase,
                     include_pvp=False,
-                    include_arena=get_include_arena(guild_id),
+                    include_arena=include_arena,
                     include_world_boss=False,
                     mode="bis",
                     racial_hit=13 if is_alliance_shaman else 0,

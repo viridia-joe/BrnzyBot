@@ -18,7 +18,7 @@ from core.audit.normalize import normalize_combatant
 from core.audit.profiles import ELE_SHAMAN, get_profile
 from core.audit.report import (
     audit_combatant, build_roster_audit, check_consumes, check_enchants,
-    check_gems, check_rotation, parse_report_url,
+    check_end_activity, check_gems, check_rotation, parse_report_url,
 )
 
 # Enchantable slot → positional index in the WCL CombatantInfo gear array.
@@ -159,6 +159,41 @@ def test_dps_consumes_flask_covers_elixirs_and_flags_weapon_buff():
                                {"name": "Well Fed"}], fury)
     assert no_stone.verdict == Verdict.FAIL
     assert "Sharpening Stone" in no_stone.summary
+
+
+def test_all_healer_specs_have_profiles():
+    for s in ("holy_paladin", "holy_priest", "resto_druid", "resto_shaman"):
+        p = get_profile(s)
+        assert p is not None and p.role == "healer"
+        assert p.end_silence_warn_sec > 0           # healers get the OOM check
+        assert p.meta_gem == "Insightful Earthstorm Diamond"
+
+
+def test_healer_consumes_uses_mana_oil_not_wizard():
+    rs = get_profile("resto_shaman")
+    ok = check_consumes([{"name": "Flask of Mighty Restoration"},
+                         {"name": "Golden Fish Sticks"},
+                         {"name": "Superior Mana Oil"}], rs)
+    assert ok.verdict == Verdict.PASS, ok.summary
+    # a DPS wizard oil must NOT satisfy a healer's weapon-buff slot
+    no_oil = check_consumes([{"name": "Flask of Mighty Restoration"},
+                             {"name": "Golden Fish Sticks"},
+                             {"name": "Superior Wizard Oil"}], rs)
+    assert no_oil.verdict == Verdict.FAIL
+    assert "Mana Oil" in no_oil.summary
+
+
+def test_check_end_activity_flags_trailing_silence():
+    rs = get_profile("resto_shaman")
+    window = (0, 300_000)  # 300s fight
+    # cast only up to 250s → 50s of silence → WARN (OOM indicator)
+    oom = check_end_activity(list(range(0, 250_001, 1000)), window, rs)
+    assert oom.verdict == Verdict.WARN and "final 50s" in oom.summary
+    # cast through ~298s → tiny trailing lull → PASS
+    fine = check_end_activity(list(range(0, 298_001, 1000)), window, rs)
+    assert fine.verdict == Verdict.PASS
+    # DPS opt out entirely → None (never penalise throughput)
+    assert check_end_activity([1, 2, 3], window, get_profile("fire_mage")) is None
 
 
 def test_check_rotation_flags_earth_shock_filler():

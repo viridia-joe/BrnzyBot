@@ -261,6 +261,43 @@ def check_parse(best_pct: float | None, avg_pct: float | None) -> CheckResult:
 # Per-combatant assembly (pure: takes already-normalized data)
 # ---------------------------------------------------------------------------
 
+def check_end_activity(cast_times: list[float], fight_window: tuple[float, float],
+                       profile: SpecProfile) -> CheckResult | None:
+    """
+    Healer-only signal. cast_times: ms timestamps of the player's casts;
+    fight_window: (start_ms, end_ms), both report-relative.
+
+    Flags a long trailing silence (no casts well before the kill) as INDICATIVE
+    of going OOM. WARN, never FAIL: a quiet stretch can also be a legitimate
+    end-of-fight lull while the boss dies. Returns None when the profile opts out
+    (DPS/tanks), so it never penalises throughput.
+    """
+    warn_sec = getattr(profile, "end_silence_warn_sec", 0.0)
+    if not warn_sec:
+        return None
+    start, end = fight_window
+    dur = (end - start) / 1000.0
+    if dur <= 0:
+        return CheckResult("end_activity", "End-of-fight activity", Verdict.UNKNOWN,
+                           "no fight timing")
+    if not cast_times:
+        return CheckResult("end_activity", "End-of-fight activity", Verdict.UNKNOWN,
+                           "no cast data")
+    trailing = max(0.0, (end - max(cast_times)) / 1000.0)
+    # Flag only when the silence is both absolutely long and a real share of the
+    # fight, so a short natural lull at the kill doesn't trip it.
+    if trailing >= warn_sec and trailing >= 0.12 * dur:
+        return CheckResult(
+            "end_activity", "End-of-fight activity", Verdict.WARN,
+            f"no casts for the final {trailing:.0f}s of a {dur:.0f}s fight",
+            detail=("A long silence before the kill often means running low on mana. "
+                    "It can also be a normal lull as the boss dies — worth a glance at "
+                    "mana management/regen rather than a throughput judgement."),
+            evidence={"trailing_silence_sec": round(trailing, 1), "fight_sec": round(dur, 1)})
+    return CheckResult("end_activity", "End-of-fight activity", Verdict.PASS,
+                       f"casting through to ~{trailing:.0f}s before the end")
+
+
 def audit_combatant(
     character: str,
     spec: str,
@@ -292,7 +329,19 @@ def audit_combatant(
                                meta_present=data.get("meta_present"),
                                empty_sockets=data.get("empty_sockets")))
 
-    report.sections = [baseline, preparation]
+    sections = [baseline, preparation]
+
+    # Execution (healers only, and only when cast data was gathered).
+    cast_times = data.get("cast_times")
+    fight_window = data.get("fight_window")
+    if profile.end_silence_warn_sec and cast_times is not None and fight_window:
+        end_act = check_end_activity(cast_times, fight_window, profile)
+        if end_act is not None:
+            execution = Section("Execution")
+            execution.add(end_act)
+            sections.append(execution)
+
+    report.sections = sections
     return report
 
 
@@ -426,6 +475,19 @@ def build_audit(url: str, character: str, spec: str) -> AuditReport:
 
     norm = normalize_combatant(rec)
     norm["empty_sockets"] = _count_empty_sockets(norm.get("gear", []))
+
+    # Healers get one Execution signal: end-of-fight silence (OOM indicator).
+    # Only fetch casts when the profile asks for it — keeps DPS audits cheap.
+    if profile.end_silence_warn_sec:
+        try:
+            from core import wcl_client
+            casts = wcl_client.get_casts(report_code, fight["id"], target_id)
+            norm["cast_times"] = [e["timestamp"] for e in casts
+                                  if e.get("type") == "cast" and "timestamp" in e]
+            norm["fight_window"] = (fight.get("startTime", 0), fight.get("endTime", 0))
+        except Exception as exc:  # cast fetch is best-effort; never break the audit
+            log.warning("end-activity cast fetch failed for %s: %s", character, exc)
+
     return audit_combatant(character, spec, profile, norm,
                            report_code=report_code, fight_ids=[fight["id"]])
 

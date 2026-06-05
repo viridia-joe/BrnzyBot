@@ -22,6 +22,14 @@ services:
     volumes:
       - /home/brnz/openclaw-data:/root/.openclaw/data
       - /home/brnz/openclaw-logs:/root/.openclaw/logs
+    # Stream container logs to GCP Cloud Logging.
+    # Visible at: console.cloud.google.com → Logging → Log Explorer
+    # Filter: resource.type="gce_instance" logName=~"brnzybot"
+    logging:
+      driver: gcplogs
+      options:
+        gcp-project: brnzybot-prod
+        tag: brnzybot
 
   # ── LiteLLM proxy — routes model aliases to Claude API ──────────────────
   # Opt-in only: lives behind the "llm" compose profile so the default

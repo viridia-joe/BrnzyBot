@@ -1,0 +1,21 @@
+{
+  "spec": "balance_druid",
+  "display": "Balance Druid",
+  "class": "Druid",
+  "role": "caster_dps",
+  "source": "Icy Veins / Wowhead TBC guides + WCL top parses",
+  "summary": "Keep Moonfire and Insect Swarm up; nuke with Wrath or Starfire (Wrath scales better at lower gear, Starfire as spell power grows).",
+  "core_spells": ["Wrath", "Starfire", "Moonfire", "Insect Swarm"],
+  "downrank_watch": ["Wrath", "Starfire", "Moonfire", "Insect Swarm"],
+  "off_rotation": {
+    "Healing Touch": {"min_casts": 3, "note": "healing during a DPS parse"},
+    "Rejuvenation":  {"min_casts": 3, "note": "healing during a DPS parse"},
+    "Regrowth":      {"min_casts": 3, "note": "healing during a DPS parse"}
+  },
+  "breakpoint": {
+    "spells": ["Starfire", "Wrath"],
+    "note": "Wrath is the more mana-efficient and gear-light nuke; Starfire's larger hits scale up as spell power and crit grow. The mix shifts toward Starfire with better gear — a parse that is nearly all of one or the other is worth a second look."
+  },
+  "advisory": "Moonfire and Insect Swarm are damage-per-cast-time gains — letting them drop to spam a nuke is a common DPS loss.",
+  "notes_verified": false
+}

@@ -425,3 +425,104 @@ def get_combatant_info(report_code: str, fight_id: int) -> list[dict]:
             .get("events", {})
             .get("data", [])
     )
+
+
+# ---------------------------------------------------------------------------
+# Query: a character's most recent reports (for /rotationcheck auto-log)
+# ---------------------------------------------------------------------------
+_CHAR_REPORTS_QUERY = """
+query CharReports($name: String!, $serverSlug: String!, $region: String!, $limit: Int!) {
+  characterData {
+    character(name: $name, serverSlug: $serverSlug, serverRegion: $region) {
+      classID
+      recentReports(limit: $limit) {
+        data { code startTime }
+      }
+    }
+  }
+}
+"""
+
+
+def get_character_recent_reports(
+    name: str, realm: str, region: str = "us", limit: int = 5
+) -> list[dict]:
+    """Returns the character's most recent reports: [{code, startTime}]. [] if none."""
+    data = graphql(_CHAR_REPORTS_QUERY, {
+        "name": name, "serverSlug": realm, "region": region, "limit": limit,
+    })
+    char = (data.get("characterData") or {}).get("character") or {}
+    return (char.get("recentReports") or {}).get("data", [])
+
+
+# ---------------------------------------------------------------------------
+# Query: masterData abilities — gameID → name (resolves cast spell + rank)
+# ---------------------------------------------------------------------------
+_ABILITIES_QUERY = """
+query Abilities($code: String!) {
+  reportData {
+    report(code: $code) {
+      masterData {
+        abilities { gameID name type }
+      }
+    }
+  }
+}
+"""
+
+
+def get_abilities(report_code: str) -> list[dict]:
+    """Returns ability records for the report: [{gameID, name, type}]."""
+    data = graphql(_ABILITIES_QUERY, {"code": report_code})
+    return (
+        data.get("reportData", {})
+            .get("report", {})
+            .get("masterData", {})
+            or {}
+    ).get("abilities", [])
+
+
+# ---------------------------------------------------------------------------
+# Query: cast events for a single actor (for /rotationcheck)
+# ---------------------------------------------------------------------------
+_CASTS_QUERY = """
+query Casts($code: String!, $fightID: Int!, $sourceID: Int, $startTime: Float, $limit: Int!) {
+  reportData {
+    report(code: $code) {
+      events(fightIDs: [$fightID], dataType: Casts, sourceID: $sourceID, startTime: $startTime, limit: $limit) {
+        data
+        nextPageTimestamp
+      }
+    }
+  }
+}
+"""
+
+
+def get_casts(
+    report_code: str, fight_id: int, source_id: int | None = None,
+    max_events: int = 20_000, page_limit: int = 10_000,
+) -> list[dict]:
+    """
+    Returns cast events for a fight, optionally filtered to one actor (source_id).
+    Each record has at least: timestamp, type ('cast'/'begincast'), sourceID,
+    abilityGameID. Paginates via nextPageTimestamp up to max_events.
+    """
+    out: list[dict] = []
+    start: float | None = None
+    for _ in range(10):  # hard page cap as a safety net
+        ev = (
+            graphql(_CASTS_QUERY, {
+                "code": report_code, "fightID": fight_id, "sourceID": source_id,
+                "startTime": start, "limit": page_limit,
+            })
+            .get("reportData", {}).get("report", {})
+            .get("events", {}) or {}
+        )
+        out.extend(ev.get("data", []))
+        nxt = ev.get("nextPageTimestamp")
+        if not nxt or len(out) >= max_events:
+            break
+        start = nxt
+    return out
+

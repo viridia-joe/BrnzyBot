@@ -56,6 +56,16 @@ resource "google_compute_instance" "brnzybot" {
 
   tags = ["brnzybot"]
 
+  # Grant the VM's service account permission to write to Cloud Logging and Monitoring.
+  # Without this the gcplogs Docker driver fails with "Unauthenticated".
+  service_account {
+    scopes = [
+      "logging-write",
+      "monitoring-write",
+      "storage-ro",
+    ]
+  }
+
   scheduling {
     automatic_restart   = true
     on_host_maintenance = "MIGRATE"

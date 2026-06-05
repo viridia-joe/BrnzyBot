@@ -7,6 +7,15 @@
   "summary": "Keep Shadow Word: Pain and Vampiric Touch up, Mind Blast on cooldown, Mind Flay as filler. Devouring Plague and Shadow Word: Death on cooldown.",
   "core_spells": ["Mind Blast", "Mind Flay", "Shadow Word: Pain", "Vampiric Touch", "Devouring Plague", "Shadow Word: Death"],
   "downrank_watch": ["Mind Blast", "Mind Flay", "Shadow Word: Pain", "Vampiric Touch", "Devouring Plague", "Shadow Word: Death"],
+  "ranks_verified": true,
+  "max_rank_ids": {
+    "Mind Blast": 25375,
+    "Mind Flay": 25387,
+    "Shadow Word: Pain": 25368,
+    "Vampiric Touch": 34914,
+    "Devouring Plague": 25467,
+    "Shadow Word: Death": 32996
+  },
   "off_rotation": {
     "Smite":        {"min_casts": 3, "note": "a holy nuke — Shadowform spriests should not be casting Smite"},
     "Holy Fire":    {"min_casts": 3, "note": "a holy nuke — wrong school for Shadowform"},

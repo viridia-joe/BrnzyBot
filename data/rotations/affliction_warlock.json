@@ -7,6 +7,14 @@
   "summary": "Keep your DoTs rolling (Corruption, Curse of Agony, Unstable Affliction, Siphon Life) and fill with Shadow Bolt. Maintain Curse of the Elements if you're the assigned curse.",
   "core_spells": ["Shadow Bolt", "Corruption", "Curse of Agony", "Unstable Affliction", "Siphon Life", "Curse of the Elements"],
   "downrank_watch": ["Shadow Bolt", "Corruption", "Curse of Agony", "Unstable Affliction", "Siphon Life"],
+  "ranks_verified": true,
+  "max_rank_ids": {
+    "Shadow Bolt": 25307,
+    "Corruption": 27216,
+    "Curse of Agony": 27218,
+    "Unstable Affliction": 30405,
+    "Siphon Life": 30911
+  },
   "off_rotation": {
     "Searing Pain": {"min_casts": 3, "note": "a fire filler — Affliction should fill with Shadow Bolt, not Searing Pain"},
     "Rain of Fire": {"min_casts": 3, "note": "AoE filler used on single-target — usually a misclick or wrong build"},

@@ -7,6 +7,13 @@
   "summary": "Keep Moonfire and Insect Swarm up; nuke with Wrath or Starfire (Wrath scales better at lower gear, Starfire as spell power grows).",
   "core_spells": ["Wrath", "Starfire", "Moonfire", "Insect Swarm"],
   "downrank_watch": ["Wrath", "Starfire", "Moonfire", "Insect Swarm"],
+  "ranks_verified": true,
+  "max_rank_ids": {
+    "Wrath": 26985,
+    "Starfire": 26986,
+    "Moonfire": 26988,
+    "Insect Swarm": 27013
+  },
   "off_rotation": {
     "Healing Touch": {"min_casts": 3, "note": "healing during a DPS parse"},
     "Rejuvenation":  {"min_casts": 3, "note": "healing during a DPS parse"},

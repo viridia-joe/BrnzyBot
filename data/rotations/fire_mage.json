@@ -7,6 +7,12 @@
   "summary": "Fireball spam with Scorch used to keep the Improved Scorch debuff at 5 stacks (if you're the assigned scorcher). Fire Blast on the move.",
   "core_spells": ["Fireball", "Scorch", "Fire Blast", "Pyroblast"],
   "downrank_watch": ["Fireball", "Scorch", "Pyroblast"],
+  "ranks_verified": true,
+  "max_rank_ids": {
+    "Fireball": 38692,
+    "Scorch": 27074,
+    "Pyroblast": 33938
+  },
   "off_rotation": {
     "Frostbolt": {"min_casts": 5, "note": "a fire mage casting Frostbolt — check spec/macros"}
   },

@@ -7,6 +7,12 @@
   "summary": "Lightning Bolt is your filler; cast Chain Lightning on cooldown and keep Flame Shock ticking.",
   "core_spells": ["Chain Lightning", "Lightning Bolt", "Flame Shock"],
   "downrank_watch": ["Lightning Bolt", "Chain Lightning", "Flame Shock"],
+  "ranks_verified": true,
+  "max_rank_ids": {
+    "Lightning Bolt": 25449,
+    "Chain Lightning": 25442,
+    "Flame Shock": 25457
+  },
   "off_rotation": {
     "Healing Wave":        {"min_casts": 3, "note": "healing during a DPS parse — a sign of a heal bound where a nuke should be"},
     "Lesser Healing Wave": {"min_casts": 3, "note": "healing during a DPS parse"},

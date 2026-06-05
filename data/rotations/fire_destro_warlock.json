@@ -7,6 +7,13 @@
   "summary": "Incinerate as the primary nuke with Immolate kept up (Incinerate bonus damage on an Immolated target) and Conflagrate on cooldown.",
   "core_spells": ["Incinerate", "Immolate", "Conflagrate", "Curse of the Elements", "Curse of Agony"],
   "downrank_watch": ["Incinerate", "Immolate", "Conflagrate", "Curse of Agony"],
+  "ranks_verified": true,
+  "max_rank_ids": {
+    "Incinerate": 32231,
+    "Immolate": 27215,
+    "Conflagrate": 17962,
+    "Curse of Agony": 27218
+  },
   "off_rotation": {
     "Shadow Bolt":  {"min_casts": 5, "note": "a fire/Incinerate build should fill with Incinerate, not Shadow Bolt — check your build and action bars"},
     "Searing Pain": {"min_casts": 3, "note": "a low-value fire filler"}

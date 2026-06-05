@@ -298,6 +298,31 @@ def check_end_activity(cast_times: list[float], fight_window: tuple[float, float
                        f"casting through to ~{trailing:.0f}s before the end")
 
 
+_POTION_RE = re.compile(r"potion", re.I)
+
+
+def _tally_casts(casts: list[dict], abilities: list[dict]) -> dict:
+    """
+    From cast events + the report ability table, return
+    {source_id: {"potions": int, "cast_times": [ms]}}.
+
+    Potions are counted as completed casts whose ability name contains "Potion"
+    (Super Mana / Haste / Insane Strength / Destruction / Ironshield / healing…).
+    """
+    name_by_id = {a.get("gameID"): (a.get("name") or "") for a in abilities}
+    out: dict = {}
+    for e in casts:
+        if e.get("type") != "cast":
+            continue
+        rec = out.setdefault(e.get("sourceID"), {"potions": 0, "cast_times": []})
+        ts = e.get("timestamp")
+        if ts is not None:
+            rec["cast_times"].append(ts)
+        if _POTION_RE.search(name_by_id.get(e.get("abilityGameID"), "")):
+            rec["potions"] += 1
+    return out
+
+
 def audit_combatant(
     character: str,
     spec: str,
@@ -323,7 +348,8 @@ def audit_combatant(
                              f"{ilvl:.0f} avg equipped" if ilvl else "—"))
 
     preparation = Section("Preparation")
-    preparation.add(check_consumes(data.get("auras", []), profile))
+    preparation.add(check_consumes(data.get("auras", []), profile,
+                                   potion_count=data.get("potion_count")))
     preparation.add(check_enchants(data.get("gear", []), profile))
     preparation.add(check_gems(data.get("gems", []), profile,
                                meta_present=data.get("meta_present"),
@@ -476,17 +502,20 @@ def build_audit(url: str, character: str, spec: str) -> AuditReport:
     norm = normalize_combatant(rec)
     norm["empty_sockets"] = _count_empty_sockets(norm.get("gear", []))
 
-    # Healers get one Execution signal: end-of-fight silence (OOM indicator).
-    # Only fetch casts when the profile asks for it — keeps DPS audits cheap.
-    if profile.end_silence_warn_sec:
-        try:
-            from core import wcl_client
-            casts = wcl_client.get_casts(report_code, fight["id"], target_id)
-            norm["cast_times"] = [e["timestamp"] for e in casts
-                                  if e.get("type") == "cast" and "timestamp" in e]
+    # One cast fetch powers potion tracking (all specs) and the healer
+    # end-of-fight silence check. Best-effort: never break the audit over it.
+    try:
+        from core import wcl_client
+        tally = _tally_casts(
+            wcl_client.get_casts(report_code, fight["id"], target_id),
+            wcl_client.get_abilities(report_code),
+        ).get(target_id, {"potions": 0, "cast_times": []})
+        norm["potion_count"] = tally["potions"]
+        if profile.end_silence_warn_sec:
+            norm["cast_times"] = tally["cast_times"]
             norm["fight_window"] = (fight.get("startTime", 0), fight.get("endTime", 0))
-        except Exception as exc:  # cast fetch is best-effort; never break the audit
-            log.warning("end-activity cast fetch failed for %s: %s", character, exc)
+    except Exception as exc:
+        log.warning("cast/potion fetch failed for %s: %s", character, exc)
 
     return audit_combatant(character, spec, profile, norm,
                            report_code=report_code, fight_ids=[fight["id"]])
@@ -520,6 +549,19 @@ def build_roster_audit(url: str, resolve_spec) -> RosterAudit:
         return roster
     roster.fight_label = _fight_label(fight)
 
+    # One fight-wide cast fetch powers potion tracking (+ healer end-activity) for
+    # the whole roster, instead of N per-player queries. None = fetch failed →
+    # potions show ❔ rather than a false ❌.
+    cast_tally = None
+    try:
+        from core import wcl_client
+        cast_tally = _tally_casts(
+            wcl_client.get_casts(report_code, fight["id"]),
+            wcl_client.get_abilities(report_code),
+        )
+    except Exception as exc:
+        log.warning("roster cast/potion fetch failed: %s", exc)
+
     seen: set[str] = set()
     for rec in combatants:
         norm = normalize_combatant(rec)
@@ -535,6 +577,12 @@ def build_roster_audit(url: str, resolve_spec) -> RosterAudit:
             roster.skipped.append((name, f"no profile for {spec}" if spec else "unregistered"))
             continue
         norm["empty_sockets"] = _count_empty_sockets(norm.get("gear", []))
+        if cast_tally is not None:
+            t = cast_tally.get(norm.get("source_id"), {"potions": 0, "cast_times": []})
+            norm["potion_count"] = t["potions"]
+            if profile.end_silence_warn_sec:
+                norm["cast_times"] = t["cast_times"]
+                norm["fight_window"] = (fight.get("startTime", 0), fight.get("endTime", 0))
         roster.reports.append(audit_combatant(
             name, spec, profile, norm, report_code=report_code, fight_ids=[fight["id"]]
         ))

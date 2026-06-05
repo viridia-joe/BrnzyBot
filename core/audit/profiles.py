@@ -225,6 +225,40 @@ HEALER_CONSUMES = (
 )
 
 
+TANK_META = "Powerful Earthstorm Diamond"   # +stamina meta
+
+# Shield tanks (warrior/paladin): stamina/hit food, fort or threat flask,
+# defense/agi elixirs, sharpening stone for threat (optional — many run a
+# permanent weapon enchant instead).
+TANK_CONSUMES = (
+    ConsumeRule("food", "Food", ("Fisherman's Feast", "Spicy Hot Talbuk", "Well Fed"),
+                note="+stamina (Fisherman's Feast) or +hit (threat) food"),
+    ConsumeRule("flask", "Flask", ("Flask of Fortification", "Flask of Relentless Assault"),
+                required=False, note="Fortification (survival) or Relentless Assault (threat)"),
+    ConsumeRule("battle_elixir", "Battle Elixir",
+                ("Elixir of Major Defense", "Elixir of Major Agility"), required=False),
+    ConsumeRule("guardian_elixir", "Guardian Elixir",
+                ("Elixir of Major Fortitude", "Major Mageblood", "Ironskin"), required=False),
+    ConsumeRule("weapon_oil", "Sharpening Stone", ("Sharpening Stone", "Weightstone"),
+                required=False, note="threat — or a permanent weapon enchant"),
+    ConsumeRule("potion", "Potions", ("Ironshield Potion", "Super Mana Potion",
+                                      "Haste Potion", "Major Healing Potion")),
+)
+
+# Bear tanks: no weapon enchant/stone works in form, so no weapon-buff slot.
+BEAR_TANK_CONSUMES = (
+    ConsumeRule("food", "Food", ("Fisherman's Feast", "Grilled Mudfish", "Well Fed"),
+                note="+stamina or +agility food"),
+    ConsumeRule("flask", "Flask", ("Flask of Fortification", "Flask of Relentless Assault"),
+                required=False),
+    ConsumeRule("battle_elixir", "Battle Elixir",
+                ("Elixir of Major Agility", "Elixir of Major Defense"), required=False),
+    ConsumeRule("guardian_elixir", "Guardian Elixir",
+                ("Elixir of Major Fortitude", "Major Mageblood"), required=False),
+    ConsumeRule("potion", "Potions", ("Haste Potion", "Major Healing Potion", "Ironshield Potion")),
+)
+
+
 def _dps(spec: str, display: str, role: str, slots, meta: str, consumes) -> SpecProfile:
     return SpecProfile(
         spec=spec, display=display, role=role,
@@ -239,6 +273,14 @@ def _healer(spec: str, display: str) -> SpecProfile:
         enchantable_slots=CASTER_SLOTS, min_gem_quality="rare",
         meta_gem=HEALER_META, consumes=HEALER_CONSUMES,
         end_silence_warn_sec=15.0,
+    )
+
+
+def _tank(spec: str, display: str, slots, consumes) -> SpecProfile:
+    return SpecProfile(
+        spec=spec, display=display, role="tank",
+        enchantable_slots=slots, min_gem_quality="rare",
+        meta_gem=TANK_META, consumes=consumes,
     )
 
 
@@ -279,9 +321,22 @@ _HEALER_PROFILES = [
     _healer("resto_shaman", "Restoration Shaman"),
 ]
 
+# ── Tanks ───────────────────────────────────────────────────────────────────
+# Preparation-focused like DPS, but with survival consumes and the +stamina meta.
+# Shield tanks carry weapon + shield (Off Hand) enchants; bears carry no weapon
+# enchant (forms). No end-of-fight silence check — for a tank, going quiet means
+# death/threat-drop, a different signal than a healer's OOM.
+_TANK_PROFILES = [
+    _tank("prot_warrior", "Protection Warrior", MELEE_DW_SLOTS, TANK_CONSUMES),
+    _tank("prot_paladin", "Protection Paladin", MELEE_DW_SLOTS, TANK_CONSUMES),
+    _tank("feral_bear_druid", "Feral (Bear) Druid", FERAL_SLOTS, BEAR_TANK_CONSUMES),
+]
+
 # ELE_SHAMAN keeps its richer hand-authored execution data; the rest fill in
 # from role templates. ELE wins on key collision.
-PROFILES: dict[str, SpecProfile] = {p.spec: p for p in _DPS_PROFILES + _HEALER_PROFILES}
+PROFILES: dict[str, SpecProfile] = {
+    p.spec: p for p in _DPS_PROFILES + _HEALER_PROFILES + _TANK_PROFILES
+}
 PROFILES[ELE_SHAMAN.spec] = ELE_SHAMAN
 
 

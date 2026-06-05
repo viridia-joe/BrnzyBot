@@ -101,3 +101,91 @@ Totems, Idols, and Librams currently show "proc-based, not EP-rated". These coul
 **Effort:** Medium
 
 `gearprio.py` doesn't use trinket EP overrides, gem EP, or set bonus calculations. Its upgrade recommendations for trinkets and socketed items are based on raw stats only — inconsistent with `gearcheck.py`. Port the same EP calculation logic to gearprio.
+
+## Offline Dev/Test Harness (WCL fixtures)
+
+**Priority:** High
+**Effort:** Medium
+
+We can't run the WCL-backed features (`/rotationcheck`, `/gearcheck`, auto-register)
+end-to-end in the cloud dev environment: there are no `WCL_CLIENT_ID`/`WCL_CLIENT_SECRET`
+there and no built `*.db`. Today the only verification possible is mocking WCL responses
+by hand. A fixture-based harness fixes that and unblocks confident iteration from this box.
+
+**Goal:** record a handful of *real* WCL responses once (from a machine that has creds —
+e.g. VS Code on desktop), commit them as JSON fixtures, and run the pure logic against
+them with no network.
+
+Implementation:
+- Add `scripts/capture-wcl-fixtures.py` — given creds + a report code (and a character),
+  dump the raw responses we actually consume to `tests/fixtures/wcl/<name>.json`:
+  `get_character_recent_reports`, `get_master_actors`, `get_fights`, `get_abilities`,
+  `get_casts` (a caster with at least one downranked spell if possible), and
+  `get_combatant_info` (gear with `gems` + `permanentEnchant` populated).
+- Add `tests/` with tests that monkeypatch `core.rotation_handler.wcl` (and the gear
+  fetch) to serve fixtures, then assert on the handler output. The mock E2E I ran by
+  hand for `/rotationcheck` is the template — promote it to `tests/test_rotation.py`.
+- Scrub fixtures of anything sensitive (they're just public log data, but double-check
+  player names are fine to commit; offer an anonymize flag in the capture script).
+- Wire `python3 -m pytest -q` (or a stdlib `unittest` runner, to avoid adding a dep)
+  into `.github/workflows/ci.yml` after the byte-compile step.
+
+Considerations:
+- Keep it dependency-light: a stdlib `unittest` runner avoids adding pytest to the 1 GB box.
+- Fixtures double as documentation of the exact WCL response shapes we depend on.
+- Capture 2-3 specs (a downranking caster, a clean caster, a caster with empty
+  sockets + missing enchant) so both the rotation and gems/enchants features are covered.
+
+## Caster Gems & Enchants Review
+
+**Priority:** High
+**Effort:** High (phased)
+
+Add a gems & enchants audit to `/gearcheck` for caster specs. Build it in phases —
+the first is cheap and high-value; the later ones are "a lot."
+
+**Data we already have** (confirmed): `gear_cache` captures `enchant` (permanentEnchant
+id) and `gems` (list of gem ids) per equipped item; the item DB has `sockets`
+(JSON list of socket colors incl. `Meta`) and `socket_bonus`; `data/gems.json` has the
+best caster gem per color. **Gaps:** no gem-id→quality map (needed to flag green gems),
+and no enchantable-slot / recommended-enchant reference.
+
+### Phase 1 — flag the obvious (buildable now from existing data)
+- **Empty sockets:** `len(item.sockets excluding Meta)` vs `len(equipped gems)` → "N empty sockets".
+- **Missing enchants:** `enchant == 0` on an enchantable slot.
+- **Cheap gems:** socketed gem of green (uncommon) quality. Needs a gem-id→quality
+  source — either confirm gems are in the item DB with quality, add a small
+  `data/gem_quality.json`, or fall back to the existing Wowhead lookup used for unknown items.
+
+### Enchant severity (validated against TBC values — weight callouts by slot)
+Treat a missing **major** enchant as a real grade hit (A → B); a missing **minor**
+enchant as cosmetic (A → A+). The user's instinct checks out:
+
+| Slot | Tier | Typical caster enchant (≈ value) |
+|---|---|---|
+| **Weapon** | Major | Major Spellpower (+40 sp) / Soulfrost (+54 shadow-frost) — the single biggest |
+| **Head** | Major | Arcanum / Glyph of Power (~+22 sp, +14 spell hit) — rep-gated |
+| **Legs** | Major | Spellthread (Mystic +25 sp/+15 sta, Runic +35 sp/+20 sta) |
+| **Shoulder** | Major | Greater Inscription of the Orb (~+12 sp, +15 crit) — rep-gated |
+| **Chest** | Minor | Exceptional Stats (+6 all) — trivial for a caster |
+| **Feet** | Minor | Boar's Speed / minor stats — mostly run speed |
+| **Wrist / Hands / Back** | Minor | small int/sp/threat-reduction enchants |
+| **Finger** | Optional | enchanter-only (+sp each) — only flag for enchanters |
+| Neck / Trinket / Wand / Relic | n/a | not enchantable — never flag |
+
+Encode as `data/enchant_slots.json`: `{slot: {enchantable, tier, recommended}}`.
+
+### Phase 2 — gem optimization to hit cap
+Once flagging works, recommend a gem layout that reaches the spell hit cap first
+(respecting socket colors + socket bonuses, like the existing `gear_optimizer` socket
+logic), then…
+
+### Phase 3 — gems by stat weights
+…fills remaining sockets by spec EP weights (reuse `data/weights/*.json`). This overlaps
+the existing socket-bonus math in `gear_optimizer.py` — factor that out and share it.
+
+Considerations:
+- Deterministic (no LLM); slot into the `/gearcheck` output the same way as the hit/BiS sections.
+- Meta gem: don't count the Meta socket as "empty" if a meta is present; flag a missing/incorrect meta separately.
+- Verify against real fixtures (see the harness item) before trusting empty-socket and
+  green-gem detection — this is gear-correctness data, where wrong flags erode trust.

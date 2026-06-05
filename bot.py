@@ -78,6 +78,7 @@ class BrnzyBot(commands.Bot):
         await self.load_extension("cogs.simexport")
         await self.load_extension("cogs.botduel")
         await self.load_extension("cogs.heartbeat")
+        await self.load_extension("cogs.audit")
         log.info("Cogs loaded")
 
         # Slash-command sync — pick exactly ONE scope per server. If the same

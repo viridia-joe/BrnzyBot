@@ -91,9 +91,9 @@ class HeartbeatCog(commands.Cog, name="Heartbeat"):
         last_haiku  = get_last_haiku_ts(guild_id) or 0
         days_since  = (now - last_haiku) / 86_400
 
-        if pool["haikus"] and days_since >= HAIKU_MIN_DAYS and random.random() < HAIKU_CHANCE:
+        if pool.get("spammacros") and days_since >= HAIKU_MIN_DAYS and random.random() < HAIKU_CHANCE:
             set_last_haiku_ts(guild_id, now)
-            return random.choice(pool["haikus"])
+            return random.choice(pool["spammacros"])
 
         category = random.choice(
             [k for k in ("lore", "tips", "jokes") if pool.get(k)]

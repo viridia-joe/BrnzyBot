@@ -59,3 +59,8 @@ jobs:
 
           print("deterministic import-check OK")
           PY
+
+      - name: Unit tests
+        env:
+          ENABLE_LLM: "false"
+        run: python tests/test_audit.py

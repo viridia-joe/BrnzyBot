@@ -22,17 +22,11 @@ from __future__ import annotations
 import logging
 import re
 
-from core.audit.checks import AuditReport, CheckResult, Section, Verdict
+from core.audit.checks import AuditReport, CheckResult, RosterAudit, Section, Verdict
+from core.audit.normalize import normalize_combatant
 from core.audit.profiles import SpecProfile, get_profile
 
 log = logging.getLogger(__name__)
-
-# WCL CombatantInfo `gear` array is positional. Index → equipment slot.
-GEAR_SLOTS = [
-    "Head", "Neck", "Shoulder", "Shirt", "Chest", "Waist", "Legs", "Feet",
-    "Wrist", "Hands", "Finger", "Finger", "Trinket", "Trinket", "Back",
-    "Main Hand", "Off Hand", "Relic", "Tabard",
-]
 
 
 # ---------------------------------------------------------------------------
@@ -218,61 +212,182 @@ def check_parse(best_pct: float | None, avg_pct: float | None) -> CheckResult:
 
 
 # ---------------------------------------------------------------------------
-# Orchestrator (integration stub)
+# Per-combatant assembly (pure: takes already-normalized data)
+# ---------------------------------------------------------------------------
+
+def audit_combatant(
+    character: str,
+    spec: str,
+    profile: SpecProfile,
+    data: dict,
+    report_code: str = "",
+    fight_ids: list[int] | None = None,
+) -> AuditReport:
+    """
+    Build the Preparation scorecard (plus a free Baseline iLvl line) for one
+    raider from a normalized CombatantInfo dict (see normalize.normalize_combatant).
+
+    This is the first shippable cut: enchants / gems / consumes need nothing
+    beyond CombatantInfo. Execution (rotation/activity) and the parse-% Baseline
+    follow when the cast-table and rankings queries land — see docs/RAID_AUDIT.md.
+    """
+    report = AuditReport(character=character, spec=spec,
+                         report_code=report_code, fight_ids=fight_ids or [])
+
+    ilvl = data.get("avg_item_level")
+    baseline = Section("Baseline")
+    baseline.add(CheckResult("ilvl", "Gear iLvl", Verdict.INFO,
+                             f"{ilvl:.0f} avg equipped" if ilvl else "—"))
+
+    preparation = Section("Preparation")
+    preparation.add(check_consumes(data.get("auras", []), profile))
+    preparation.add(check_enchants(data.get("gear", []), profile))
+    preparation.add(check_gems(data.get("gems", []), profile,
+                               meta_present=data.get("meta_present")))
+
+    report.sections = [baseline, preparation]
+    return report
+
+
+# ---------------------------------------------------------------------------
+# WCL gathering (the only network in this module)
+# ---------------------------------------------------------------------------
+
+def _fight_label(fight: dict) -> str:
+    name = fight.get("name", "fight")
+    return f"{name} ({'kill' if fight.get('kill') else 'wipe'})"
+
+
+def _select_fight(fights: list[dict], fight_sel: str | None) -> dict | None:
+    """
+    Pick the fight whose at-pull snapshot we audit. An explicit ?fight=N wins;
+    otherwise prefer the longest *kill* (most representative of a fully-prepped
+    pull), falling back to the longest fight of any kind.
+    """
+    if not fights:
+        return None
+    if fight_sel and fight_sel.isdigit():
+        fid = int(fight_sel)
+        for f in fights:
+            if f.get("id") == fid:
+                return f
+    kills = [f for f in fights if f.get("kill")]
+    pool = kills or fights
+    return max(pool, key=lambda f: f.get("endTime", 0) - f.get("startTime", 0))
+
+
+def _gather(report_code: str, fight_sel: str | None):
+    """Return (fight, combatants, actors_by_id) for the selected fight, or raise."""
+    from core import wcl_client
+
+    fights = wcl_client.get_fights(report_code)
+    fight = _select_fight(fights, fight_sel)
+    if fight is None:
+        return None, [], {}
+    actors = wcl_client.get_master_actors(report_code)
+    combatants = wcl_client.get_combatant_info(report_code, fight["id"])
+    actors_by_id = {a.get("id"): a for a in actors}
+    return fight, combatants, actors_by_id
+
+
+# ---------------------------------------------------------------------------
+# Orchestrators
 # ---------------------------------------------------------------------------
 
 def build_audit(url: str, character: str, spec: str) -> AuditReport:
     """
-    Top-level entry: audit `character` (`spec`) in the WCL report at `url`.
-    Returns an AuditReport (call .render() for Discord text).
-
-    SCAFFOLD: the data-gathering wiring below is the integration TODO — each
-    `# TODO(wcl)` shows which existing/forthcoming wcl_client call feeds the
-    already-implemented pure check above. Until then we assemble a report skeleton
-    with UNKNOWN checks so the layout can be validated against the example doc.
+    Audit a single `character` (`spec`) in the WCL report at `url`.
+    Returns an AuditReport (call .render() for Discord text). Deterministic.
     """
     profile = get_profile(spec)
     report_code, fight_sel = parse_report_url(url)
-
     report = AuditReport(character=character, spec=spec,
                          report_code=report_code or "", fight_ids=[])
 
     if profile is None:
-        report.warnings.append(f"No audit profile for spec '{spec}' yet — add one in core/audit/profiles.py.")
+        report.warnings.append(
+            f"No audit profile for spec '{spec}' yet — add one in core/audit/profiles.py."
+        )
         return report
     if report_code is None:
         report.warnings.append("Could not parse a WCL report code from that URL.")
         return report
 
-    # TODO(wcl): resolve fight_sel → fight_ids via wcl_client.get_fights(report_code).
-    # TODO(wcl): get_master_actors → map character name → sourceID.
-    # TODO(wcl): get_combatant_info(report_code, fight_id) → gear[]/auras[]; normalize
-    #            gear into {slot, item_id, enchant_id, enchant_name, gems:[{quality}]}.
-    # TODO(wcl): new cast-table query (table dataType:Casts) → cast_counts + active%.
-    # TODO(wcl): get_rankings(report_code, fight_ids) → parse avg/best + per-fight
-    #            percentiles for the movement spread (see docs/RAID_AUDIT.md).
-    gear: list[dict] = []
-    gems: list[dict] = []
-    auras: list[dict] = []
-    cast_counts: dict[str, int] = {}
+    try:
+        fight, combatants, actors_by_id = _gather(report_code, fight_sel)
+    except Exception as exc:  # network / WCL errors are surfaced, not raised
+        log.exception("audit fetch failed for %s", character)
+        report.warnings.append(f"WCL fetch failed: {exc}")
+        return report
 
-    baseline = Section("Baseline")
-    baseline.add(check_parse(None, None))   # TODO(wcl): rankings
-    baseline.add(CheckResult("spec", "Spec", Verdict.INFO,
-                             profile.standard_build_note or "—"))
+    if fight is None:
+        report.warnings.append("No fights found in that report.")
+        return report
 
-    execution = Section("Execution")
-    execution.add(check_activity(None, profile))      # TODO(wcl): cast table
-    execution.add(check_rotation(cast_counts, profile))
+    name_to_id = {str(a.get("name", "")).lower(): a.get("id")
+                  for a in actors_by_id.values()}
+    target_id = name_to_id.get(character.lower())
+    rec = next((r for r in combatants if r.get("sourceID") == target_id), None)
+    if rec is None:
+        report.warnings.append(
+            f"{character} not found in {_fight_label(fight)} — were they in this pull?"
+        )
+        return report
 
-    preparation = Section("Preparation")
-    preparation.add(check_consumes(auras, profile))
-    preparation.add(check_enchants(gear, profile))
-    preparation.add(check_gems(gems, profile))
+    return audit_combatant(character, spec, profile, normalize_combatant(rec),
+                           report_code=report_code, fight_ids=[fight["id"]])
 
-    report.sections = [baseline, execution, preparation]
-    report.warnings.append(
-        "Scaffold: WCL data gathering not wired yet — checks show ❔ until the "
-        "`# TODO(wcl)` calls in core/audit/report.py are implemented."
-    )
-    return report
+
+def build_roster_audit(url: str, resolve_spec) -> RosterAudit:
+    """
+    Audit every profiled raider in the report at `url`.
+
+    `resolve_spec(name, wow_class) -> spec | None` maps a logged player to a
+    canonical spec key (the cog supplies one backed by the guild's character
+    registry). Players with no spec, or a spec we have no profile for, are
+    listed under `skipped` rather than dropped silently.
+    """
+    report_code, fight_sel = parse_report_url(url)
+    roster = RosterAudit(report_code=report_code or "")
+
+    if report_code is None:
+        roster.warnings.append("Could not parse a WCL report code from that URL.")
+        return roster
+
+    try:
+        fight, combatants, actors_by_id = _gather(report_code, fight_sel)
+    except Exception as exc:
+        log.exception("roster audit fetch failed")
+        roster.warnings.append(f"WCL fetch failed: {exc}")
+        return roster
+
+    if fight is None:
+        roster.warnings.append("No fights found in that report.")
+        return roster
+    roster.fight_label = _fight_label(fight)
+
+    seen: set[str] = set()
+    for rec in combatants:
+        norm = normalize_combatant(rec)
+        actor = actors_by_id.get(norm.get("source_id"), {})
+        name = actor.get("name") or f"source {norm.get('source_id')}"
+        if name.lower() in seen:
+            continue
+        seen.add(name.lower())
+
+        spec = resolve_spec(name, actor.get("subType", ""))
+        profile = get_profile(spec) if spec else None
+        if profile is None:
+            roster.skipped.append((name, f"no profile for {spec}" if spec else "unregistered"))
+            continue
+        roster.reports.append(audit_combatant(
+            name, spec, profile, norm, report_code=report_code, fight_ids=[fight["id"]]
+        ))
+
+    roster.reports.sort(key=lambda r: r.character.lower())
+    roster.skipped.sort()
+    if not roster.reports and not roster.warnings:
+        roster.warnings.append(
+            "No registered raiders with an audit profile were found in this report."
+        )
+    return roster

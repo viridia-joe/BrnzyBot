@@ -104,21 +104,43 @@ Two complementary inputs feed the rubric:
 ## Implementation plan
 
 1. **(done) Scaffold** — result model, `ELE_SHAMAN` profile, pure checks, render.
-2. **Preparation checks live** — wire `get_combatant_info`; normalize gear/auras;
-   add a gem-id→quality resolver (reuse `data/gems.json`). Highest value, lowest risk.
+2. **(done) Preparation checks live** — `core/audit/normalize.py` maps a WCL
+   `CombatantInfo` record to the normalized gear/gems/auras the checks expect;
+   `report.py` wires `get_fights`/`get_master_actors`/`get_combatant_info` and
+   runs enchants/gems/consumes (+ a free Baseline iLvl line). Shipped both
+   single-character (`build_audit`) and **whole-roster** (`build_roster_audit`),
+   surfaced via the `/audit` cog. Covered by `tests/test_audit.py` (wired into CI).
 3. **Cast table query** — add `table(dataType: Casts)`; implement rotation +
-   activity; add potion-event query.
+   activity; add potion-event query. *(check_rotation/check_activity already exist
+   and are unit-tested; they just need the cast-table feed.)*
 4. **Baseline** — `get_rankings` → parse avg/best; talent → spec deviation check.
 5. **Movement & utility** — per-fight percentile spread; interrupts/dispels.
-6. **`/audit` cog** + chunked output; optional LLM narration behind the flag.
+6. **`/audit` cog** — *(done for the Preparation cut; extend output as 3–5 land.)*
 7. **Top-parse validation** job to tune the profiles.
 
+### Decisions made in the Preparation cut
+- **Fight selection:** one at-pull snapshot per run — explicit `?fight=N` wins,
+  else the longest *kill* (fallback: longest fight). Consumes/enchants/gems are
+  per-pull, so one representative pull is enough.
+- **Spec resolution (roster):** the cog maps each logged player → canonical spec
+  via the guild's `characters` registry and passes a `resolve_spec(name, class)`
+  callback into core. Unregistered players, or specs with no profile yet, are
+  listed under "Skipped" rather than dropped silently.
+- **Gem quality:** WCL CombatantInfo gems carry item level, not a quality string,
+  so quality is inferred from TBC item-level thresholds (≥110 epic, ≥70 rare,
+  else green). Flags green gems exactly as the example doc does.
+- **Meta gem:** detected by a small known-id set; an unrecognised gem yields
+  "unknown" (never a false "missing"), so the roster under-warns rather than
+  mis-accuses. The pure `check_gems` still takes an explicit `meta_present` and
+  is unit-tested on the missing-meta path.
+- **Field-mapping caveat:** normalization follows the documented CombatantInfo
+  schema and degrades to ❔ on missing/renamed keys — so the first live report can
+  only ever require a small tweak in `normalize.py`, never a crash.
+
 ## Open questions
-- Scope of the first shippable cut — Preparation-only audit (steps 1–2) is useful
-  on its own and needs no new WCL queries beyond CombatantInfo.
-- Multi-character "raid audit" (whole roster) vs single-character.
+- ~~First shippable cut~~ → **Preparation-only, whole-roster** (done).
 - How much to weight per-fight movement percentiles vs raw parse (noisy on small
-  samples).
-- Which specs to author next (the example is ele; the team likely wants all core
-  raid specs eventually).
+  samples). *(Deferred to the Execution/Movement steps.)*
+- Which specs to author next — the example is ele; **other casters next**
+  (warlock / mage / shadow priest / balance druid), then melee/tanks/healers.
 </content>

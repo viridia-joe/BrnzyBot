@@ -79,11 +79,44 @@ class AuditReport:
     sections: list[Section] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)   # data-gathering caveats
 
+    def title(self) -> str:
+        return f"{self.character} ({self.spec})"
+
+    def render_body(self) -> str:
+        """Sections + warnings, without the top-level title (for roster nesting)."""
+        body = "\n\n".join(s.render() for s in self.sections)
+        if self.warnings:
+            body += "\n\n" + "\n".join(f"> ⚠️ {w}" for w in self.warnings)
+        return body
+
     def render(self) -> str:
         """Deterministic Discord/markdown render, mirroring the scorecard doc."""
-        head = f"# Raid Audit — {self.character} ({self.spec})"
-        body = "\n\n".join(s.render() for s in self.sections)
+        return f"# Raid Audit — {self.title()}\n\n{self.render_body()}"
+
+
+@dataclass
+class RosterAudit:
+    """A Preparation audit for every profiled raider in one WCL report/fight."""
+    report_code: str
+    fight_label: str = ""
+    reports: list[AuditReport] = field(default_factory=list)
+    skipped: list[tuple[str, str]] = field(default_factory=list)   # (name, reason)
+    warnings: list[str] = field(default_factory=list)
+
+    def render(self) -> str:
+        head = f"# Raid Audit — Preparation · {len(self.reports)} raiders"
+        if self.fight_label:
+            head += f"\n_{self.fight_label}_"
+        if self.reports:
+            body = "\n\n".join(
+                f"## {r.title()}\n{r.render_body()}" for r in self.reports
+            )
+        else:
+            body = "_No raiders with an audit profile were found in this report._"
         out = f"{head}\n\n{body}"
+        if self.skipped:
+            sk = ", ".join(f"{n} ({why})" for n, why in self.skipped)
+            out += f"\n\n_Skipped — no profile / unregistered: {sk}_"
         if self.warnings:
             out += "\n\n" + "\n".join(f"> ⚠️ {w}" for w in self.warnings)
         return out

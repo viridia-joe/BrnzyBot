@@ -12,11 +12,17 @@ three-section scorecard the team writes by hand today. Pulls parse %, rotation
 consumes, enchants, and gems straight from Warcraft Logs.
 
 Design + WCL data map: [`docs/RAID_AUDIT.md`](docs/RAID_AUDIT.md).
-Scaffold landed in `core/audit/` (result model, `ELE_SHAMAN` profile, pure
-checks, render). Remaining work is marked `# TODO(wcl)` in `core/audit/report.py`
-— mostly normalizing `get_combatant_info` and adding a `table(dataType: Casts)`
-query. Start with the Preparation checks (enchants/gems/consumes): highest value,
-no new WCL queries needed beyond CombatantInfo.
+
+**Shipped — Preparation cut (whole-roster):** `core/audit/` now wires WCL live —
+`normalize.py` maps `get_combatant_info` to normalized gear/gems/auras, and
+`report.py` runs enchants/gems/consumes (+ a Baseline iLvl line) for one raider
+(`build_audit`) or every profiled raider in the report (`build_roster_audit`),
+surfaced by the `/audit` cog. Covered by `tests/test_audit.py` (in CI), which
+reproduces the Brnzy-vs-Shermshaman example.
+
+**Remaining:** Execution (`table(dataType: Casts)` → rotation/activity — the pure
+checks already exist and are tested), Baseline parse % (`get_rankings`), movement
+& utility, then more spec profiles (other casters next). See the plan in the doc.
 
 ## Spec Override Flag
 

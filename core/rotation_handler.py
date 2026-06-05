@@ -13,19 +13,14 @@ Flow
      paragraph is appended; the deterministic report is always the product.
 
 Anomaly model (intentionally conservative — anomaly-focused, low false positives):
-  - Downrank: each WoW spell rank is a distinct game ID. We establish the
-    "expected" max-rank ID for a spell from EVIDENCE that a higher rank exists,
-    then flag the player's casts below it. Evidence is gathered from, in order:
-      1. every rank any player cast in THIS report (masterData.abilities is
-         report-wide — this is the cross-player comparison),
-      2. ranks seen in PAST analyzed reports (a small learned cache), so a
-         player who is the only one of their spec today is still measured
-         against a correct-rank cast seen historically,
-      3. an optional curated max-rank table (used only when ranks_verified).
-    If no higher rank has ever been seen anywhere, we do NOT accuse — this
-    catches both the occasional misclick AND the "button bound to an old rank,
-    wrong every cast" case, without hardcoded rank tables and without false
-    positives when there's genuinely no reference.
+  - Downrank: each WoW spell rank is a distinct game ID. Each spec profile
+    carries the verified TBC max-rank ID per watched spell (ranks_verified +
+    max_rank_ids); we flag the player's casts whose game ID is BELOW that max.
+    This catches the "button bound to an old rank, wrong every cast" case as
+    well as occasional misclicks. We deliberately do NOT infer the max rank
+    from the log environment — WCL report metadata can carry non-TBC (e.g.
+    WotLK) spell IDs, and trusting them produced false positives. Spells with no
+    verified max rank are simply not rank-checked (no guessing, no false alarms).
   - Off-rotation: spells a spec should not be casting on a DPS parse (heals,
     wrong-school nukes, wrong-build fillers), past a per-spell cast threshold.
   - Breakpoint/advisory: informational notes (e.g. Chain Lightning weaving).
@@ -97,39 +92,26 @@ def load_profile(spec: str) -> dict | None:
         return json.load(f)
 
 
-# ---------------------------------------------------------------------------
-# Learned max-rank store — accumulates the ranks of watched spells seen across
-# every analyzed report, so a player who is the only one of their spec today is
-# still measured against a correct-rank cast observed historically.
-# ---------------------------------------------------------------------------
-_LEARNED_PATH = os.path.join(config.DATA_DIR, "rotation_maxranks.json")
-
-
-def _load_learned() -> dict[str, list[int]]:
+def _derive_spec_from_log(code: str, fight_id: int, actor_id: int) -> str | None:
+    """Read the player's spec from the analyzed pull's CombatantInfo (specID)."""
     try:
-        with open(_LEARNED_PATH, encoding="utf-8") as f:
-            return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError, OSError):
+        events = wcl.get_combatant_info(code, fight_id)
+    except RuntimeError:
+        return None
+    rec = next((e for e in events if e.get("sourceID") == actor_id), None)
+    if rec is None and events:
+        rec = events[-1]
+    if not rec:
+        return None
+    from core.gear_cache import WCL_SPEC_MAP  # lazy: keep import-light for CI checks
+    return WCL_SPEC_MAP.get(rec.get("specID"))
+
+
+def verified_max_ranks(profile: dict) -> dict[str, int]:
+    """The profile's authoritative {spell: max_rank_game_id}, or {} if unverified."""
+    if not profile.get("ranks_verified"):
         return {}
-
-
-def _update_learned(abilities: list[dict], watch: set[str]) -> dict[str, set[int]]:
-    """Merge this report's ranks (for watched spells) into the store; return merged."""
-    merged = {k: set(v) for k, v in _load_learned().items()}
-    changed = False
-    for a in abilities:
-        nm, gid = a.get("name"), a.get("gameID")
-        if nm in watch and gid is not None and gid not in merged.setdefault(nm, set()):
-            merged[nm].add(gid)
-            changed = True
-    if changed:
-        try:
-            os.makedirs(config.DATA_DIR, exist_ok=True)
-            with open(_LEARNED_PATH, "w", encoding="utf-8") as f:
-                json.dump({k: sorted(v) for k, v in merged.items()}, f)
-        except OSError as e:
-            log.warning("could not persist learned max-ranks: %s", e)
-    return merged
+    return {k: int(v) for k, v in (profile.get("max_rank_ids") or {}).items()}
 
 
 # ---------------------------------------------------------------------------
@@ -268,25 +250,18 @@ class Analysis:
 
 def analyze(
     casts: list[dict], abilities: list[dict], profile: dict,
-    known_rank_ids: dict[str, set[int]] | None = None,
+    max_rank_ids: dict[str, int] | None = None,
 ) -> Analysis:
     """
     Compare a player's casts against a spec rotation profile.
 
-    `known_rank_ids` injects extra evidence of which ranks exist for a spell
-    (from past reports / a verified table). The report's own abilities table
-    (cross-player, report-wide) is always used as evidence too.
+    `max_rank_ids` is the authoritative {spell: max_rank_game_id} map (from the
+    profile's verified table). A watched spell is rank-checked only if it has an
+    entry here; casts with a game ID below the verified max are flagged. We never
+    infer the max rank from the report (WCL metadata can carry non-TBC IDs).
     """
-    known_rank_ids = known_rank_ids or {}
+    max_rank_ids = max_rank_ids or {}
     name_by_id = {a.get("gameID"): a.get("name") for a in abilities}
-
-    # Report-wide ranks per spell name — this is the cross-player comparison:
-    # masterData.abilities lists every (gameID, name) cast by ANYONE in the report.
-    ids_by_name: dict[str, set[int]] = {}
-    for a in abilities:
-        nm, gid = a.get("name"), a.get("gameID")
-        if nm is not None and gid is not None:
-            ids_by_name.setdefault(nm, set()).add(gid)
 
     # Aggregate the target player's completed casts by spell name + game ID.
     by_name: dict[str, dict] = {}
@@ -314,30 +289,23 @@ def analyze(
         rec = by_name.get(spell)
         if not rec:
             continue
-        # All ranks of this spell we have evidence for: this report (any player)
-        # + history/verified + the player's own casts.
-        known = (
-            ids_by_name.get(spell, set())
-            | known_rank_ids.get(spell, set())
-            | set(rec["ids"].keys())
-        )
-        if len(known) <= 1:
-            continue  # no evidence a higher rank exists anywhere — don't accuse
-        ref = max(known)  # higher rank IDs sort above lower ranks for these nukes
+        ref = max_rank_ids.get(spell)
+        if ref is None:
+            continue  # no verified max rank for this spell — don't guess
         low = sum(c for gid, c in rec["ids"].items() if gid < ref)
         if low <= 0:
             continue
         if low == rec["total"]:
             downranks.append(
-                f"**{spell}** — all {rec['total']} casts were at a lower rank than "
-                "the highest rank seen for this spell. That pattern usually means a "
-                "button is bound to an old rank (very common on freshly-70 "
-                "characters) rather than an in-the-moment choice — worth rebinding to max rank."
+                f"**{spell}** — all {rec['total']} casts were below max rank. Every cast "
+                "landing on one lower rank usually means a button bound to an old rank "
+                "(common on freshly-70 characters) rather than an in-the-moment choice — "
+                "rebinding to max rank is a free upgrade."
             )
         else:
             downranks.append(
                 f"**{spell}** — {low} of {rec['total']} casts were below max rank. "
-                "Could be a stray old-rank button/macro, or deliberate (movement, mana). Worth a glance."
+                "Could be a stray old-rank button/macro, or intentional (movement, mana). Worth a glance."
             )
 
     off: list[str] = []
@@ -450,8 +418,8 @@ def _format(profile: dict, rlog: _ResolvedLog, analysis: Analysis,
 # ---------------------------------------------------------------------------
 def handle_rotation_check(
     character: str,
-    spec: str,
-    realm: str,
+    spec: str | None = None,
+    realm: str = "",
     region: str = "us",
     guild_id: str = "global",
     report: str | None = None,
@@ -459,22 +427,35 @@ def handle_rotation_check(
 ) -> str:
     """
     Deterministic rotation check. Returns Discord-ready text (never posts).
-    `report` is an optional WCL code/URL override; `fight` an optional fight id.
-    """
-    profile = load_profile(spec)
-    if profile is None:
-        covered = ", ".join(covered_specs()) or "(none)"
-        return (
-            f"Rotation check doesn't cover **{spec}** yet. "
-            f"Currently supported (caster DPS): {covered}."
-        )
 
+    Works for unregistered characters: the log is resolved first, then the spec
+    is taken from a usable provided/registered `spec` or derived from the actual
+    pull. `report` is an optional WCL code/URL override; `fight` an optional id.
+    """
+    # 1. Resolve the log first — this works for any character with logs, so an
+    #    unregistered name still gets a real check (or a clear "no logs" message).
     try:
         resolved = _resolve_log(character, realm, region, report, fight)
     except RuntimeError as e:
         return f"Warcraft Logs is unreachable right now ({e}). Try again in a moment."
     if isinstance(resolved, str):
         return resolved
+
+    # 2. Resolve the spec: prefer a usable provided/registered spec, otherwise
+    #    derive it from the pull we're about to analyze (more accurate anyway).
+    spec_key = _resolve_spec_key(spec) if spec else None
+    profile = load_profile(spec_key) if spec_key else None
+    if profile is None:
+        derived = _derive_spec_from_log(resolved.code, resolved.fight_id, resolved.actor_id)
+        if derived:
+            profile = load_profile(derived)
+    if profile is None:
+        covered = ", ".join(covered_specs()) or "(none)"
+        who = f"**{spec}**" if spec else f"**{character}**'s spec"
+        return (
+            f"Rotation check doesn't cover {who} yet. "
+            f"Currently supported (caster DPS): {covered}."
+        )
 
     try:
         casts = wcl.get_casts(resolved.code, resolved.fight_id, resolved.actor_id)
@@ -486,15 +467,8 @@ def handle_rotation_check(
         return (f"No casts found for **{character}** in {resolved.fight_name} "
                 f"(`{resolved.code}`). They may not have cast anything in that pull.")
 
-    # Evidence of which ranks exist: report-wide (in analyze) + learned history +
-    # an optional verified curated table.
-    watch = set(profile.get("downrank_watch", []))
-    known = _update_learned(abilities, watch)
-    if profile.get("ranks_verified"):
-        for nm, mid in (profile.get("max_rank_ids") or {}).items():
-            known.setdefault(nm, set()).add(mid)
-
-    analysis = analyze(casts, abilities, profile, known_rank_ids=known)
+    analysis = analyze(casts, abilities, profile,
+                       max_rank_ids=verified_max_ranks(profile))
     out = _format(profile, resolved, analysis, character)
 
     if config.ENABLE_LLM:

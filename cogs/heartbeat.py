@@ -51,7 +51,7 @@ class HeartbeatCog(commands.Cog, name="Heartbeat"):
     def _content(self) -> dict:
         if self._pool is None:
             try:
-                with open(_CONTENT_PATH, encoding="utf-8") as f:
+                with open(_CONTENT_PATH, encoding="utf-8-sig") as f:
                     self._pool = json.load(f)
             except FileNotFoundError:
                 log.warning("fun_content.json not found — heartbeat will be silent")

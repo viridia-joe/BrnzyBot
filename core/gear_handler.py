@@ -232,6 +232,9 @@ _SLOT_ORDER = [
     "Main Hand", "Off Hand", "Wand", "Ranged", "Totem",
 ]
 
+# Insert a blank line before these slots to visually group armor / jewelry / weapons
+_SECTION_BREAKS = {"Ring", "Main Hand"}
+
 _PHASE_LABELS = {1: "Phase 1", 2: "Phase 2", 3: "Phase 3", 4: "Phase 4", 5: "Phase 5"}
 
 
@@ -343,6 +346,11 @@ def handle_gear_list(
         if i >= len(items):
             continue
         slot_idx[slot] = i + 1
+
+        # Visual breathing room between armor / jewelry / weapons sections
+        if slot_idx[slot] == 1 and slot in _SECTION_BREAKS:
+            lines.append("")
+
         g = items[i]
 
         cur_name = g["name"]
@@ -354,23 +362,23 @@ def handle_gear_list(
             bis_list = bis_by_slot.get(slot, [])
             sr = bis_list[bi] if bi < len(bis_list) else None
             bis_idx[slot] = bi + 1
+            marker = "🔥"  # default; overwritten when an upgrade exists
 
             if sr is None:
-                line = f"**{slot}** {cur_name}{set_tag} `{cur_ep:.1f}`"
+                line = f"🔥 **{slot}** {cur_name}{set_tag} `{cur_ep:.1f}`"
                 if slot in ("Main Hand", "Off Hand"):
                     two_hand = bis_by_slot.get("Two-Hand", []) or bis_by_slot.get("Weapon", [])
                     one_hand  = bis_by_slot.get("One Hand", [])
                     if two_hand and slot == "Main Hand":
-                        # Treat MH+OH as a stat-stick pair; compare combined EP vs 2H
                         two_h_sr = two_hand[0]
                         oh_ep = cur_ep_by_slot.get("Off Hand", 0.0)
                         combined_gain = two_h_sr.ep - oh_ep
                         pct_off = combined_gain / two_h_sr.ep if two_h_sr.ep > 0 else 0
-                        marker = "❄️" if pct_off > 0.20 else ("" if pct_off > 0.10 else "🔥")
+                        marker = "❄️" if pct_off > 0.20 else ("➡️" if pct_off > 0.10 else "🔥")
                         if combined_gain > 0.5:
                             line = (
-                                f"**{slot}** {cur_name} `{cur_ep:.1f}` "
-                                f"→ {two_h_sr.item_name} (2H) **+{combined_gain:.1f}** {marker}"
+                                f"{marker} **{slot}** {cur_name} `{cur_ep:.1f}` "
+                                f"→ {two_h_sr.item_name} (2H) **+{combined_gain:.1f}**"
                             )
                             src_str = f" — {two_h_sr.source}" if two_h_sr.source else ""
                             vdesc = (
@@ -378,33 +386,28 @@ def handle_gear_list(
                                 f"+{combined_gain:.1f} over MH+OH pair{src_str})"
                             )
                         else:
-                            line = f"**{slot}** {cur_name} `{cur_ep:.1f}` {marker or '🔥'}"
+                            line = f"🔥 **{slot}** {cur_name} `{cur_ep:.1f}`"
                             vdesc = f"BiS ✓ ({two_h_sr.item_name} 2H is not a meaningful upgrade over MH+OH pair)"
                         _shown_2h_name = two_h_sr.item_name
                     elif two_hand and slot == "Off Hand":
                         ref = f" ({_shown_2h_name})" if _shown_2h_name else f" ({two_hand[0].item_name})"
                         vdesc = f"N/A — replaced by 2H{ref}, see Main Hand"
                     elif one_hand and slot == "Off Hand":
-                        # "One Hand" weapon placed in Off Hand slot by optimizer
                         oh_sr = one_hand[0]
-                        oh_label = "🔥" if oh_sr.was_equipped else f"→ {oh_sr.item_name}"
-                        line = (
-                            f"**{slot}** {cur_name}{set_tag} `{cur_ep:.1f}` {oh_label}"
-                            if oh_sr.was_equipped
-                            else f"**{slot}** {cur_name} `{cur_ep:.1f}` → {oh_sr.item_name}"
-                        )
+                        if oh_sr.was_equipped:
+                            line = f"🔥 **{slot}** {cur_name}{set_tag} `{cur_ep:.1f}`"
+                        else:
+                            line = f"➡️ **{slot}** {cur_name} `{cur_ep:.1f}` → {oh_sr.item_name}"
                         vdesc = "BiS ✓" if oh_sr.was_equipped else f"BiS: {oh_sr.item_name} ({oh_sr.source})"
                     else:
                         vdesc = "no BiS data"
                 else:
                     vdesc = "no BiS data"
             elif sr.was_equipped:
-                # Currently wearing BiS 🔥 — check this BEFORE the equipped_names guard
-                line = f"**{slot}** {cur_name}{set_tag} `{cur_ep:.1f}` 🔥"
+                line = f"🔥 **{slot}** {cur_name}{set_tag} `{cur_ep:.1f}`"
                 vdesc = "BiS ✓"
             elif sr.item_name in equipped_names:
-                # BiS is a unique already worn in the other ring/trinket slot
-                line = f"**{slot}** {cur_name}{set_tag} `{cur_ep:.1f}`"
+                line = f"🔥 **{slot}** {cur_name}{set_tag} `{cur_ep:.1f}`"
                 vdesc = f"BiS ({sr.item_name}) already worn"
             else:
                 gain = sr.ep
@@ -413,20 +416,19 @@ def handle_gear_list(
                 if pct_off <= 0.10:
                     marker = "🔥"
                 elif pct_off <= 0.20:
-                    marker = ""
+                    marker = "➡️"
                 else:
                     marker = "❄️"
                 src_str = f" — {sr.source}" if sr.source else ""
                 if gain > 0.5:
                     line = (
-                        f"**{slot}** {cur_name} `{cur_ep:.1f}` "
-                        f"→ {sr.item_name} **+{gain:.1f}** {marker}"
+                        f"{marker} **{slot}** {cur_name} `{cur_ep:.1f}` "
+                        f"→ {sr.item_name} **+{gain:.1f}**"
                     )
                 else:
-                    line = f"**{slot}** {cur_name}{set_tag} `{cur_ep:.1f}` {marker}"
+                    line = f"{marker} **{slot}** {cur_name}{set_tag} `{cur_ep:.1f}`"
 
                 if gain < 0:
-                    # Equipped item is better than anything in the DB for this slot
                     vdesc = f"BiS ✓ (best in DB is {sr.item_name} at {bis_ep:.0f} EP — already better)"
                 else:
                     vdesc = f"BiS: {sr.item_name} ({bis_ep:.0f} EP, {pct_off*100:.0f}% off{src_str})"
@@ -435,7 +437,7 @@ def handle_gear_list(
                 line = f"{line}  · _{vdesc}_"
             lines.append(line)
         else:
-            lines.append(f"**{slot}** {cur_name}{set_tag} `{cur_ep:.1f}`")
+            lines.append(f"🔥 **{slot}** {cur_name}{set_tag} `{cur_ep:.1f}`")
 
     if context.warnings:
         lines.append("")

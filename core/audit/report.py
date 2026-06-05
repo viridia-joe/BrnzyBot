@@ -54,61 +54,107 @@ def parse_report_url(url: str) -> tuple[str | None, str | None]:
 # Pure check functions — Preparation
 # ---------------------------------------------------------------------------
 
+# Enchant severity by slot. Missing a MAJOR enchant is a real stat loss; missing
+# only MINOR enchants is closer to A → A+. Validated against TBC values: weapon,
+# helm, legs, shoulders (and a hunter's ranged scope, slot "Relic") are the heavy
+# hitters; chest/boots/wrist/hands/back/off-hand are comparatively small.
+MAJOR_ENCHANT_SLOTS = {"Head", "Legs", "Shoulder", "Main Hand", "Off Hand", "Relic"}
+
+_VERDICT_RANK = {Verdict.PASS: 0, Verdict.INFO: 1, Verdict.WARN: 2, Verdict.FAIL: 3}
+
+
+def _worst(a: Verdict, b: Verdict) -> Verdict:
+    return a if _VERDICT_RANK.get(a, 0) >= _VERDICT_RANK.get(b, 0) else b
+
+
 def check_enchants(gear: list[dict], profile: SpecProfile) -> CheckResult:
     """
     gear: list of normalized slot dicts: {slot, item_id, enchant_id, enchant_name}.
     An enchant counts as present when enchant_id is truthy.
+
+    Missing a MAJOR enchant (weapon, helm, legs, shoulders, hunter ranged scope)
+    is a real stat loss → FAIL. Missing only MINOR enchants (chest, boots, wrist,
+    hands, back, off-hand) is closer to A → A+ → WARN.
     """
     want = set(profile.enchantable_slots)
-    present, missing = [], []
-    seen_slots: dict[str, int] = {}
+    present, missing_major, missing_minor = [], [], []
     for g in gear:
         slot = g.get("slot", "")
         if slot not in want:
             continue
-        # de-dupe dual slots by occurrence
-        seen_slots[slot] = seen_slots.get(slot, 0) + 1
         if g.get("enchant_id"):
             present.append(slot)
+        elif slot in MAJOR_ENCHANT_SLOTS:
+            missing_major.append(slot)
         else:
-            missing.append(slot)
+            missing_minor.append(slot)
 
     have = len(present)
-    total = have + len(missing)
+    total = have + len(missing_major) + len(missing_minor)
     if total == 0:
         return CheckResult("enchants", "Enchants", Verdict.UNKNOWN,
                            "no gear/enchant data in log")
-    verdict = Verdict.PASS if not missing else (Verdict.WARN if have >= total - 2 else Verdict.FAIL)
-    summ = f"{have}/{total} enchantable slots"
-    if missing:
-        summ += f" — missing {', '.join(missing)}"
-    return CheckResult("enchants", "Enchants", verdict, summ,
-                       evidence={"present": present, "missing": missing})
+    if missing_major:
+        verdict = Verdict.FAIL
+    elif missing_minor:
+        verdict = Verdict.WARN
+    else:
+        verdict = Verdict.PASS
+    summ = f"{have}/{total} enchantable slots enchanted"
+    parts = []
+    if missing_major:
+        parts.append(f"missing major: {', '.join(missing_major)}")
+    if missing_minor:
+        parts.append(f"missing minor: {', '.join(missing_minor)}")
+    if parts:
+        summ += " — " + "; ".join(parts)
+    detail = ""
+    if missing_major:
+        detail = ("Major slots (weapon, helm, legs, shoulders) are big stat gains. "
+                  "Minor slots like chest/boots are closer to A → A+.")
+    return CheckResult("enchants", "Enchants", verdict, summ, detail,
+                       evidence={"present": present, "missing_major": missing_major,
+                                 "missing_minor": missing_minor})
 
 
-def check_gems(gems: list[dict], profile: SpecProfile, meta_present: bool | None = None) -> CheckResult:
+def check_gems(gems: list[dict], profile: SpecProfile,
+               meta_present: bool | None = None,
+               empty_sockets: int | None = None) -> CheckResult:
     """
     gems: list of {quality} dicts (quality in "uncommon"|"rare"|"epic"|...).
-    Flags any gem below the profile's min quality (green/"uncommon").
+    Flags empty sockets, gems below the profile's min quality (green/"uncommon"),
+    and a missing meta gem. empty_sockets is computed against the item DB's socket
+    counts (None when that data isn't available → simply not checked).
     """
-    if not gems:
-        return CheckResult("gems", "Gems", Verdict.UNKNOWN, "no gem data in log")
+    if not gems and empty_sockets is None and meta_present is None:
+        return CheckResult("gems", "Gems", Verdict.UNKNOWN, "no gem/socket data in log")
+
     order = {"poor": 0, "common": 1, "uncommon": 2, "rare": 3, "epic": 4, "legendary": 5}
     floor = order.get(profile.min_gem_quality, 3)
     below = [g for g in gems if order.get(str(g.get("quality", "")).lower(), 99) < floor]
     total = len(gems)
+
+    verdict = Verdict.PASS
+    issues: list[str] = []
+    if empty_sockets:
+        issues.append(f"{empty_sockets} empty socket{'s' if empty_sockets != 1 else ''}")
+        verdict = _worst(verdict, Verdict.WARN if empty_sockets <= 2 else Verdict.FAIL)
     if below:
-        verdict = Verdict.WARN if len(below) <= 2 else Verdict.FAIL
-        summ = f"{len(below)}/{total} gems below {profile.min_gem_quality} quality"
-    else:
-        verdict = Verdict.PASS
-        summ = f"all {total} gems {profile.min_gem_quality}+ quality"
-    detail = ""
+        issues.append(f"{len(below)}/{total} gems below {profile.min_gem_quality} quality")
+        verdict = _worst(verdict, Verdict.WARN if len(below) <= 2 else Verdict.FAIL)
     if meta_present is False and profile.meta_gem:
-        detail = f"meta gem missing — want {profile.meta_gem}"
-        verdict = Verdict.WARN if verdict == Verdict.PASS else verdict
-    return CheckResult("gems", "Gems", verdict, summ, detail,
-                       evidence={"below": len(below), "total": total, "meta": meta_present})
+        issues.append(f"meta gem missing — want {profile.meta_gem}")
+        verdict = _worst(verdict, Verdict.WARN)
+
+    if issues:
+        summ = "; ".join(issues)
+    elif total:
+        summ = f"all {total} gems {profile.min_gem_quality}+ quality, sockets filled"
+    else:
+        summ = "sockets filled" if empty_sockets == 0 else "no gems socketed"
+    return CheckResult("gems", "Gems", verdict, summ,
+                       evidence={"below": len(below), "total": total,
+                                 "meta": meta_present, "empty_sockets": empty_sockets})
 
 
 def check_consumes(auras: list[dict], profile: SpecProfile, potion_count: int | None = None) -> CheckResult:
@@ -243,7 +289,8 @@ def audit_combatant(
     preparation.add(check_consumes(data.get("auras", []), profile))
     preparation.add(check_enchants(data.get("gear", []), profile))
     preparation.add(check_gems(data.get("gems", []), profile,
-                               meta_present=data.get("meta_present")))
+                               meta_present=data.get("meta_present"),
+                               empty_sockets=data.get("empty_sockets")))
 
     report.sections = [baseline, preparation]
     return report
@@ -252,6 +299,49 @@ def audit_combatant(
 # ---------------------------------------------------------------------------
 # WCL gathering (the only network in this module)
 # ---------------------------------------------------------------------------
+
+def _count_empty_sockets(gear: list[dict]) -> int | None:
+    """
+    Empty (ungemmed) non-meta sockets across equipped gear, using the item DB's
+    socket counts vs. the gems actually socketed. Returns None when the item DB
+    isn't present (e.g. dev box) so the gem check skips empty-socket scoring
+    rather than guessing.
+    """
+    import json as _json
+    import os as _os
+    import sqlite3 as _sqlite3
+
+    import config
+    from core.audit.normalize import META_GEM_IDS
+
+    if not _os.path.exists(config.ITEM_DB_PATH):
+        return None
+    try:
+        conn = _sqlite3.connect(config.ITEM_DB_PATH)
+    except _sqlite3.Error:
+        return None
+    empty = 0
+    try:
+        cur = conn.cursor()
+        for g in gear:
+            iid = g.get("item_id")
+            if not iid:
+                continue
+            row = cur.execute("SELECT sockets FROM items WHERE item_id = ?", (iid,)).fetchone()
+            if not row or not row[0]:
+                continue
+            try:
+                colors = _json.loads(row[0])
+            except (ValueError, TypeError):
+                continue
+            nonmeta_sockets = sum(1 for c in colors if str(c).lower() != "meta")
+            socketed = sum(1 for gm in (g.get("gems") or [])
+                           if gm.get("item_id") not in META_GEM_IDS)
+            empty += max(0, nonmeta_sockets - socketed)
+    finally:
+        conn.close()
+    return empty
+
 
 def _fight_label(fight: dict) -> str:
     name = fight.get("name", "fight")
@@ -334,7 +424,9 @@ def build_audit(url: str, character: str, spec: str) -> AuditReport:
         )
         return report
 
-    return audit_combatant(character, spec, profile, normalize_combatant(rec),
+    norm = normalize_combatant(rec)
+    norm["empty_sockets"] = _count_empty_sockets(norm.get("gear", []))
+    return audit_combatant(character, spec, profile, norm,
                            report_code=report_code, fight_ids=[fight["id"]])
 
 
@@ -380,6 +472,7 @@ def build_roster_audit(url: str, resolve_spec) -> RosterAudit:
         if profile is None:
             roster.skipped.append((name, f"no profile for {spec}" if spec else "unregistered"))
             continue
+        norm["empty_sockets"] = _count_empty_sockets(norm.get("gear", []))
         roster.reports.append(audit_combatant(
             name, spec, profile, norm, report_code=report_code, fight_ids=[fight["id"]]
         ))

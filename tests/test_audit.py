@@ -17,8 +17,8 @@ from core.audit.checks import Verdict
 from core.audit.normalize import normalize_combatant
 from core.audit.profiles import ELE_SHAMAN, get_profile
 from core.audit.report import (
-    audit_combatant, build_roster_audit, check_gems, check_rotation,
-    parse_report_url,
+    audit_combatant, build_roster_audit, check_enchants, check_gems,
+    check_rotation, parse_report_url,
 )
 
 # Enchantable slot → positional index in the WCL CombatantInfo gear array.
@@ -102,7 +102,49 @@ def test_check_gems_flags_missing_meta():
     res = check_gems([{"quality": "rare"}, {"quality": "rare"}], ELE_SHAMAN,
                      meta_present=False)
     assert res.verdict == Verdict.WARN
-    assert "meta" in res.detail.lower()
+    assert "meta" in res.summary.lower()
+
+
+def test_enchant_severity_major_vs_minor():
+    prof = get_profile("destro_warlock")
+    slots = list(prof.enchantable_slots)
+
+    def gear(missing):
+        return [{"slot": s, "item_id": 1, "enchant_id": (0 if s in missing else 9)}
+                for s in slots]
+
+    # Missing the weapon (a major slot) is a real loss → FAIL
+    major = check_enchants(gear({"Main Hand"}), prof)
+    assert major.verdict == Verdict.FAIL
+    assert "Main Hand" in major.summary
+    # Missing only boots (a minor slot) is A → A+ → WARN
+    minor = check_enchants(gear({"Feet"}), prof)
+    assert minor.verdict == Verdict.WARN
+    # Fully enchanted → PASS
+    assert check_enchants(gear(set()), prof).verdict == Verdict.PASS
+
+
+def test_check_gems_flags_empty_sockets():
+    prof = get_profile("destro_warlock")
+    res = check_gems([{"quality": "rare"}], prof, meta_present=True, empty_sockets=3)
+    assert res.verdict == Verdict.FAIL
+    assert "empty socket" in res.summary
+    clean = check_gems([{"quality": "rare"}], prof, meta_present=True, empty_sockets=0)
+    assert clean.verdict == Verdict.PASS
+
+
+def test_all_dps_specs_have_audit_profiles():
+    dps = [
+        "affliction_warlock", "destro_warlock", "fire_destro_warlock", "arcane_mage",
+        "fire_mage", "frost_mage", "shadow_priest", "balance_druid", "ele_shaman",
+        "arms_warrior", "fury_warrior", "ret_paladin", "combat_rogue",
+        "assassination_rogue", "enh_shaman", "feral_cat_druid",
+        "bm_hunter", "mm_hunter", "survival_hunter",
+    ]
+    assert all(get_profile(s) is not None for s in dps)
+    # dual-wielders carry an Off Hand enchant slot; feral (forms) carries none on weapons
+    assert "Off Hand" in get_profile("fury_warrior").enchantable_slots
+    assert "Main Hand" not in get_profile("feral_cat_druid").enchantable_slots
 
 
 def test_check_rotation_flags_earth_shock_filler():

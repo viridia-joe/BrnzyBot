@@ -15,8 +15,10 @@ User-facing overview is in [`README.md`](README.md); deeper design in
 ## Golden rules
 
 1. **Keep core commands deterministic.** `/gearprio`, `/gearcheck`, `/strat`,
-   `/abilities`, `/simexport`, and all admin/billing/botduel commands must work
-   with `ENABLE_LLM=false` and **no** network calls to any model. If you add a
+   `/abilities`, `/simexport`, `/rotationcheck`, and all admin/billing/botduel
+   commands must work with `ENABLE_LLM=false` and **no** network calls to any
+   model. (`/rotationcheck` calls WCL for cast data, but its anomaly report is
+   fully deterministic; the LLM "coach" paragraph is gated on `ENABLE_LLM`.) If you add a
    feature that needs an LLM, gate it on `config.ENABLE_LLM` and provide a
    deterministic fallback. Grep for existing `if not config.ENABLE_LLM:` guards
    to match the pattern.
@@ -56,11 +58,12 @@ Discord ──▶ bot.py ──▶ cogs/*           (command surface, all I/O)
   default 8081), and loads the cogs in `setup_hook`.
 - **`config.py`** — the single source of env vars, filesystem paths, the
   `ENABLE_LLM` flag, and model routing names. Import it as `import config`.
-- **`cogs/`** — one cog per feature: `gear`, `strategy`, `bossguide`,
+- **`cogs/`** — one cog per feature: `gear`, `rotation`, `strategy`, `bossguide`,
   `listener` (NL gate), `admin`, `billing`, `onboarding`, `simexport`,
   `botduel`. Registered in `bot.py:setup_hook`.
 - **`core/`** — pure logic. Notable: `gear_optimizer.py` (the MIP solver),
   `gear_handler.py` / `gear_reasoning.py`, `wcl_client.py` + `gear_cache.py`,
+  `rotation_handler.py` (cast-by-cast anomaly check; profiles in `data/rotations/`),
   `classifier.py` (intent parsing — deterministic first, LLM fallback),
   `strategy_context.py` / `strategy_handler.py`, `bossguide_*`, `node_health.py`.
 - **`db/`** — per-server config in `brnzybot.db` (verbosity, characters, realm,

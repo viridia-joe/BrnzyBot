@@ -37,6 +37,7 @@ from db.server_config import (
     set_guild_config,
     set_guild_phase,
     get_guild_phase,
+    set_include_arena,
     set_heartbeat_channel,
     set_officer_role,
     set_response_target,
@@ -108,6 +109,22 @@ class AdminCog(commands.Cog, name="Admin"):
             "Gear recommendations will now filter by phase-appropriate sources.",
             ephemeral=True,
         )
+
+    @setup_group.command(
+        name="arena",
+        description="Include Season-2 arena (rated) gear in /gearcheck & /gearprio BiS (off by default).",
+    )
+    @app_commands.describe(enabled="True to consider arena gear for PvE BiS; False for PvE-only.")
+    @_require_manage_guild()
+    async def setup_arena(self, interaction: discord.Interaction, enabled: bool) -> None:
+        guild_id = str(interaction.guild_id)
+        set_include_arena(guild_id, enabled)
+        if enabled:
+            msg = ("Season-2 arena gear is now **included** in BiS recommendations "
+                   "(rated arena pieces only — battleground honor gear stays excluded).")
+        else:
+            msg = "Arena gear is now **excluded** — gear recommendations are PvE-only."
+        await interaction.response.send_message(msg, ephemeral=True)
 
     @setup_group.command(
         name="heartbeat",

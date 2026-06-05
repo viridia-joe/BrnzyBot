@@ -51,6 +51,7 @@ _MIGRATIONS = [
     "ALTER TABLE guild_config ADD COLUMN botduel_log_channel_id TEXT",
     "ALTER TABLE guild_config ADD COLUMN heartbeat_channel_id TEXT",
     "ALTER TABLE guild_config ADD COLUMN last_haiku_ts INTEGER",
+    "ALTER TABLE guild_config ADD COLUMN include_arena INTEGER NOT NULL DEFAULT 0",
 ]
 
 
@@ -174,6 +175,26 @@ def get_guild_phase(guild_id: str, path: str = DB_PATH) -> int:
             "SELECT current_phase FROM guild_config WHERE guild_id=?", (guild_id,)
         ).fetchone()
     return row["current_phase"] if row else 1
+
+
+def get_include_arena(guild_id: str, path: str = DB_PATH) -> bool:
+    """Whether this guild opts Season-2 arena (rated) gear into PvE BiS. Default off."""
+    with _conn(path) as conn:
+        row = conn.execute(
+            "SELECT include_arena FROM guild_config WHERE guild_id=?", (guild_id,)
+        ).fetchone()
+    return bool(row["include_arena"]) if row else False
+
+
+def set_include_arena(guild_id: str, enabled: bool, path: str = DB_PATH) -> None:
+    with _conn(path) as conn:
+        conn.execute(
+            """INSERT INTO guild_config (guild_id, include_arena)
+               VALUES (?, ?)
+               ON CONFLICT (guild_id)
+               DO UPDATE SET include_arena=excluded.include_arena""",
+            (guild_id, 1 if enabled else 0),
+        )
 
 
 # ---------------------------------------------------------------------------

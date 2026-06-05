@@ -177,6 +177,25 @@ LOOT_TABLES = [
     ("Crafted", "Leatherworking (Netherstrike)", 100, [29515, 29517, 29516]),
     ("Crafted", "Leatherworking (Windhawk)", 100, [29524, 29522, 29523]),
     ("Crafted", "Engineering (Goggles)", 100, [32461, 32472, 32473, 32474, 32475, 32476, 34847, 34848, 34849, 34851, 35182, 35185]),
+
+    # === OGRI'LA / SKYGUARD DAILIES (Phase 2) ===
+    # The WowSims re-import brings these in with phase=2; with an empty source_type
+    # they are already BiS-eligible, so this entry only adds the source label.
+    # IDs left to a DB audit so we never mislabel — fill from:
+    #   SELECT item_id, name FROM items WHERE phase=2 AND source_type='';
+    ("Quest", "Ogri'la / Skyguard Dailies", 100, [
+        # TODO(verify): populate from the rebuilt DB.
+    ]),
+]
+
+# Sources applied by item-NAME prefix rather than by enumerating IDs. The PvP
+# arena sets follow a strict "<Season Title> Gladiator's ..." naming convention,
+# so a prefix match labels every piece (armor, jewelry, weapons, off-pieces)
+# comprehensively without a hand-maintained ID list.
+# Format: (source_type, source_name, effort_score, name_prefix)
+NAME_PREFIX_SOURCES = [
+    ("Arena", "Season 2 Arena (Merciless Gladiator)", 4.0, "Merciless Gladiator's "),
+    ("Arena", "Season 1 Arena (Gladiator)",           4.0, "Gladiator's "),
 ]
 
 
@@ -193,6 +212,8 @@ def main():
         "Heroic Dungeon": 3.0,
         "Badge": 2.5,
         "Crafted": 3.0,
+        "Arena": 4.0,
+        "Quest": 2.0,
     }
 
     updated = 0
@@ -206,11 +227,22 @@ def main():
             if c.rowcount > 0:
                 updated += 1
 
+    # Name-prefix sources (PvP arena sets) — only touches still-unclassified rows.
+    prefix_updated = 0
+    for source_type, source_name, effort, name_prefix in NAME_PREFIX_SOURCES:
+        c.execute(
+            "UPDATE items SET source_type=?, source_name=?, drop_rate=?, effort_score=? "
+            "WHERE name LIKE ? AND (source_type = '' OR source_type = 'Unknown')",
+            (source_type, source_name, 100, effort, name_prefix + "%"),
+        )
+        prefix_updated += c.rowcount
+    updated += prefix_updated
+
     conn.commit()
 
     # Report
     c.execute("SELECT source_type, COUNT(*) FROM items WHERE source_type != '' AND source_type != 'Unknown' GROUP BY source_type ORDER BY COUNT(*) DESC")
-    print(f"\n  Updated {updated} items from loot tables")
+    print(f"\n  Updated {updated} items from loot tables ({prefix_updated} via name prefix)")
     print("  Classified source distribution:")
     for row in c.fetchall():
         print(f"    {row[0]}: {row[1]}")

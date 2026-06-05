@@ -21,6 +21,8 @@ CREATE TABLE IF NOT EXISTS guild_config (
     region          TEXT NOT NULL DEFAULT 'us',
     current_phase   INTEGER NOT NULL DEFAULT 1,
     interest_threshold INTEGER NOT NULL DEFAULT 5,
+    -- Opt Season-2 arena (rated) gear into PvE BiS recommendations (0 = off)
+    include_arena   INTEGER NOT NULL DEFAULT 0,
     setup_at        TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

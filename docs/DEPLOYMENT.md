@@ -45,6 +45,24 @@ to stay within the box's 1 GB of RAM.
    ```
    `brnzybot.db` is created automatically on first start.
 
+## Rolling the bot to a new content phase
+
+When a phase ships (e.g. Phase 2 — SSC / The Eye / Ogri'la / Season 2 arena):
+
+1. **Refresh the item DB** so newly-relevant items land with their correct phase
+   (the WowSims export already tags each item's phase; the enrich pass adds source
+   labels, including name-prefix labels for the PvP arena sets):
+   ```bash
+   curl -s https://raw.githubusercontent.com/wowsims/tbc/master/sim/core/items/all_items.go -o /tmp/all_items.go
+   python3 scripts/import-items.py
+   python3 scripts/enrich-boss-drops.py
+   ```
+2. **Flip each guild forward** in Discord: `/setup phase 2`. The optimizer then
+   considers Phase 1 **and** 2 gear, so still-BiS Phase-1 pieces stay in the pool
+   (shown with 🥇 in `/gearcheck`, vs 🔥 for current-tier BiS).
+3. **(optional)** `/setup arena true` to let `/gearcheck` and `/gearprio` consider
+   Season-2 rated arena gear in BiS (battleground honor gear stays excluded).
+
 ## Deploying
 
 - **Automatic:** push to `master`. `deploy.yml` SSHes in, `git reset --hard`,

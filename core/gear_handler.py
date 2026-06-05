@@ -23,7 +23,7 @@ from core.gear_reasoning import annotate
 from core.node_health import check_nodes
 from core.gear_optimizer import solve_upgrades, solve_bis, OptimizeParams
 from core.classifier import SPEC_ALIASES
-from db.server_config import get_guild_phase
+from db.server_config import get_guild_phase, get_include_arena
 
 ITEM_DB_PATH = config.ITEM_DB_PATH
 
@@ -61,7 +61,8 @@ class PriorityEntry:
     source:     str         # "Karazhan (Moroes)", "Crafted", etc.
 
 
-def _build_upgrade_priority(character, spec, snapshot, context, phase: int = 1) -> list[PriorityEntry]:
+def _build_upgrade_priority(character, spec, snapshot, context, phase: int = 1,
+                            include_arena: bool = False) -> list[PriorityEntry]:
     """
     Run the optimizer and return a list of PriorityEntry objects sorted by
     net EP gain descending. This is the single source of truth for gearprio.
@@ -72,6 +73,7 @@ def _build_upgrade_priority(character, spec, snapshot, context, phase: int = 1) 
     is_alliance_shaman = "shaman" in spec.lower() and getattr(snapshot, "faction", -1) == 1
     racial_hit = 13 if is_alliance_shaman else 0
     params = OptimizeParams(phase=phase, include_pvp=False,
+                            include_arena=include_arena,
                             include_world_boss=False, max_changes=20,
                             racial_hit=racial_hit,
                             gem_hit_weight=context.hit_cap.effective_weight)
@@ -220,7 +222,8 @@ def handle_gear_question(
 
     phase    = phase_override if phase_override is not None else get_guild_phase(guild_id)
     context  = build_context(snapshot, spec)
-    priority = _build_upgrade_priority(character, spec, snapshot, context, phase=phase)
+    priority = _build_upgrade_priority(character, spec, snapshot, context, phase=phase,
+                                       include_arena=get_include_arena(guild_id))
     skeleton = _format_priority_skeleton(character, context.spec_desc, context, priority, phase=phase)
 
     log.info(
@@ -295,6 +298,7 @@ def handle_gear_list(
                 params = OptimizeParams(
                     phase=phase,
                     include_pvp=False,
+                    include_arena=get_include_arena(guild_id),
                     include_world_boss=False,
                     mode="bis",
                     racial_hit=13 if is_alliance_shaman else 0,

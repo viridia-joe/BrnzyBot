@@ -117,7 +117,8 @@ class OptimizeParams:
     fight_length_sec:  int   = 120     # 2 min default; affects healer objective weighting
     mode:              str   = "bis"   # "bis" or "upgrades"
     max_changes:       int   = 99      # for upgrades mode; 99 = unrestricted
-    include_pvp:       bool  = False   # include Arena / PvP Honor gear
+    include_pvp:       bool  = False   # include Arena (rated) AND PvP Honor gear
+    include_arena:     bool  = False   # include Arena (rated) gear but still skip Honor gear
     include_world_boss: bool = True    # include world boss drops
     racial_hit:        int   = 0       # hit rating reduction from racial (e.g. 13 for Heroic Presence)
     gem_hit_weight:    float = -1.0   # effective hit weight for gem valuation; -1 = use spec default
@@ -380,10 +381,20 @@ def _load_candidates(
 
     quality_filter = "quality IN ('Epic', 'Rare', 'Uncommon')"
     source_filter_parts = []
-    if not params.include_pvp:
-        source_filter_parts.append("source_type NOT IN ('Arena', 'PvP')")
+    # Arena (rated) gear is gated by include_pvp OR include_arena; Honor gear only
+    # by include_pvp. So a PvE guild can opt into S2 arena BiS without pulling in
+    # battleground honor gear.
+    if params.include_pvp:
+        excluded_sources = []
+    elif params.include_arena:
+        excluded_sources = ["PvP"]
+    else:
+        excluded_sources = ["Arena", "PvP"]
     if not params.include_world_boss:
-        source_filter_parts.append("source_type != 'World Boss'")
+        excluded_sources.append("World Boss")
+    if excluded_sources:
+        in_list = ", ".join(f"'{s}'" for s in excluded_sources)
+        source_filter_parts.append(f"source_type NOT IN ({in_list})")
 
     source_filter = ("AND " + " AND ".join(source_filter_parts)
                      if source_filter_parts else "")

@@ -1,0 +1,33 @@
+{
+  "spec": "survival_hunter",
+  "display": "Survival Hunter",
+  "class": "Hunter",
+  "role": "ranged_dps",
+  "source": "Icy Veins / Wowhead TBC guides + WCL top Survival parses",
+  "summary": "Steady Shot weave, Serpent Sting maintained, Multi-Shot on cooldown. Expose Weakness (armor debuff on crits) is the primary raid contribution. Readiness resets all cooldowns on a 5-min timer.",
+
+  "core_spells": ["Steady Shot", "Serpent Sting", "Multi-Shot", "Arcane Shot", "Rapid Fire", "Readiness"],
+
+  "downrank_watch": ["Serpent Sting", "Arcane Shot", "Multi-Shot", "Hunter's Mark"],
+  "ranks_verified": true,
+  "max_rank_ids": {
+    "Serpent Sting": 25295
+  },
+
+  "off_rotation": {
+    "Aspect of the Monkey":  {"min_casts": 5,  "note": "should be in Aspect of the Hawk for DPS — Monkey is melee avoidance only"},
+    "Aspect of the Viper":   {"min_casts": 15, "note": "sustained Viper use means running OOM — check consumables"},
+    "Wing Clip":             {"min_casts": 5,  "note": "melee slow on a ranged DPS parse"},
+    "Wyvern Sting":          {"min_casts": 3,  "note": "CC utility ability used as a filler — should not appear on a non-CC encounter"},
+    "Volley":                {"min_casts": 5,  "note": "AoE channel on a single-target encounter"}
+  },
+
+  "breakpoint": {
+    "spells": ["Steady Shot", "Multi-Shot"],
+    "note": "Survival's shot rotation is mechanically identical to BM — the difference is in the talent tree (Expose Weakness, Lightning Reflexes, Resourcefulness). A survival hunter parse that looks exactly like a BM parse is working correctly."
+  },
+
+  "advisory": "Expose Weakness procs on ranged crits and reduces the target's armor — this is a significant raid DPS contribution that doesn't show directly in the hunter's personal damage. Readiness (resets all cooldowns on a 5-min timer) enables a double-Rapid Fire burst window. Note: Explosive Shot and Kill Shot do NOT exist in TBC — they were added in Wrath.",
+
+  "notes_verified": false
+}

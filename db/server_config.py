@@ -49,6 +49,8 @@ _MIGRATIONS = [
     "ALTER TABLE server_config ADD COLUMN recap_channel_id TEXT",
     "ALTER TABLE guild_config ADD COLUMN officer_role_id TEXT",
     "ALTER TABLE guild_config ADD COLUMN botduel_log_channel_id TEXT",
+    "ALTER TABLE guild_config ADD COLUMN heartbeat_channel_id TEXT",
+    "ALTER TABLE guild_config ADD COLUMN last_haiku_ts INTEGER",
 ]
 
 
@@ -432,6 +434,40 @@ def purge_expired_intents(path: str = DB_PATH) -> int:
 # ---------------------------------------------------------------------------
 # BotDuel — guild config extras
 # ---------------------------------------------------------------------------
+
+def set_heartbeat_channel(guild_id: str, channel_id: str, path: str = DB_PATH) -> None:
+    with _conn(path) as conn:
+        conn.execute(
+            """INSERT INTO guild_config (guild_id, heartbeat_channel_id) VALUES (?, ?)
+               ON CONFLICT (guild_id) DO UPDATE SET heartbeat_channel_id=excluded.heartbeat_channel_id""",
+            (guild_id, channel_id),
+        )
+
+
+def get_heartbeat_channel(guild_id: str, path: str = DB_PATH) -> Optional[str]:
+    with _conn(path) as conn:
+        row = conn.execute(
+            "SELECT heartbeat_channel_id FROM guild_config WHERE guild_id=?", (guild_id,)
+        ).fetchone()
+    return row["heartbeat_channel_id"] if row else None
+
+
+def get_last_haiku_ts(guild_id: str, path: str = DB_PATH) -> Optional[int]:
+    with _conn(path) as conn:
+        row = conn.execute(
+            "SELECT last_haiku_ts FROM guild_config WHERE guild_id=?", (guild_id,)
+        ).fetchone()
+    return row["last_haiku_ts"] if row else None
+
+
+def set_last_haiku_ts(guild_id: str, ts: int, path: str = DB_PATH) -> None:
+    with _conn(path) as conn:
+        conn.execute(
+            """INSERT INTO guild_config (guild_id, last_haiku_ts) VALUES (?, ?)
+               ON CONFLICT (guild_id) DO UPDATE SET last_haiku_ts=excluded.last_haiku_ts""",
+            (guild_id, ts),
+        )
+
 
 def set_officer_role(guild_id: str, role_id: str, path: str = DB_PATH) -> None:
     with _conn(path) as conn:

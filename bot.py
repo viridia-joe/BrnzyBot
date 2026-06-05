@@ -76,6 +76,7 @@ class BrnzyBot(commands.Bot):
         await self.load_extension("cogs.billing")
         await self.load_extension("cogs.simexport")
         await self.load_extension("cogs.botduel")
+        await self.load_extension("cogs.heartbeat")
         log.info("Cogs loaded")
 
         # Guild sync: instant propagation to home server (set HOME_GUILD_ID in .env)

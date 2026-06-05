@@ -1,6 +1,8 @@
 #!/bin/bash
-# VM startup script — runs once on first boot after Terraform provisions the machine.
-# Installs Docker, creates the brnz user, and sets up directory structure.
+# VM startup script — bootstraps Docker and the brnz user on first boot only.
+# A sentinel file prevents re-running on subsequent reboots (avoids slow apt on restart).
+
+[ -f /etc/brnzybot-bootstrap-done ] && exit 0
 set -e
 
 export DEBIAN_FRONTEND=noninteractive
@@ -26,3 +28,5 @@ chown -R brnz:brnz /home/brnz/openclaw-data /home/brnz/openclaw-logs
 # Placeholder repo directory — GitHub Actions CI populates this on first deploy.
 mkdir -p /home/brnz/brnzybot-git
 chown brnz:brnz /home/brnz/brnzybot-git
+
+touch /etc/brnzybot-bootstrap-done

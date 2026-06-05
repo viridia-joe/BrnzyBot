@@ -37,6 +37,7 @@ from db.server_config import (
     set_guild_config,
     set_guild_phase,
     get_guild_phase,
+    set_heartbeat_channel,
     set_officer_role,
     set_response_target,
     set_verbosity,
@@ -105,6 +106,22 @@ class AdminCog(commands.Cog, name="Admin"):
         await interaction.response.send_message(
             f"Content phase set to **Phase {phase}**. "
             "Gear recommendations will now filter by phase-appropriate sources.",
+            ephemeral=True,
+        )
+
+    @setup_group.command(
+        name="heartbeat",
+        description="Set the channel for random lore/tip/joke/haiku posts every 8 hours.",
+    )
+    @app_commands.describe(channel="Channel to receive heartbeat posts")
+    @_require_manage_guild()
+    async def setup_heartbeat(
+        self, interaction: discord.Interaction, channel: discord.TextChannel
+    ) -> None:
+        set_heartbeat_channel(str(interaction.guild_id), str(channel.id))
+        await interaction.response.send_message(
+            f"Heartbeat channel set to {channel.mention}. "
+            "Posts every 8 hours: lore nuggets, raid tips, dad jokes, and the occasional haiku.",
             ephemeral=True,
         )
 

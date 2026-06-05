@@ -17,9 +17,10 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+import config
 from core.rotation_handler import handle_rotation_check
 from cogs.gear import _resolve_character, _try_auto_register, _chunks
-from db.server_config import log_usage, check_rate_limit
+from db.server_config import log_usage, check_rate_limit, get_guild_config
 
 log = logging.getLogger(__name__)
 
@@ -52,13 +53,21 @@ class RotationCog(commands.Cog, name="Rotation"):
         display, reg_spec, realm, region = _resolve_character(character, guild_id)
         auto_note = None
         if display is None:
+            # Not in the registry. Try a WCL auto-register first (gets spec+realm).
             auto_result = await _try_auto_register(
                 character, guild_id, added_by=str(interaction.user.id)
             )
-            if auto_result is None:
-                await interaction.response.send_message(reg_spec, ephemeral=True)
-                return
-            display, reg_spec, realm, region, auto_note = auto_result
+            if auto_result is not None:
+                display, reg_spec, realm, region, auto_note = auto_result
+            else:
+                # Couldn't auto-register (e.g. no character endpoint hit). Still try
+                # the check by log lookup using guild defaults — the handler finds the
+                # log and derives the spec from the actual pull. Beats a registry dump.
+                gcfg = get_guild_config(guild_id) or {}
+                display = character
+                reg_spec = None
+                realm = gcfg.get("server_slug") or config.DEFAULT_REALM
+                region = gcfg.get("region") or "us"
 
         resolved_spec = spec or reg_spec
         await interaction.response.defer(thinking=True)

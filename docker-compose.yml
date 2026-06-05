@@ -29,7 +29,6 @@ services:
       driver: gcplogs
       options:
         gcp-project: brnzybot-prod
-        tag: brnzybot
 
   # ── LiteLLM proxy — routes model aliases to Claude API ──────────────────
   # Opt-in only: lives behind the "llm" compose profile so the default

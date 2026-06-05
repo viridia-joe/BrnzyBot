@@ -137,9 +137,110 @@ ELE_SHAMAN = SpecProfile(
 
 
 # Registry — extend as profiles are authored.
-PROFILES: dict[str, SpecProfile] = {
-    ELE_SHAMAN.spec: ELE_SHAMAN,
-}
+# ---------------------------------------------------------------------------
+# Role-based templates — Preparation data (enchant slots, meta gem, consumes)
+# is largely shared by role, so the rest of the DPS specs are built from these
+# rather than hand-authored field-by-field. Sourced from Icy Veins / Wowhead /
+# WoWTBC consumable & enchant guides (TBC Classic P1–P2). Execution fields are
+# left default: audit_combatant scores Preparation only today.
+# ---------------------------------------------------------------------------
+
+CASTER_META = "Chaotic Skyfire Diamond"
+PHYS_META   = "Relentless Earthstorm Diamond"
+
+# Enchant-bearing slots by weapon layout (labels match normalize.GEAR_SLOTS).
+_ARMOR_SLOTS   = ("Head", "Shoulder", "Back", "Chest", "Wrist", "Hands", "Legs", "Feet")
+CASTER_SLOTS   = _ARMOR_SLOTS + ("Main Hand",)
+MELEE_2H_SLOTS = _ARMOR_SLOTS + ("Main Hand",)            # 2H weapon occupies Main Hand
+MELEE_DW_SLOTS = _ARMOR_SLOTS + ("Main Hand", "Off Hand")
+FERAL_SLOTS    = _ARMOR_SLOTS                              # weapon enchants don't work in forms
+HUNTER_SLOTS   = _ARMOR_SLOTS + ("Relic",)                # Relic index = ranged weapon (scope)
+
+CASTER_CONSUMES = (
+    ConsumeRule("food", "Food", ("Blackened Basilisk", "Well Fed"), note="+spell damage food"),
+    ConsumeRule("flask", "Flask",
+                ("Flask of Supreme Power", "Flask of Pure Death", "Flask of Blinding Light"),
+                required=False, note="A flask satisfies both elixir slots."),
+    ConsumeRule("battle_elixir", "Battle Elixir",
+                ("Adept's Elixir", "Major Firepower", "Major Shadow Power"), required=False),
+    ConsumeRule("guardian_elixir", "Guardian Elixir",
+                ("Draenic Wisdom", "Major Mageblood"), required=False),
+    ConsumeRule("weapon_oil", "Weapon Oil", ("Wizard Oil",), note="Superior/Brilliant Wizard Oil"),
+    ConsumeRule("potion", "Mana/Damage Potions", ("Super Mana Potion", "Destruction Potion")),
+)
+
+MELEE_STR_CONSUMES = (
+    ConsumeRule("food", "Food", ("Roasted Clefthoof", "Spicy Hot Talbuk", "Well Fed"),
+                note="+strength or +hit food"),
+    ConsumeRule("flask", "Flask", ("Flask of Relentless Assault",), required=False),
+    ConsumeRule("battle_elixir", "Battle Elixir",
+                ("Elixir of Major Strength", "Elixir of Major Agility"), required=False),
+    ConsumeRule("guardian_elixir", "Guardian Elixir",
+                ("Major Fortitude", "Major Mageblood"), required=False),
+    ConsumeRule("weapon_oil", "Sharpening Stone", ("Sharpening Stone", "Weightstone"),
+                note="Adamantite Sharpening Stone (bladed) or Weightstone (blunt) — stacks with a permanent enchant"),
+    ConsumeRule("potion", "Potions", ("Haste Potion", "Insane Strength Potion")),
+)
+
+MELEE_AGI_CONSUMES = (
+    ConsumeRule("food", "Food", ("Grilled Mudfish", "Spicy Hot Talbuk", "Well Fed"),
+                note="+agility or +hit food"),
+    ConsumeRule("flask", "Flask", ("Flask of Relentless Assault",), required=False),
+    ConsumeRule("battle_elixir", "Battle Elixir", ("Elixir of Major Agility",), required=False),
+    ConsumeRule("guardian_elixir", "Guardian Elixir",
+                ("Major Fortitude", "Major Mageblood"), required=False),
+    ConsumeRule("weapon_oil", "Sharpening Stone", ("Sharpening Stone", "Weightstone"),
+                note="Adamantite Sharpening Stone (bladed) or Weightstone (blunt) — stacks with a permanent enchant"),
+    ConsumeRule("potion", "Potions", ("Haste Potion", "Insane Strength Potion")),
+)
+
+HUNTER_CONSUMES = (
+    ConsumeRule("food", "Food", ("Grilled Mudfish", "Spicy Hot Talbuk", "Ravager Dog", "Well Fed"),
+                note="+agility or +AP food"),
+    ConsumeRule("flask", "Flask", ("Flask of Relentless Assault",), required=False),
+    ConsumeRule("battle_elixir", "Battle Elixir", ("Elixir of Major Agility",), required=False),
+    ConsumeRule("guardian_elixir", "Guardian Elixir",
+                ("Major Fortitude", "Major Mageblood"), required=False),
+    ConsumeRule("potion", "Potions", ("Haste Potion", "Insane Strength Potion")),
+)
+
+
+def _dps(spec: str, display: str, role: str, slots, meta: str, consumes) -> SpecProfile:
+    return SpecProfile(
+        spec=spec, display=display, role=role,
+        enchantable_slots=slots, min_gem_quality="rare",
+        meta_gem=meta, consumes=consumes,
+    )
+
+
+_DPS_PROFILES = [
+    # ── Caster DPS ────────────────────────────────────────────────────────
+    _dps("affliction_warlock", "Affliction Warlock", "caster_dps", CASTER_SLOTS, CASTER_META, CASTER_CONSUMES),
+    _dps("destro_warlock", "Destruction Warlock", "caster_dps", CASTER_SLOTS, CASTER_META, CASTER_CONSUMES),
+    _dps("fire_destro_warlock", "Destruction Warlock (Fire)", "caster_dps", CASTER_SLOTS, CASTER_META, CASTER_CONSUMES),
+    _dps("arcane_mage", "Arcane Mage", "caster_dps", CASTER_SLOTS, CASTER_META, CASTER_CONSUMES),
+    _dps("fire_mage", "Fire Mage", "caster_dps", CASTER_SLOTS, CASTER_META, CASTER_CONSUMES),
+    _dps("frost_mage", "Frost Mage", "caster_dps", CASTER_SLOTS, CASTER_META, CASTER_CONSUMES),
+    _dps("shadow_priest", "Shadow Priest", "caster_dps", CASTER_SLOTS, CASTER_META, CASTER_CONSUMES),
+    _dps("balance_druid", "Balance Druid", "caster_dps", CASTER_SLOTS, CASTER_META, CASTER_CONSUMES),
+    # ── Melee DPS ─────────────────────────────────────────────────────────
+    _dps("arms_warrior", "Arms Warrior", "melee_dps", MELEE_2H_SLOTS, PHYS_META, MELEE_STR_CONSUMES),
+    _dps("fury_warrior", "Fury Warrior", "melee_dps", MELEE_DW_SLOTS, PHYS_META, MELEE_STR_CONSUMES),
+    _dps("ret_paladin", "Retribution Paladin", "melee_dps", MELEE_2H_SLOTS, PHYS_META, MELEE_STR_CONSUMES),
+    _dps("combat_rogue", "Combat Rogue", "melee_dps", MELEE_DW_SLOTS, PHYS_META, MELEE_AGI_CONSUMES),
+    _dps("assassination_rogue", "Assassination Rogue", "melee_dps", MELEE_DW_SLOTS, PHYS_META, MELEE_AGI_CONSUMES),
+    _dps("enh_shaman", "Enhancement Shaman", "melee_dps", MELEE_DW_SLOTS, PHYS_META, MELEE_AGI_CONSUMES),
+    _dps("feral_cat_druid", "Feral (Cat) Druid", "melee_dps", FERAL_SLOTS, PHYS_META, MELEE_AGI_CONSUMES),
+    # ── Ranged physical (hunters) ─────────────────────────────────────────
+    _dps("bm_hunter", "Beast Mastery Hunter", "ranged_dps", HUNTER_SLOTS, PHYS_META, HUNTER_CONSUMES),
+    _dps("mm_hunter", "Marksmanship Hunter", "ranged_dps", HUNTER_SLOTS, PHYS_META, HUNTER_CONSUMES),
+    _dps("survival_hunter", "Survival Hunter", "ranged_dps", HUNTER_SLOTS, PHYS_META, HUNTER_CONSUMES),
+]
+
+# ELE_SHAMAN keeps its richer hand-authored execution data; the rest fill in
+# from role templates. ELE wins on key collision.
+PROFILES: dict[str, SpecProfile] = {p.spec: p for p in _DPS_PROFILES}
+PROFILES[ELE_SHAMAN.spec] = ELE_SHAMAN
 
 
 def get_profile(spec: str) -> SpecProfile | None:

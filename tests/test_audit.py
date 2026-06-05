@@ -17,8 +17,8 @@ from core.audit.checks import Verdict
 from core.audit.normalize import normalize_combatant
 from core.audit.profiles import ELE_SHAMAN, get_profile
 from core.audit.report import (
-    audit_combatant, build_roster_audit, check_enchants, check_gems,
-    check_rotation, parse_report_url,
+    audit_combatant, build_roster_audit, check_consumes, check_enchants,
+    check_gems, check_rotation, parse_report_url,
 )
 
 # Enchantable slot → positional index in the WCL CombatantInfo gear array.
@@ -145,6 +145,20 @@ def test_all_dps_specs_have_audit_profiles():
     # dual-wielders carry an Off Hand enchant slot; feral (forms) carries none on weapons
     assert "Off Hand" in get_profile("fury_warrior").enchantable_slots
     assert "Main Hand" not in get_profile("feral_cat_druid").enchantable_slots
+
+
+def test_dps_consumes_flask_covers_elixirs_and_flags_weapon_buff():
+    fury = get_profile("fury_warrior")
+    # Flask satisfies both elixir slots; food + sharpening stone present → PASS
+    full = check_consumes([{"name": "Flask of Relentless Assault"},
+                           {"name": "Well Fed"},
+                           {"name": "Adamantite Sharpening Stone"}], fury)
+    assert full.verdict == Verdict.PASS, full.summary
+    # Drop the (required) weapon stone → FAIL, and it's the melee stone, not an oil
+    no_stone = check_consumes([{"name": "Flask of Relentless Assault"},
+                               {"name": "Well Fed"}], fury)
+    assert no_stone.verdict == Verdict.FAIL
+    assert "Sharpening Stone" in no_stone.summary
 
 
 def test_check_rotation_flags_earth_shock_filler():

@@ -177,8 +177,8 @@ MELEE_STR_CONSUMES = (
                 ("Elixir of Major Strength", "Elixir of Major Agility"), required=False),
     ConsumeRule("guardian_elixir", "Guardian Elixir",
                 ("Major Fortitude", "Major Mageblood"), required=False),
-    ConsumeRule("weapon_oil", "Sharpening Stone", ("Sharpening Stone", "Weightstone", "Mongoose"),
-                note="Adamantite Sharpening Stone/Weightstone or a weapon enchant"),
+    ConsumeRule("weapon_oil", "Sharpening Stone", ("Sharpening Stone", "Weightstone"),
+                note="Adamantite Sharpening Stone (bladed) or Weightstone (blunt) — stacks with a permanent enchant"),
     ConsumeRule("potion", "Potions", ("Haste Potion", "Insane Strength Potion")),
 )
 
@@ -189,8 +189,8 @@ MELEE_AGI_CONSUMES = (
     ConsumeRule("battle_elixir", "Battle Elixir", ("Elixir of Major Agility",), required=False),
     ConsumeRule("guardian_elixir", "Guardian Elixir",
                 ("Major Fortitude", "Major Mageblood"), required=False),
-    ConsumeRule("weapon_oil", "Sharpening Stone", ("Sharpening Stone", "Weightstone", "Mongoose"),
-                note="Adamantite Sharpening Stone or a weapon enchant"),
+    ConsumeRule("weapon_oil", "Sharpening Stone", ("Sharpening Stone", "Weightstone"),
+                note="Adamantite Sharpening Stone (bladed) or Weightstone (blunt) — stacks with a permanent enchant"),
     ConsumeRule("potion", "Potions", ("Haste Potion", "Insane Strength Potion")),
 )
 

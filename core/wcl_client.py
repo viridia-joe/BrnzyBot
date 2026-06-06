@@ -29,6 +29,26 @@ WCL_GRAPHQL_URL = "https://classic.warcraftlogs.com/api/v2/client"
 _TOKEN_FILE = os.path.join(config.DATA_DIR, "wcl_token.json")
 
 # ---------------------------------------------------------------------------
+# Offline fixture transport. When WCL_FIXTURE_DIR is set, the get_* functions
+# read canned JSON instead of hitting the API — so the whole pipeline (audit,
+# rotationcheck) runs with no creds and no network. tools/capture_wcl.py writes
+# these files; the naming below is the contract between capture and replay.
+# Zero effect in production (the env var is unset there).
+# ---------------------------------------------------------------------------
+def _fixture_dir() -> str | None:
+    """Replay dir from the env (read live so tests/CLI can toggle it any time)."""
+    return os.environ.get("WCL_FIXTURE_DIR") or None
+
+
+def _fixture(name: str, default=None):
+    """Load tests-fixture JSON `<WCL_FIXTURE_DIR>/<name>.json`, or `default`."""
+    try:
+        with open(os.path.join(_fixture_dir(), f"{name}.json"), encoding="utf-8") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return default
+
+# ---------------------------------------------------------------------------
 # Rate limiter — minimum seconds between WCL GraphQL requests.
 # WCL v2 is point-based; staying at ≥0.5s/req puts us well under the limit
 # even on the largest reports (Kara ~20 calls).
@@ -273,6 +293,8 @@ query ReportFights($code: String!) {
 
 def get_fights(report_code: str) -> list[dict]:
     """Returns the fight list for a report."""
+    if _fixture_dir():
+        return _fixture(f"{report_code}.fights", [])
     data = graphql(_FIGHTS_QUERY, {"code": report_code})
     return (
         data.get("reportData", {})
@@ -303,6 +325,8 @@ query MasterActors($code: String!) {
 
 def get_master_actors(report_code: str) -> list[dict]:
     """Returns player actors for the report: [{id, name, subType (class)}]."""
+    if _fixture_dir():
+        return _fixture(f"{report_code}.actors", [])
     data = graphql(_MASTER_ACTORS_QUERY, {"code": report_code})
     return (
         data.get("reportData", {})
@@ -418,6 +442,8 @@ def get_combatant_info(report_code: str, fight_id: int) -> list[dict]:
     Returns CombatantInfo records for all players in a fight.
     Each record includes gear[], auras[] (flask/food at pull), talents[].
     """
+    if _fixture_dir():
+        return _fixture(f"{report_code}.combatant.{fight_id}", [])
     data = graphql(_COMBATANT_QUERY, {"code": report_code, "fightID": fight_id})
     return (
         data.get("reportData", {})
@@ -448,6 +474,8 @@ def get_character_recent_reports(
     name: str, realm: str, region: str = "us", limit: int = 5
 ) -> list[dict]:
     """Returns the character's most recent reports: [{code, startTime}]. [] if none."""
+    if _fixture_dir():
+        return _fixture(f"recent_reports.{name.lower()}", None) or _fixture("recent_reports", [])
     data = graphql(_CHAR_REPORTS_QUERY, {
         "name": name, "serverSlug": realm, "region": region, "limit": limit,
     })
@@ -473,6 +501,8 @@ query Abilities($code: String!) {
 
 def get_abilities(report_code: str) -> list[dict]:
     """Returns ability records for the report: [{gameID, name, type}]."""
+    if _fixture_dir():
+        return _fixture(f"{report_code}.abilities", [])
     data = graphql(_ABILITIES_QUERY, {"code": report_code})
     return (
         data.get("reportData", {})
@@ -508,6 +538,9 @@ def get_casts(
     Each record has at least: timestamp, type ('cast'/'begincast'), sourceID,
     abilityGameID. Paginates via nextPageTimestamp up to max_events.
     """
+    if _fixture_dir():
+        rows = _fixture(f"{report_code}.casts.{fight_id}", [])
+        return [e for e in rows if source_id is None or e.get("sourceID") == source_id]
     out: list[dict] = []
     start: float | None = None
     for _ in range(10):  # hard page cap as a safety net

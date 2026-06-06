@@ -18,7 +18,7 @@ from core.audit.normalize import normalize_combatant
 from core.audit.profiles import ELE_SHAMAN, get_profile
 from core.audit.report import (
     _tally_casts, audit_combatant, build_roster_audit, check_consumes,
-    check_enchants, check_end_activity, check_gems, check_rotation,
+    check_enchants, check_end_activity, check_gems, check_meta, check_rotation,
     parse_report_url,
 )
 
@@ -97,13 +97,33 @@ def test_shermshaman_matches_doc():
 
 # --- pure-check unit coverage -----------------------------------------------
 
-def test_check_gems_flags_missing_meta():
-    # all rare but no meta → only the meta warning fires (this is the path the
-    # live roster can't assert, so we cover it directly).
-    res = check_gems([{"quality": "rare"}, {"quality": "rare"}], ELE_SHAMAN,
-                     meta_present=False)
-    assert res.verdict == Verdict.WARN
-    assert "meta" in res.summary.lower()
+def test_check_meta_active_inactive_missing():
+    prof = get_profile("ele_shaman")  # recommends Chaotic Skyfire Diamond (34220)
+    CSD = 34220
+    blue = {"color": "Blue"}
+    red = {"color": "Red"}
+
+    # No meta socket at all → nothing to judge (None)
+    assert check_meta({"meta_socket": False}, prof) is None
+
+    # Meta socket but no meta gem → WARN (this is the gap the old code missed)
+    miss = check_meta({"meta_socket": True, "meta_id": None, "gems": []}, prof)
+    assert miss.verdict == Verdict.WARN and "no meta gem" in miss.summary.lower()
+
+    # Meta socketed with 2 blue gems → active
+    active = check_meta({"meta_socket": True, "meta_id": CSD,
+                         "gems": [blue, blue, red]}, prof)
+    assert active.verdict == Verdict.PASS and "active" in active.summary
+
+    # Meta socketed but 0 blue → INACTIVE (verified requirement) → FAIL
+    inactive = check_meta({"meta_socket": True, "meta_id": CSD,
+                           "gems": [red, red]}, prof)
+    assert inactive.verdict == Verdict.FAIL and "INACTIVE" in inactive.summary
+
+    # Compound gems count: a Purple gem (red+blue) helps satisfy "2 Blue"
+    compound = check_meta({"meta_socket": True, "meta_id": CSD,
+                           "gems": [{"color": "Purple"}, {"color": "Green"}]}, prof)
+    assert compound.verdict == Verdict.PASS  # purple + green = 2 blue
 
 
 def test_enchant_severity_major_vs_minor():
@@ -127,10 +147,10 @@ def test_enchant_severity_major_vs_minor():
 
 def test_check_gems_flags_empty_sockets():
     prof = get_profile("destro_warlock")
-    res = check_gems([{"quality": "rare"}], prof, meta_present=True, empty_sockets=3)
+    res = check_gems([{"quality": "rare"}], prof, empty_sockets=3)
     assert res.verdict == Verdict.FAIL
     assert "empty socket" in res.summary
-    clean = check_gems([{"quality": "rare"}], prof, meta_present=True, empty_sockets=0)
+    clean = check_gems([{"quality": "rare"}], prof, empty_sockets=0)
     assert clean.verdict == Verdict.PASS
 
 
@@ -295,6 +315,40 @@ def test_roster_surfaces_unprofiled_players():
 def test_get_profile_unknown_is_none():
     assert get_profile("totally_made_up_spec") is None
     assert get_profile("ele_shaman") is ELE_SHAMAN
+
+
+def test_offline_roster_audit_against_fixtures():
+    """End-to-end through the fixture transport + real item DB — no creds, no network."""
+    import json as _json
+    import os as _os
+    from tools.fixtures import FIXTURE_WCL_DIR, ensure_item_db
+
+    code = "SYNTHLOG00000001"
+    specs_path = _os.path.join(FIXTURE_WCL_DIR, f"{code}.specs.json")
+    if not _os.path.exists(specs_path):
+        return  # synthetic fixtures not generated in this checkout — skip
+    specs = _json.load(open(specs_path, encoding="utf-8"))
+
+    _os.environ["WCL_FIXTURE_DIR"] = FIXTURE_WCL_DIR
+    ensure_item_db()  # point config.ITEM_DB_PATH at the committed item-DB fixture
+    try:
+        roster = build_roster_audit(
+            f"https://classic.warcraftlogs.com/reports/{code}",
+            lambda n, c="": specs.get(n.lower()),
+        )
+    finally:
+        _os.environ.pop("WCL_FIXTURE_DIR", None)
+
+    assert len(roster.reports) == 8
+    out = roster.render()
+    assert "missing major: Legs" in out          # enchant severity (major)
+    assert "empty socket" in out                  # empty sockets vs the real item DB
+    assert "below rare quality" in out            # green gems
+    assert "Weapon Oil: ❌" in out                 # missing consume
+    assert "Potions: ✅" in out and "Potions: ❌" in out   # potion counting from casts
+    assert "no casts for the final" in out        # healer end-of-fight silence
+    assert "INACTIVE" in out                       # meta activation (requirement unmet)
+    assert "no meta gem socketed" in out           # missing meta gem (the critical gap)
 
 
 # --- plain-asserts harness for CI (no pytest needed) ------------------------

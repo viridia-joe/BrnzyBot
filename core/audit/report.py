@@ -22,6 +22,7 @@ from __future__ import annotations
 import logging
 import re
 
+from core.audit import gemdata
 from core.audit.checks import AuditReport, CheckResult, RosterAudit, Section, Verdict
 from core.audit.normalize import normalize_combatant
 from core.audit.profiles import SpecProfile, get_profile
@@ -118,21 +119,22 @@ def check_enchants(gear: list[dict], profile: SpecProfile) -> CheckResult:
 
 
 def check_gems(gems: list[dict], profile: SpecProfile,
-               meta_present: bool | None = None,
                empty_sockets: int | None = None) -> CheckResult:
     """
-    gems: list of {quality} dicts (quality in "uncommon"|"rare"|"epic"|...).
-    Flags empty sockets, gems below the profile's min quality (green/"uncommon"),
-    and a missing meta gem. empty_sockets is computed against the item DB's socket
-    counts (None when that data isn't available → simply not checked).
+    gems: list of {quality, ...} dicts. Flags empty sockets and gems below the
+    profile's min quality (green/"uncommon"). empty_sockets is computed against
+    the item DB's socket counts (None when unavailable → simply not checked).
+    Meta gems are handled separately by check_meta.
     """
-    if not gems and empty_sockets is None and meta_present is None:
+    if not gems and empty_sockets is None:
         return CheckResult("gems", "Gems", Verdict.UNKNOWN, "no gem/socket data in log")
 
     order = {"poor": 0, "common": 1, "uncommon": 2, "rare": 3, "epic": 4, "legendary": 5}
     floor = order.get(profile.min_gem_quality, 3)
-    below = [g for g in gems if order.get(str(g.get("quality", "")).lower(), 99) < floor]
-    total = len(gems)
+    # the meta gem isn't graded on the rare/epic ladder here — that's check_meta
+    scored = [g for g in gems if (g.get("color") or "") != "Meta"]
+    below = [g for g in scored if order.get(str(g.get("quality", "")).lower(), 99) < floor]
+    total = len(scored)
 
     verdict = Verdict.PASS
     issues: list[str] = []
@@ -142,9 +144,6 @@ def check_gems(gems: list[dict], profile: SpecProfile,
     if below:
         issues.append(f"{len(below)}/{total} gems below {profile.min_gem_quality} quality")
         verdict = _worst(verdict, Verdict.WARN if len(below) <= 2 else Verdict.FAIL)
-    if meta_present is False and profile.meta_gem:
-        issues.append(f"meta gem missing — want {profile.meta_gem}")
-        verdict = _worst(verdict, Verdict.WARN)
 
     if issues:
         summ = "; ".join(issues)
@@ -154,7 +153,58 @@ def check_gems(gems: list[dict], profile: SpecProfile,
         summ = "sockets filled" if empty_sockets == 0 else "no gems socketed"
     return CheckResult("gems", "Gems", verdict, summ,
                        evidence={"below": len(below), "total": total,
-                                 "meta": meta_present, "empty_sockets": empty_sockets})
+                                 "empty_sockets": empty_sockets})
+
+
+def check_meta(data: dict, profile: SpecProfile) -> CheckResult | None:
+    """
+    Meta gem: present? correct meta? and — critically — ACTIVE (its color
+    requirement met)? Inputs come from the normalized combatant `data`:
+      meta_socket : bool  — does any equipped item have a Meta socket?
+      meta_id     : int   — the socketed meta gem id (None if none)
+      gems        : [{color}] — for counting colors toward the requirement
+
+    Returns None when the player has no meta socket at all (nothing to judge).
+    A missing meta gem in a meta socket → WARN. An inactive meta (requirement
+    unmet, and the requirement is verified) → FAIL. Unverified requirement →
+    PASS with a note (we never false-flag).
+    """
+    if not data.get("meta_socket"):
+        return None
+
+    meta_id = data.get("meta_id")
+    if not meta_id:
+        want = f" — want {profile.meta_gem}" if profile.meta_gem else ""
+        return CheckResult("meta", "Meta gem", Verdict.WARN,
+                           f"meta socket empty — no meta gem socketed{want}")
+
+    req = gemdata.meta_requirement(meta_id)
+    name = (req or {}).get("name") or "meta gem"
+
+    # Count colors across non-meta gems; compound gems count toward each component.
+    counts: dict[str, int] = {}
+    for g in data.get("gems", []):
+        for comp in gemdata.COLOR_COMPONENTS.get(g.get("color") or "", set()):
+            counts[comp] = counts.get(comp, 0) + 1
+
+    if not req or not req.get("require"):
+        return CheckResult("meta", "Meta gem", Verdict.PASS,
+                           f"{name} socketed (activation requirement not on file)")
+
+    unmet = {c: n for c, n in req["require"].items() if counts.get(c, 0) < n}
+    if not unmet:
+        return CheckResult("meta", "Meta gem", Verdict.PASS, f"{name} active")
+    need = ", ".join(f"{n} {c}" for c, n in req["require"].items())
+    have = ", ".join(f"{counts.get(c, 0)} {c}" for c in req["require"]) or "none"
+    if not req.get("verified"):
+        return CheckResult("meta", "Meta gem", Verdict.PASS,
+                           f"{name} socketed (needs {need}; requirement unverified)")
+    return CheckResult(
+        "meta", "Meta gem", Verdict.FAIL,
+        f"{name} is INACTIVE — needs {need}, you have {have}",
+        detail="An inactive meta gem gives no bonus at all. Add blue/purple/green "
+               "gems (which count toward the Blue requirement) to switch it on.",
+        evidence={"meta_id": meta_id, "require": req["require"], "counts": counts})
 
 
 def check_consumes(auras: list[dict], profile: SpecProfile, potion_count: int | None = None) -> CheckResult:
@@ -352,8 +402,10 @@ def audit_combatant(
                                    potion_count=data.get("potion_count")))
     preparation.add(check_enchants(data.get("gear", []), profile))
     preparation.add(check_gems(data.get("gems", []), profile,
-                               meta_present=data.get("meta_present"),
                                empty_sockets=data.get("empty_sockets")))
+    meta = check_meta(data, profile)
+    if meta is not None:
+        preparation.add(meta)
 
     sections = [baseline, preparation]
 
@@ -375,27 +427,28 @@ def audit_combatant(
 # WCL gathering (the only network in this module)
 # ---------------------------------------------------------------------------
 
-def _count_empty_sockets(gear: list[dict]) -> int | None:
+def _socket_info(gear: list[dict]) -> dict:
     """
-    Empty (ungemmed) non-meta sockets across equipped gear, using the item DB's
-    socket counts vs. the gems actually socketed. Returns None when the item DB
-    isn't present (e.g. dev box) so the gem check skips empty-socket scoring
-    rather than guessing.
+    Using the item DB's per-item socket colors, return
+        {"empty_sockets": int | None, "meta_socket": bool}
+    `empty_sockets` counts ungemmed non-meta sockets; `meta_socket` is True if any
+    equipped item has a Meta socket (so a missing meta gem can be flagged).
+    empty_sockets is None when the item DB isn't available (then it's not scored).
     """
     import json as _json
     import os as _os
     import sqlite3 as _sqlite3
 
     import config
-    from core.audit.normalize import META_GEM_IDS
 
     if not _os.path.exists(config.ITEM_DB_PATH):
-        return None
+        return {"empty_sockets": None, "meta_socket": False}
     try:
         conn = _sqlite3.connect(config.ITEM_DB_PATH)
     except _sqlite3.Error:
-        return None
+        return {"empty_sockets": None, "meta_socket": False}
     empty = 0
+    meta_socket = False
     try:
         cur = conn.cursor()
         for g in gear:
@@ -409,13 +462,15 @@ def _count_empty_sockets(gear: list[dict]) -> int | None:
                 colors = _json.loads(row[0])
             except (ValueError, TypeError):
                 continue
+            if any(str(c).lower() == "meta" for c in colors):
+                meta_socket = True
             nonmeta_sockets = sum(1 for c in colors if str(c).lower() != "meta")
             socketed = sum(1 for gm in (g.get("gems") or [])
-                           if gm.get("item_id") not in META_GEM_IDS)
+                           if not gemdata.is_meta(gm.get("item_id") or 0))
             empty += max(0, nonmeta_sockets - socketed)
     finally:
         conn.close()
-    return empty
+    return {"empty_sockets": empty, "meta_socket": meta_socket}
 
 
 def _fight_label(fight: dict) -> str:
@@ -500,7 +555,7 @@ def build_audit(url: str, character: str, spec: str) -> AuditReport:
         return report
 
     norm = normalize_combatant(rec)
-    norm["empty_sockets"] = _count_empty_sockets(norm.get("gear", []))
+    norm.update(_socket_info(norm.get("gear", [])))
 
     # One cast fetch powers potion tracking (all specs) and the healer
     # end-of-fight silence check. Best-effort: never break the audit over it.
@@ -576,7 +631,7 @@ def build_roster_audit(url: str, resolve_spec) -> RosterAudit:
         if profile is None:
             roster.skipped.append((name, f"no profile for {spec}" if spec else "unregistered"))
             continue
-        norm["empty_sockets"] = _count_empty_sockets(norm.get("gear", []))
+        norm.update(_socket_info(norm.get("gear", [])))
         if cast_tally is not None:
             t = cast_tally.get(norm.get("source_id"), {"potions": 0, "cast_times": []})
             norm["potion_count"] = t["potions"]

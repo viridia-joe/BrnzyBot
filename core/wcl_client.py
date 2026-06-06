@@ -599,30 +599,16 @@ def get_zone_encounters(zone_id: int) -> list[dict]:
 # Query: global encounter rankings by spec (for baseline builder)
 # ---------------------------------------------------------------------------
 _ENCOUNTER_RANKINGS_QUERY = """
-query EncounterRankings($encounterID: Int!, $classID: Int!, $specID: Int!, $page: Int!) {
+query EncounterRankings($encounterID: Int!, $className: String!, $specName: String!, $page: Int!) {
   worldData {
     encounter(id: $encounterID) {
       name
-      rankings(
-        classID: $classID
-        specID: $specID
+      characterRankings(
+        className: $className
+        specName: $specName
         page: $page
         includeCombatantInfo: false
-      ) {
-        page
-        hasMorePages
-        count
-        rankings {
-          name
-          amount
-          duration
-          startTime
-          report {
-            code
-            fightID
-          }
-        }
-      }
+      )
     }
   }
 }
@@ -631,22 +617,30 @@ query EncounterRankings($encounterID: Int!, $classID: Int!, $specID: Int!, $page
 
 def get_encounter_rankings(
     encounter_id: int,
-    class_id: int,
-    spec_id: int,
+    class_name: str,
+    spec_name: str,
     page: int = 1,
 ) -> dict:
     """
-    Fetch one page of global rankings for a boss+spec combination.
+    Fetch one page of global characterRankings for a boss+spec combination.
 
-    Returns the raw `rankings` object:
-      {page, hasMorePages, count, rankings: [{name, amount, duration, report: {code, fightID}}]}
+    Returns the raw rankings object:
+      {page, hasMorePages, count, rankings: [{name, duration, report: {code, fightID}, ...}]}
     Returns {} on failure.
     """
     data = graphql(_ENCOUNTER_RANKINGS_QUERY, {
         "encounterID": encounter_id,
-        "classID": class_id,
-        "specID": spec_id,
+        "className": class_name,
+        "specName": spec_name,
         "page": page,
     })
     enc = ((data.get("worldData") or {}).get("encounter") or {})
-    return enc.get("rankings") or {}
+    raw = enc.get("characterRankings")
+    # characterRankings returns JSON blob (not a typed object) — parse if string
+    if isinstance(raw, str):
+        import json as _json
+        try:
+            raw = _json.loads(raw)
+        except Exception:
+            return {}
+    return raw or {}

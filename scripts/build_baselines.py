@@ -75,25 +75,26 @@ ENCOUNTERS: dict[str, tuple[int, str]] = {
 
 # Specs to build baselines for: {spec_key: (class_id, spec_id)}
 # spec_id matches WCL's WCL_SPEC_MAP values in core/gear_cache.py.
-SPECS: dict[str, tuple[int, int]] = {
-    "ele_shaman":          (7, 262),
-    "enh_shaman":          (7, 263),
-    "bm_hunter":           (3, 253),
-    "mm_hunter":           (3, 254),
-    "survival_hunter":     (3, 255),
-    "combat_rogue":        (4, 260),
-    "assassination_rogue": (4, 259),
-    "fury_warrior":        (1, 72),
-    "arms_warrior":        (1, 71),
-    "ret_paladin":         (2, 70),
-    "feral_cat_druid":     (11, 281),
-    "balance_druid":       (11, 283),
-    "fire_mage":           (8, 63),
-    "arcane_mage":         (8, 62),
-    "frost_mage":          (8, 64),
-    "shadow_priest":       (5, 258),
-    "affliction_warlock":  (9, 265),
-    "destro_warlock":      (9, 266),
+# Specs: {spec_key: (className, specName)} — strings as WCL characterRankings expects.
+SPECS: dict[str, tuple[str, str]] = {
+    "ele_shaman":          ("Shaman",   "Elemental"),
+    "enh_shaman":          ("Shaman",   "Enhancement"),
+    "bm_hunter":           ("Hunter",   "Beast Mastery"),
+    "mm_hunter":           ("Hunter",   "Marksmanship"),
+    "survival_hunter":     ("Hunter",   "Survival"),
+    "combat_rogue":        ("Rogue",    "Combat"),
+    "assassination_rogue": ("Rogue",    "Assassination"),
+    "fury_warrior":        ("Warrior",  "Fury"),
+    "arms_warrior":        ("Warrior",  "Arms"),
+    "ret_paladin":         ("Paladin",  "Retribution"),
+    "feral_cat_druid":     ("Druid",    "Feral"),
+    "balance_druid":       ("Druid",    "Balance"),
+    "fire_mage":           ("Mage",     "Fire"),
+    "arcane_mage":         ("Mage",     "Arcane"),
+    "frost_mage":          ("Mage",     "Frost"),
+    "shadow_priest":       ("Priest",   "Shadow"),
+    "affliction_warlock":  ("Warlock",  "Affliction"),
+    "destro_warlock":      ("Warlock",  "Destruction"),
 }
 
 BASELINE_DIR = Path(__file__).parent.parent / "data" / "baselines"
@@ -129,14 +130,14 @@ def _slugify(name: str) -> str:
 # ---------------------------------------------------------------------------
 
 def fetch_top_parses(
-    encounter_id: int, class_id: int, spec_id: int, top_n: int
+    encounter_id: int, class_name: str, spec_name: str, top_n: int
 ) -> list[dict]:
     """Fetch up to top_n ranking entries for this encounter+spec."""
     results = []
     page = 1
     while len(results) < top_n:
         log.debug("  rankings page %d …", page)
-        data = wcl.get_encounter_rankings(encounter_id, class_id, spec_id, page)
+        data = wcl.get_encounter_rankings(encounter_id, class_name, spec_name, page)
         entries = data.get("rankings") or []
         if not entries:
             break
@@ -215,8 +216,8 @@ def build_baseline(
     encounter_slug: str,
     encounter_id: int,
     encounter_name: str,
-    class_id: int,
-    spec_id: int,
+    class_name: str,
+    spec_name: str,
     top_n: int,
 ) -> dict | None:
     """
@@ -224,7 +225,7 @@ def build_baseline(
     """
     log.info("Building %s / %s …", spec_key, encounter_slug)
 
-    parses = fetch_top_parses(encounter_id, class_id, spec_id, top_n)
+    parses = fetch_top_parses(encounter_id, class_name, spec_name, top_n)
     if not parses:
         log.warning("  No parses found — skipping")
         return None
@@ -331,14 +332,14 @@ def main() -> None:
 
     total = len(specs) * len(encounters)
     done = 0
-    for spec_key, (class_id, spec_id) in specs.items():
+    for spec_key, (class_name, spec_name) in specs.items():
         for enc_slug, (enc_id, enc_name) in encounters.items():
             done += 1
             log.info("[%d/%d] %s × %s", done, total, spec_key, enc_slug)
             try:
                 result = build_baseline(
                     spec_key, enc_slug, enc_id, enc_name,
-                    class_id, spec_id, args.top,
+                    class_name, spec_name, args.top,
                 )
                 if result:
                     write_baseline(spec_key, enc_slug, result)

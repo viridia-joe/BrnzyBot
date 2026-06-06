@@ -569,3 +569,84 @@ def get_casts(
         start = nxt
     return out
 
+
+# ---------------------------------------------------------------------------
+# Query: zone encounter list (for baseline builder --discover)
+# ---------------------------------------------------------------------------
+_ZONE_ENCOUNTERS_QUERY = """
+query ZoneEncounters($zoneID: Int!) {
+  worldData {
+    zone(id: $zoneID) {
+      name
+      encounters {
+        id
+        name
+      }
+    }
+  }
+}
+"""
+
+
+def get_zone_encounters(zone_id: int) -> list[dict]:
+    """Return [{id, name}] for all encounters in a WCL zone. [] on failure."""
+    data = graphql(_ZONE_ENCOUNTERS_QUERY, {"zoneID": zone_id})
+    zone = (data.get("worldData") or {}).get("zone") or {}
+    return zone.get("encounters") or []
+
+
+# ---------------------------------------------------------------------------
+# Query: global encounter rankings by spec (for baseline builder)
+# ---------------------------------------------------------------------------
+_ENCOUNTER_RANKINGS_QUERY = """
+query EncounterRankings($encounterID: Int!, $classID: Int!, $specID: Int!, $page: Int!) {
+  worldData {
+    encounter(id: $encounterID) {
+      name
+      rankings(
+        classID: $classID
+        specID: $specID
+        page: $page
+        includeCombatantInfo: false
+      ) {
+        page
+        hasMorePages
+        count
+        rankings {
+          name
+          amount
+          duration
+          startTime
+          report {
+            code
+            fightID
+          }
+        }
+      }
+    }
+  }
+}
+"""
+
+
+def get_encounter_rankings(
+    encounter_id: int,
+    class_id: int,
+    spec_id: int,
+    page: int = 1,
+) -> dict:
+    """
+    Fetch one page of global rankings for a boss+spec combination.
+
+    Returns the raw `rankings` object:
+      {page, hasMorePages, count, rankings: [{name, amount, duration, report: {code, fightID}}]}
+    Returns {} on failure.
+    """
+    data = graphql(_ENCOUNTER_RANKINGS_QUERY, {
+        "encounterID": encounter_id,
+        "classID": class_id,
+        "specID": spec_id,
+        "page": page,
+    })
+    enc = ((data.get("worldData") or {}).get("encounter") or {})
+    return enc.get("rankings") or {}

@@ -47,7 +47,8 @@ except Exception:  # pragma: no cover - classifier should always import
 
 log = logging.getLogger(__name__)
 
-ROTATIONS_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "rotations")
+ROTATIONS_DIR  = os.path.join(os.path.dirname(__file__), "..", "data", "rotations")
+BASELINES_DIR  = os.path.join(os.path.dirname(__file__), "..", "data", "baselines")
 
 # Only cast events count as a "cast"; begincast is the start of a cast-time spell.
 _CAST_TYPE = "cast"
@@ -88,6 +89,27 @@ def load_profile(spec: str) -> dict | None:
         return None
     with open(path, encoding="utf-8") as f:
         return json.load(f)
+
+
+def load_baseline(spec: str, fight_name: str) -> dict | None:
+    """
+    Load a pre-built CPM baseline for a spec+encounter, or None if unavailable.
+
+    Tries the fight-specific file first (e.g. lady_vashj.json), then falls back
+    to _generic.json in the spec's baseline directory.
+    """
+    import re as _re
+    spec_key = _resolve_spec_key(spec)
+    slug = _re.sub(r"[^a-z0-9]+", "_", (fight_name or "").lower()).strip("_")
+    for name in (slug, "_generic"):
+        path = os.path.join(BASELINES_DIR, spec_key, f"{name}.json")
+        if os.path.exists(path):
+            try:
+                with open(path, encoding="utf-8") as f:
+                    return json.load(f)
+            except Exception:
+                pass
+    return None
 
 
 def _derive_spec_from_log(code: str, fight_id: int, actor_id: int) -> str | None:
@@ -270,6 +292,7 @@ class Analysis:
 def analyze(
     casts: list[dict], abilities: list[dict], profile: dict,
     max_rank_ids: dict[str, int] | None = None,
+    baseline: dict | None = None,
 ) -> Analysis:
     """
     Compare a player's casts against a spec rotation profile.
@@ -278,6 +301,9 @@ def analyze(
     profile's verified table). A watched spell is rank-checked only if it has an
     entry here; casts with a game ID below the verified max are flagged. We never
     infer the max rank from the report (WCL metadata can carry non-TBC IDs).
+
+    `baseline` is an optional pre-built CPM baseline dict (from load_baseline()).
+    When present, advisories include percentile comparisons for core spells.
     """
     max_rank_ids = max_rank_ids or {}
     name_by_id = {a.get("gameID"): a.get("name") for a in abilities}
@@ -363,6 +389,42 @@ def analyze(
         advisories.append(f"{bp.get('note', '')} (observed: {observed})")
     if profile.get("advisory"):
         advisories.append(profile["advisory"])
+
+    # Baseline CPM comparison — surfaces how core spells compare to top parses.
+    if baseline and fight_duration_s > 0:
+        bl_spells = baseline.get("spells") or {}
+        core = profile.get("core_spells") or []
+        cpm_lines = []
+        for spell in core:
+            bl = bl_spells.get(spell)
+            rec = by_name.get(spell)
+            if not bl or not rec:
+                continue
+            player_cpm = round(rec["total"] / (fight_duration_s / 60.0), 2)
+            p50 = bl.get("p50", 0)
+            p25 = bl.get("p25", 0)
+            p75 = bl.get("p75", 0)
+            if p50 == 0:
+                continue
+            if player_cpm < p25:
+                tier = "⚠️ below p25"
+            elif player_cpm < p50:
+                tier = "↙ below median"
+            elif player_cpm >= bl.get("p95", p75):
+                tier = "🔥 top 5%"
+            elif player_cpm >= p75:
+                tier = "✅ above median"
+            else:
+                tier = "✅ near median"
+            cpm_lines.append(
+                f"  • **{spell}**: {player_cpm} cpm (p25={p25} p50={p50} p75={p75}) — {tier}"
+            )
+        if cpm_lines:
+            sample = baseline.get("sample_size", "?")
+            enc = baseline.get("encounter", "this encounter")
+            advisories.append(
+                f"**Cast-rate vs top {sample} parses on {enc}:**\n" + "\n".join(cpm_lines)
+            )
 
     return Analysis(
         total_casts=total, breakdown=breakdown, downranks=downranks,
@@ -506,8 +568,14 @@ def handle_rotation_check(
         return (f"No casts found for **{character}** in {resolved.fight_name} "
                 f"(`{resolved.code}`). They may not have cast anything in that pull.")
 
+    baseline = load_baseline(profile["spec"], resolved.fight_name)
+    if baseline:
+        log.debug("Loaded baseline: %s / %s (n=%d)",
+                  profile["spec"], resolved.fight_name, baseline.get("sample_size", 0))
+
     analysis = analyze(casts, abilities, profile,
-                       max_rank_ids=verified_max_ranks(profile))
+                       max_rank_ids=verified_max_ranks(profile),
+                       baseline=baseline)
     out = _format(profile, resolved, analysis, character)
 
     if config.ENABLE_LLM:

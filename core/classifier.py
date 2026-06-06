@@ -197,8 +197,22 @@ for _cmd, _aliases in COMMAND_PATTERNS.items():
 # Deterministic parser
 # ---------------------------------------------------------------------------
 
+def resolve_spec(raw: str) -> Optional[str]:
+    """
+    Map any user spec input to a canonical spec key, or None if unrecognized.
+    Handles already-canonical keys, aliases, and "Elemental Shaman"-style spacing.
+    The single source of truth for spec normalization (gear/rotation/etc.).
+    """
+    if not raw:
+        return None
+    s = raw.strip().lower().replace(" ", "_")
+    if s in VALID_SPECS:
+        return s
+    return SPEC_ALIASES.get(s)
+
+
 def _resolve_spec(token: str) -> Optional[str]:
-    return SPEC_ALIASES.get(token.lower())
+    return resolve_spec(token)
 
 
 def parse(text: str, source: str = "unknown") -> Optional[Intent]:

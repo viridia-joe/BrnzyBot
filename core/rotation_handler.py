@@ -41,11 +41,6 @@ import config
 from core import entitlements
 from core import wcl_client as wcl
 
-try:
-    from core.classifier import SPEC_ALIASES, VALID_SPECS
-except Exception:  # pragma: no cover - classifier should always import
-    SPEC_ALIASES, VALID_SPECS = {}, frozenset()
-
 log = logging.getLogger(__name__)
 
 ROTATIONS_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "rotations")
@@ -76,11 +71,9 @@ def covered_specs() -> list[str]:
 
 
 def _resolve_spec_key(spec: str) -> str:
-    """Map a raw spec string to a canonical key (best effort)."""
-    s = (spec or "").strip().lower().replace(" ", "_")
-    if s in VALID_SPECS:
-        return s
-    return SPEC_ALIASES.get(s, s)
+    """Map a raw spec string to a canonical key (best effort; unknown → normalized input)."""
+    from core.classifier import resolve_spec
+    return resolve_spec(spec) or (spec or "").strip().lower().replace(" ", "_")
 
 
 def load_profile(spec: str) -> dict | None:

@@ -38,20 +38,9 @@ DISCORD_MAX = 2000
 
 
 def _chunks(text: str, limit: int = DISCORD_MAX) -> list[str]:
-    """Split text into Discord-safe chunks, breaking on newlines where possible."""
-    if len(text) <= limit:
-        return [text]
-    parts = []
-    while text:
-        if len(text) <= limit:
-            parts.append(text)
-            break
-        split = text.rfind("\n", 0, limit)
-        if split == -1:
-            split = limit
-        parts.append(text[:split])
-        text = text[split:].lstrip("\n")
-    return parts
+    """Split into Discord-safe chunks (shared impl in core.messages)."""
+    from core.messages import chunk
+    return chunk(text, limit)
 
 
 # ---------------------------------------------------------------------------

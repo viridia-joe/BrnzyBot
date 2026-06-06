@@ -22,7 +22,7 @@ from core.gear_context import build_context
 from core.gear_reasoning import annotate
 from core.node_health import check_nodes
 from core.gear_optimizer import solve_upgrades, solve_bis, OptimizeParams
-from core.classifier import SPEC_ALIASES
+from core.classifier import resolve_spec
 from db.server_config import get_guild_phase
 
 ITEM_DB_PATH = config.ITEM_DB_PATH
@@ -205,7 +205,7 @@ def handle_gear_question(
     The optimizer decides what to recommend and in what order.
     The LLM only adds prose: source notes, strategic context, set bonus explanations.
     """
-    spec = SPEC_ALIASES.get(spec.lower(), spec.lower())
+    spec = resolve_spec(spec) or spec.strip().lower()
 
     item_db = sqlite3.connect(ITEM_DB_PATH) if os.path.exists(ITEM_DB_PATH) else None
     try:
@@ -271,7 +271,7 @@ def handle_gear_list(
     verbose=True appends BiS item name, EP, and pct-off to each line.
     """
     from collections import defaultdict
-    spec = SPEC_ALIASES.get(spec.lower(), spec.lower())
+    spec = resolve_spec(spec) or spec.strip().lower()
 
     item_db = sqlite3.connect(ITEM_DB_PATH) if os.path.exists(ITEM_DB_PATH) else None
     try:

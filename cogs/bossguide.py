@@ -33,20 +33,9 @@ log = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 def _chunks(text: str, limit: int = 1990) -> List[str]:
-    if len(text) <= limit:
-        return [text]
-    parts = []
-    while len(text) > limit:
-        split_at = text.rfind('\n', 0, limit)
-        if split_at <= 0:
-            split_at = text.rfind(' ', 0, limit)
-        if split_at <= 0:
-            split_at = limit
-        parts.append(text[:split_at])
-        text = text[split_at:].lstrip('\n')
-    if text:
-        parts.append(text)
-    return parts
+    """Split into Discord-safe chunks (shared impl in core.messages)."""
+    from core.messages import chunk
+    return chunk(text, limit)
 
 
 async def _find_recent_image(channel: discord.TextChannel, limit: int = 15) -> bytes | None:

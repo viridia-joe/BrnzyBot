@@ -128,6 +128,26 @@ Totems, Idols, and Librams currently show "proc-based, not EP-rated". These coul
 
 ## Offline Dev/Test Harness (WCL fixtures)
 
+**Status:** ✅ Largely implemented (`tools/fixtures.py`, `tools/capture_wcl.py`,
+`tools/audit_cli.py`, `tools/make_synthetic_fixtures.py`; `core/wcl_client.py`
+fixture replay via `WCL_FIXTURE_DIR`; committed item-DB fixture; CI runs the audit
+harness incl. an offline end-to-end roster audit). Remaining follow-ups:
+- **Capture real logs** from a creds-bearing machine with `tools/capture_wcl.py`
+  (one per progression encounter) to validate the potion matcher against live data
+  and replace the synthetic stand-in.
+- **Rotation offline replay** needs `specID` in the captured CombatantInfo so
+  `_derive_spec_from_log` works under fixtures (capture already dumps combatant
+  info; just confirm specID is present), and a `tools/rotation_cli.py` shim.
+- **Missing-meta detection gap:** `normalize` only sets `meta_present=True`/`None`,
+  never `False`, so a missing meta gem is never flagged in the live pipeline.
+  Fix by cross-referencing the item DB for a "Meta" socket with no meta gem
+  socketed (same mechanism as `_count_empty_sockets`).
+- **Strategy DB** isn't held as a fixture (only the item DB is); add one if/when a
+  feature needs it offline.
+- **Heavy deps** (numpy/scipy/discord.py) still aren't installed in the sandbox, so
+  `gear_optimizer`/`bot.py` can't run here — fix via the web-environment setup
+  script (`pip install -r requirements.txt`), not code.
+
 **Priority:** High
 **Effort:** Medium
 

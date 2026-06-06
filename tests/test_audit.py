@@ -297,6 +297,38 @@ def test_get_profile_unknown_is_none():
     assert get_profile("ele_shaman") is ELE_SHAMAN
 
 
+def test_offline_roster_audit_against_fixtures():
+    """End-to-end through the fixture transport + real item DB — no creds, no network."""
+    import json as _json
+    import os as _os
+    from tools.fixtures import FIXTURE_WCL_DIR, ensure_item_db
+
+    code = "SYNTHLOG00000001"
+    specs_path = _os.path.join(FIXTURE_WCL_DIR, f"{code}.specs.json")
+    if not _os.path.exists(specs_path):
+        return  # synthetic fixtures not generated in this checkout — skip
+    specs = _json.load(open(specs_path, encoding="utf-8"))
+
+    _os.environ["WCL_FIXTURE_DIR"] = FIXTURE_WCL_DIR
+    ensure_item_db()  # point config.ITEM_DB_PATH at the committed item-DB fixture
+    try:
+        roster = build_roster_audit(
+            f"https://classic.warcraftlogs.com/reports/{code}",
+            lambda n, c="": specs.get(n.lower()),
+        )
+    finally:
+        _os.environ.pop("WCL_FIXTURE_DIR", None)
+
+    assert len(roster.reports) == 8
+    out = roster.render()
+    assert "missing major: Legs" in out          # enchant severity (major)
+    assert "empty socket" in out                  # empty sockets vs the real item DB
+    assert "below rare quality" in out            # green gems
+    assert "Weapon Oil: ❌" in out                 # missing consume
+    assert "Potions: ✅" in out and "Potions: ❌" in out   # potion counting from casts
+    assert "no casts for the final" in out        # healer end-of-fight silence
+
+
 # --- plain-asserts harness for CI (no pytest needed) ------------------------
 
 def _main():

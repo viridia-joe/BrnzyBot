@@ -94,13 +94,28 @@ the flag or it adds seconds of timeout latency to every gear/strategy command.
 
 - **Run locally:** `python3 bot.py` (needs `~/.openclaw/data/.env` and the built
   databases — see DEPLOYMENT.md). Or `docker compose up --build`.
-- **Checks:** there is no unit-test suite yet. CI (`.github/workflows/ci.yml`)
-  byte-compiles every `.py` on Python 3.11 and import-checks the deterministic
-  modules. **Before pushing, run:**
+- **Checks:** CI (`.github/workflows/ci.yml`) byte-compiles every `.py` on
+  Python 3.11, import-checks the deterministic modules, and runs the audit test
+  harness. **Before pushing, run:**
   ```bash
   python3 -m compileall -q .
+  python3 tests/test_audit.py          # plain-asserts harness (no pytest needed)
   ```
   If you add tests, put them under `tests/` and wire them into `ci.yml`.
+- **Offline (no creds / no network) dev & test.** The WCL-backed features
+  (`/audit`, `/rotationcheck`, gear auto-register) can run with zero credentials:
+  - `core/wcl_client.py` replays canned JSON from `WCL_FIXTURE_DIR` instead of
+    calling the API (env-gated; no effect in prod).
+  - The full TBC item DB ships as a committed fixture (`tests/fixtures/items/
+    tbc_items.db.gz`, ~330 KB); `tools.fixtures.ensure_item_db()` materialises it.
+  - `tools/make_synthetic_fixtures.py` writes an example log covering every P1–P2
+    boss; `tools/capture_wcl.py` (needs creds) captures **real** logs into the
+    same fixture format.
+  - Run the whole pipeline from the shell:
+    ```bash
+    python3 -m tools.audit_cli --fixtures SYNTHLOG00000001          # whole roster
+    python3 -m tools.audit_cli --fixtures SYNTHLOG00000001 Pyra     # one raider
+    ```
 - **Deploy:** pushing to `master` triggers `.github/workflows/deploy.yml`, which
   SSHes to the GCE VM and runs `docker compose up --build -d`. The health step
   curls `localhost:8081/health`. Deploy can also be run manually via the Actions

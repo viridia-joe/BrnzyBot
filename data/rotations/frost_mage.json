@@ -1,20 +1,28 @@
-{
-  "spec": "frost_mage",
-  "display": "Frost Mage",
-  "class": "Mage",
-  "role": "caster_dps",
-  "source": "Icy Veins / Wowhead TBC guides + WCL top parses",
-  "summary": "Frostbolt is the core nuke; Ice Lance and Fire Blast for instants on the move.",
-  "core_spells": ["Frostbolt", "Ice Lance", "Fire Blast"],
-  "downrank_watch": ["Frostbolt", "Ice Lance"],
-  "ranks_verified": true,
-  "max_rank_ids": {
-    "Frostbolt": 38697,
-    "Ice Lance": 30455
-  },
-  "off_rotation": {
-    "Fireball": {"min_casts": 5, "note": "a frost mage casting Fireball heavily — check spec/macros"}
-  },
-  "advisory": "Frostbolt should be the overwhelming majority of casts. Ice Lance is a low-damage instant — only valuable while moving or with Fingers of Frost procs.",
-  "notes_verified": false
+﻿{
+    "spec":  "frost_mage",
+    "display":  "Frost Mage",
+    "class":  "Mage",
+    "role":  "caster_dps",
+    "summary":  "Frostbolt is the core nuke; Ice Lance and Fire Blast for instants on the move.",
+    "core_spells":  [
+                        "Frostbolt",
+                        "Ice Lance",
+                        "Fire Blast"
+                    ],
+    "downrank_watch":  [
+                           "Frostbolt",
+                           "Ice Lance"
+                       ],
+    "ranks_verified":  true,
+    "max_rank_ids":  {
+                         "Frostbolt":  38697,
+                         "Ice Lance":  30455
+                     },
+    "off_rotation":  {
+                         "Fireball":  {
+                                          "min_casts":  5,
+                                          "note":  "a frost mage casting Fireball heavily â€” check spec/macros"
+                                      }
+                     },
+    "advisory":  "Frostbolt should be the overwhelming majority of casts. Ice Lance is a low-damage instant â€” only valuable while moving or with Fingers of Frost procs."
 }

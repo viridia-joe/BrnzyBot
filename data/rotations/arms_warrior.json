@@ -1,27 +1,39 @@
-{
-  "spec": "arms_warrior",
-  "display": "Arms Warrior",
-  "class": "Warrior",
-  "role": "melee_dps",
-  "source": "Icy Veins / Wowhead TBC guides + WCL top Arms parses",
-  "summary": "Mortal Strike on cooldown, Slam as filler, Overpower after dodges, Execute below 20%. Blood Frenzy debuff (+4% physical damage taken by target) is the primary raid contribution alongside Mortal Strike's healing reduction.",
-
-  "core_spells": ["Mortal Strike", "Slam", "Overpower", "Execute", "Heroic Strike", "Sweeping Strikes"],
-
-  "downrank_watch": ["Mortal Strike", "Execute", "Heroic Strike"],
-  "ranks_verified": false,
-
-  "off_rotation": {
-    "Bloodthirst": {"min_casts": 5, "note": "Fury deep talent — an Arms warrior should not be casting Bloodthirst; check spec"},
-    "Whirlwind":   {"min_casts": 5, "note": "Whirlwind is trainable but primarily a Fury filler — high Whirlwind counts on Arms suggest wrong rotation"}
-  },
-
-  "breakpoint": {
-    "spells": ["Mortal Strike", "Slam"],
-    "note": "Arms brings Mortal Strike (50% healing reduction debuff — critical for fights with self-healing bosses) and Blood Frenzy (+4% physical damage taken by target from Rend bleeds). Slam requires Improved Slam talent to be efficient — without it the 1.5s cast time clips auto attacks badly."
-  },
-
-  "advisory": "Arms is often brought to raids specifically for Mortal Strike and Blood Frenzy rather than personal DPS, which may be lower than Fury. Overpower procs should be used immediately when they appear — they only last 5 seconds and hit harder than Slam. Sweeping Strikes allows 2 back-to-back instant attacks and synergizes well with Execute in cleave situations.",
-
-  "notes_verified": false
+﻿{
+    "spec":  "arms_warrior",
+    "display":  "Arms Warrior",
+    "class":  "Warrior",
+    "role":  "melee_dps",
+    "summary":  "Mortal Strike on cooldown, Slam as filler, Overpower after dodges, Execute below 20%. Blood Frenzy debuff (+4% physical damage taken by target) is the primary raid contribution alongside Mortal Strike\u0027s healing reduction.",
+    "core_spells":  [
+                        "Mortal Strike",
+                        "Slam",
+                        "Overpower",
+                        "Execute",
+                        "Heroic Strike",
+                        "Sweeping Strikes"
+                    ],
+    "downrank_watch":  [
+                           "Mortal Strike",
+                           "Execute",
+                           "Heroic Strike"
+                       ],
+    "ranks_verified":  false,
+    "off_rotation":  {
+                         "Bloodthirst":  {
+                                             "min_casts":  5,
+                                             "note":  "Fury deep talent â€” an Arms warrior should not be casting Bloodthirst; check spec"
+                                         },
+                         "Whirlwind":  {
+                                           "min_casts":  5,
+                                           "note":  "Whirlwind is trainable but primarily a Fury filler â€” high Whirlwind counts on Arms suggest wrong rotation"
+                                       }
+                     },
+    "breakpoint":  {
+                       "spells":  [
+                                      "Mortal Strike",
+                                      "Slam"
+                                  ],
+                       "note":  "Arms brings Mortal Strike (50% healing reduction debuff â€” critical for fights with self-healing bosses) and Blood Frenzy (+4% physical damage taken by target from Rend bleeds). Slam requires Improved Slam talent to be efficient â€” without it the 1.5s cast time clips auto attacks badly."
+                   },
+    "advisory":  "Arms is often brought to raids specifically for Mortal Strike and Blood Frenzy rather than personal DPS, which may be lower than Fury. Overpower procs should be used immediately when they appear â€” they only last 5 seconds and hit harder than Slam. Sweeping Strikes allows 2 back-to-back instant attacks and synergizes well with Execute in cleave situations."
 }

@@ -1,38 +1,56 @@
-{
-  "spec": "ele_shaman",
-  "display": "Elemental Shaman",
-  "class": "Shaman",
-  "role": "caster_dps",
-  "source": "Icy Veins / Wowhead TBC guides + WCL top parses",
-  "summary": "Lightning Bolt is your filler; cast Chain Lightning on cooldown and keep Flame Shock ticking.",
-  "core_spells": ["Chain Lightning", "Lightning Bolt", "Flame Shock"],
-  "downrank_watch": ["Lightning Bolt", "Chain Lightning", "Flame Shock"],
-  "ranks_verified": true,
-  "max_rank_ids": {
-    "Lightning Bolt": 25449,
-    "Chain Lightning": 25442,
-    "Flame Shock": 25457
-  },
-  "off_rotation": {
-    "Earth Shock": {
-      "min_casts": 5,
-      "shared_cooldown_s": 6,
-      "ratio_flag": 0.25,
-      "note": "Earth Shock shares the 6s shock cooldown with Flame Shock — every Earth Shock displaces a Flame Shock tick and the Fire Vulnerability debuff. Reserve Earth Shock for interrupts only; it should not appear as a rotation filler"
-    },
-    "Frost Shock": {
-      "min_casts": 4,
-      "shared_cooldown_s": 6,
-      "ratio_flag": 0.20,
-      "note": "Frost Shock occupies the same 6s shock cooldown as Flame Shock and deals less damage. Should only appear for kiting/slow mechanics, not as a DPS filler"
-    },
-    "Healing Wave":        {"min_casts": 3, "note": "healing during a DPS parse — a sign of a heal bound where a nuke should be"},
-    "Lesser Healing Wave": {"min_casts": 3, "note": "healing during a DPS parse"},
-    "Chain Heal":          {"min_casts": 2, "note": "healing during a DPS parse"}
-  },
-  "breakpoint": {
-    "spells": ["Chain Lightning", "Lightning Bolt"],
-    "note": "Lightning Bolt is the filler with Chain Lightning woven on cooldown. As spell power scales, Chain Lightning's higher per-cast damage makes it increasingly worth casting on every cooldown — a near-zero Chain Lightning count usually means DPS left on the table."
-  },
-  "notes_verified": false
+﻿{
+    "spec":  "ele_shaman",
+    "display":  "Elemental Shaman",
+    "class":  "Shaman",
+    "role":  "caster_dps",
+    "summary":  "Lightning Bolt is your filler; cast Chain Lightning on cooldown and keep Flame Shock ticking.",
+    "core_spells":  [
+                        "Chain Lightning",
+                        "Lightning Bolt",
+                        "Flame Shock"
+                    ],
+    "downrank_watch":  [
+                           "Lightning Bolt",
+                           "Chain Lightning",
+                           "Flame Shock"
+                       ],
+    "ranks_verified":  true,
+    "max_rank_ids":  {
+                         "Lightning Bolt":  25449,
+                         "Chain Lightning":  25442,
+                         "Flame Shock":  25457
+                     },
+    "off_rotation":  {
+                         "Earth Shock":  {
+                                             "min_casts":  5,
+                                             "shared_cooldown_s":  6,
+                                             "ratio_flag":  0.25,
+                                             "note":  "Earth Shock shares the 6s shock cooldown with Flame Shock â€” every Earth Shock displaces a Flame Shock tick and the Fire Vulnerability debuff. Reserve Earth Shock for interrupts only; it should not appear as a rotation filler"
+                                         },
+                         "Frost Shock":  {
+                                             "min_casts":  4,
+                                             "shared_cooldown_s":  6,
+                                             "ratio_flag":  0.20,
+                                             "note":  "Frost Shock occupies the same 6s shock cooldown as Flame Shock and deals less damage. Should only appear for kiting/slow mechanics, not as a DPS filler"
+                                         },
+                         "Healing Wave":  {
+                                              "min_casts":  3,
+                                              "note":  "healing during a DPS parse â€” a sign of a heal bound where a nuke should be"
+                                          },
+                         "Lesser Healing Wave":  {
+                                                     "min_casts":  3,
+                                                     "note":  "healing during a DPS parse"
+                                                 },
+                         "Chain Heal":  {
+                                            "min_casts":  2,
+                                            "note":  "healing during a DPS parse"
+                                        }
+                     },
+    "breakpoint":  {
+                       "spells":  [
+                                      "Chain Lightning",
+                                      "Lightning Bolt"
+                                  ],
+                       "note":  "Lightning Bolt is the filler with Chain Lightning woven on cooldown. As spell power scales, Chain Lightning\u0027s higher per-cast damage makes it increasingly worth casting on every cooldown â€” a near-zero Chain Lightning count usually means DPS left on the table."
+                   }
 }

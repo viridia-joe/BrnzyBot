@@ -1,21 +1,31 @@
-{
-  "spec": "fire_mage",
-  "display": "Fire Mage",
-  "class": "Mage",
-  "role": "caster_dps",
-  "source": "Icy Veins / Wowhead TBC guides + WCL top parses",
-  "summary": "Fireball spam with Scorch used to keep the Improved Scorch debuff at 5 stacks (if you're the assigned scorcher). Fire Blast on the move.",
-  "core_spells": ["Fireball", "Scorch", "Fire Blast", "Pyroblast"],
-  "downrank_watch": ["Fireball", "Scorch", "Pyroblast"],
-  "ranks_verified": true,
-  "max_rank_ids": {
-    "Fireball": 38692,
-    "Scorch": 27074,
-    "Pyroblast": 33938
-  },
-  "off_rotation": {
-    "Frostbolt": {"min_casts": 5, "note": "a fire mage casting Frostbolt — check spec/macros"}
-  },
-  "advisory": "Scorch is only for maintaining the 5-stack Improved Scorch debuff — beyond keeping it up, every Scorch should be a Fireball. Heavy Scorch counts can mean over-scorching.",
-  "notes_verified": false
+﻿{
+    "spec":  "fire_mage",
+    "display":  "Fire Mage",
+    "class":  "Mage",
+    "role":  "caster_dps",
+    "summary":  "Fireball spam with Scorch used to keep the Improved Scorch debuff at 5 stacks (if you\u0027re the assigned scorcher). Fire Blast on the move.",
+    "core_spells":  [
+                        "Fireball",
+                        "Scorch",
+                        "Fire Blast",
+                        "Pyroblast"
+                    ],
+    "downrank_watch":  [
+                           "Fireball",
+                           "Scorch",
+                           "Pyroblast"
+                       ],
+    "ranks_verified":  true,
+    "max_rank_ids":  {
+                         "Fireball":  38692,
+                         "Scorch":  27074,
+                         "Pyroblast":  33938
+                     },
+    "off_rotation":  {
+                         "Frostbolt":  {
+                                           "min_casts":  5,
+                                           "note":  "a fire mage casting Frostbolt â€” check spec/macros"
+                                       }
+                     },
+    "advisory":  "Scorch is only for maintaining the 5-stack Improved Scorch debuff â€” beyond keeping it up, every Scorch should be a Fireball. Heavy Scorch counts can mean over-scorching."
 }

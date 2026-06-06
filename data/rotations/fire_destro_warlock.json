@@ -1,23 +1,38 @@
-{
-  "spec": "fire_destro_warlock",
-  "display": "Destruction Warlock (Fire / Conflagrate)",
-  "class": "Warlock",
-  "role": "caster_dps",
-  "source": "Icy Veins / Wowhead TBC guides + WCL top parses",
-  "summary": "Incinerate as the primary nuke with Immolate kept up (Incinerate bonus damage on an Immolated target) and Conflagrate on cooldown.",
-  "core_spells": ["Incinerate", "Immolate", "Conflagrate", "Curse of the Elements", "Curse of Agony"],
-  "downrank_watch": ["Incinerate", "Immolate", "Conflagrate", "Curse of Agony"],
-  "ranks_verified": true,
-  "max_rank_ids": {
-    "Incinerate": 32231,
-    "Immolate": 27215,
-    "Conflagrate": 17962,
-    "Curse of Agony": 27218
-  },
-  "off_rotation": {
-    "Shadow Bolt":  {"min_casts": 5, "note": "a fire/Incinerate build should fill with Incinerate, not Shadow Bolt — check your build and action bars"},
-    "Searing Pain": {"min_casts": 3, "note": "a low-value fire filler"}
-  },
-  "advisory": "Immolate must stay up — Incinerate does bonus damage to an Immolated target, so a dropped Immolate is a direct DPS loss.",
-  "notes_verified": false
+﻿{
+    "spec":  "fire_destro_warlock",
+    "display":  "Destruction Warlock (Fire / Conflagrate)",
+    "class":  "Warlock",
+    "role":  "caster_dps",
+    "summary":  "Incinerate as the primary nuke with Immolate kept up (Incinerate bonus damage on an Immolated target) and Conflagrate on cooldown.",
+    "core_spells":  [
+                        "Incinerate",
+                        "Immolate",
+                        "Conflagrate",
+                        "Curse of the Elements",
+                        "Curse of Agony"
+                    ],
+    "downrank_watch":  [
+                           "Incinerate",
+                           "Immolate",
+                           "Conflagrate",
+                           "Curse of Agony"
+                       ],
+    "ranks_verified":  true,
+    "max_rank_ids":  {
+                         "Incinerate":  32231,
+                         "Immolate":  27215,
+                         "Conflagrate":  17962,
+                         "Curse of Agony":  27218
+                     },
+    "off_rotation":  {
+                         "Shadow Bolt":  {
+                                             "min_casts":  5,
+                                             "note":  "a fire/Incinerate build should fill with Incinerate, not Shadow Bolt â€” check your build and action bars"
+                                         },
+                         "Searing Pain":  {
+                                              "min_casts":  3,
+                                              "note":  "a low-value fire filler"
+                                          }
+                     },
+    "advisory":  "Immolate must stay up â€” Incinerate does bonus damage to an Immolated target, so a dropped Immolate is a direct DPS loss."
 }

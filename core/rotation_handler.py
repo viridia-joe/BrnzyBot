@@ -208,10 +208,27 @@ def _resolve_log(
         )
 
     # --- auto: walk the character's recent reports ---
-    reports = wcl.get_character_recent_reports(character, realm, region, limit=3)
+    # First probe the character endpoint so we can give a specific error when
+    # the character simply doesn't exist on WCL vs when they exist but have no logs.
+    char_info = wcl.get_character(character, realm, region)
+    log.debug("WCL character probe for %s@%s/%s → %s", character, realm, region, char_info)
+    if char_info is None:
+        return (
+            f"**{character}** wasn't found on Warcraft Logs for **{realm}** ({region.upper()}). "
+            f"Possible causes:\n"
+            f"• The character name or realm is spelled differently on WCL\n"
+            f"• No logs have been uploaded for this character yet\n"
+            f"If they have a log, paste the report link and I'll check it directly: "
+            f"`/rotationcheck {character} report:<url>`"
+        )
+
+    reports = wcl.get_character_recent_reports(character, realm, region, limit=5)
     if not reports:
-        return (f"Couldn't find any recent Warcraft Logs reports for "
-                f"**{character}**-{realm}. Paste a report link to check a specific pull.")
+        return (
+            f"**{character}** is on Warcraft Logs but has no recent reports uploaded. "
+            f"Ask them to upload a parse to WCL, or paste a report link directly: "
+            f"`/rotationcheck {character} report:<url>`"
+        )
     for rep in reports:
         code = rep.get("code")
         if not code:
@@ -229,8 +246,12 @@ def _resolve_log(
             fight_name=fight.get("name", f"Fight {fight['id']}"),
             duration_s=max(0.0, (fight.get("endTime", 0) - fight.get("startTime", 0)) / 1000.0),
         )
-    return (f"Found reports for **{character}** but couldn't locate a pull with "
-            "their casts. Paste a specific report link to check a pull.")
+    return (
+        f"Found {len(reports)} recent report(s) for **{character}** on WCL but "
+        f"couldn't locate a pull where they had casts (they may have been absent, "
+        f"or the fights were too short). Paste a specific report link: "
+        f"`/rotationcheck {character} report:<url>`"
+    )
 
 
 # ---------------------------------------------------------------------------

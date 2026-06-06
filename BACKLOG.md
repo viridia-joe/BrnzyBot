@@ -303,8 +303,16 @@ table. Expose one `classifier.resolve_spec(raw) -> key | None` and call it. (Low
 
 ## Canonical Fight Diagrams (one great diagram per encounter, not generated each time)
 
+**Status:** ✅ Framework shipped — `/bossguide` now serves a committed
+`data/diagrams/<boss>.png` (`core/fight_diagrams.py`, no Pillow at runtime),
+falling back to the legacy procedural generator then text. Authoring tool
+(`tools/render_diagrams.py`, Pillow) composites a real minimap background + the
+consistent role-icon set from a per-boss JSON spec; schema + example in
+`data/diagrams/` (README + gruul.json). **Remaining = content:** author the real
+minimap backgrounds + per-boss specs and commit the rendered PNGs (P1–P2 first).
+
 **Priority:** Medium
-**Effort:** Medium (mostly asset authoring, not code)
+**Effort:** Medium (now mostly asset authoring, not code)
 
 **Today:** `core/bossguide_diagram.py` draws a *schematic* top-down map with Pillow
 **on every request** — geometric dots/zones/dashed lines, ad-hoc text labels, only

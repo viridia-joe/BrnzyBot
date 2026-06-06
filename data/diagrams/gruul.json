@@ -1,0 +1,14 @@
+{
+  "boss": "gruul",
+  "background": "backgrounds/gruuls_lair.png",
+  "title": "Gruul the Dragonkiller",
+  "_note": "Example spec. Add backgrounds/gruuls_lair.png (real minimap crop), then `python -m tools.render_diagrams gruul`. x/y are fractions (0..1) of the background.",
+  "markers": [
+    {"role": "boss",   "x": 0.50, "y": 0.45, "label": "Gruul (tank faces wall)"},
+    {"role": "tank",   "x": 0.50, "y": 0.30, "label": "MT"},
+    {"role": "melee",  "x": 0.50, "y": 0.58, "label": "Melee behind"},
+    {"role": "ranged", "x": 0.24, "y": 0.72, "label": "Ranged — spread 10yd (Shatter)"},
+    {"role": "healer", "x": 0.76, "y": 0.72, "label": "Healers spread"},
+    {"role": "marker", "x": 0.50, "y": 0.88, "label": "Cave shrinks — keep max spread"}
+  ]
+}

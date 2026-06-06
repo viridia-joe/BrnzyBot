@@ -316,9 +316,11 @@ def handle_bossguide(boss_name: str,
     # Generate text assignments
     text = _generate_assignments(entry, roster, llm_on=llm_on, guild_id=guild_id)
 
-    # Generate position diagram
-    diagram: Optional[bytes] = None
-    if entry.has_diagram:
+    # Position diagram: prefer the committed canonical diagram (one great image per
+    # encounter); fall back to the legacy procedural generator, then text only.
+    from core import fight_diagrams
+    diagram: Optional[bytes] = fight_diagrams.get_canonical(boss_key)
+    if diagram is None and entry.has_diagram:
         try:
             from core.bossguide_diagram import generate_diagram
             diagram = generate_diagram(boss_key)

@@ -36,8 +36,6 @@ import os
 import re
 from collections import Counter
 from dataclasses import dataclass, field
-from urllib.error import HTTPError, URLError
-from urllib.request import Request, urlopen
 
 import config
 from core import wcl_client as wcl
@@ -358,22 +356,12 @@ def _coach(profile: dict, analysis: Analysis, character: str) -> str | None:
         f"Their top casts: {top}\n"
         f"Things I noticed (treat as possibilities, not certainties): {'; '.join(findings)}"
     )
-    payload = {
-        "model": _LLM_MODEL,
-        "messages": [{"role": "system", "content": sys},
-                     {"role": "user", "content": user}],
-        "temperature": 0.3, "max_tokens": 300,
-    }
-    headers = {"Content-Type": "application/json"}
-    if config.LITELLM_API_KEY:
-        headers["Authorization"] = f"Bearer {config.LITELLM_API_KEY}"
+    from core import llm
+    messages = [{"role": "system", "content": sys}, {"role": "user", "content": user}]
     try:
-        req = Request(f"{config.LITELLM_BASE_URL}/chat/completions",
-                      data=json.dumps(payload).encode(), headers=headers, method="POST")
-        with urlopen(req, timeout=_LLM_TIMEOUT) as resp:
-            data = json.loads(resp.read())
-        return data["choices"][0]["message"]["content"].strip()
-    except (HTTPError, URLError, OSError, KeyError, ValueError) as e:
+        return llm.chat(_LLM_MODEL, messages, temperature=0.3,
+                        max_tokens=300, timeout=_LLM_TIMEOUT).strip()
+    except RuntimeError as e:
         log.warning("rotation coach LLM call failed: %s", e)
         return None
 

@@ -358,30 +358,15 @@ def triage_with_llm(text: str, source: str = "nl") -> Intent:
     SDK dependency. Falls back to Intent.unknown() on any failure.
     """
     try:
-        import json as _json
-        import urllib.request
         import config
+        from core import llm
 
-        payload = {
-            "model":       config.MODEL_TRIAGE,
-            "messages":    [
-                {"role": "system", "content": _TRIAGE_SYSTEM},
-                {"role": "user", "content": text},
-            ],
-            "max_tokens":  256,
-            "temperature": 0.1,
-        }
-        headers = {"Content-Type": "application/json"}
-        if config.LITELLM_API_KEY:
-            headers["Authorization"] = f"Bearer {config.LITELLM_API_KEY}"
-
-        url = f"{config.LITELLM_BASE_URL}/chat/completions"
-        req = urllib.request.Request(
-            url, data=_json.dumps(payload).encode(), headers=headers, method="POST"
-        )
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            response = _json.loads(resp.read())
-        raw = response["choices"][0]["message"]["content"].strip()
+        raw = llm.chat(
+            config.MODEL_TRIAGE,
+            [{"role": "system", "content": _TRIAGE_SYSTEM},
+             {"role": "user", "content": text}],
+            temperature=0.1, max_tokens=256, timeout=15,
+        ).strip()
 
         # Strip markdown code fences if present
         raw = re.sub(r"^```(?:json)?\s*", "", raw)

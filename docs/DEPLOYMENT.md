@@ -80,6 +80,41 @@ and start it with the profile:
 docker compose --profile llm up --build -d
 ```
 
+## Running a second instance (e.g. a prod bot on your guild's Discord)
+
+Each instance is a standalone bot for **one** Discord. Code is per-instance by
+env + per-guild by its own `brnzybot.db`, so two instances are fully isolated.
+To stand up a second one alongside the dev bot:
+
+1. **New Discord app + bot token** at the Discord developer portal → its own
+   `DISCORD_BOT_TOKEN` and `HOME_GUILD_ID`. (Separate tokens = separate Discord
+   rate-limit buckets, so no contention there.)
+2. **Use a separate WCL API client** for the new instance (register a second app
+   on Warcraft Logs). The WCL rate limiter in `core/wcl_client.py` is
+   per-process, so two instances sharing one `WCL_CLIENT_ID` would burn the
+   shared point budget twice as fast with no coordination. Separate clients =
+   independent budgets.
+3. **Provision its VM** with a distinct name so resources don't collide:
+   ```bash
+   # in a fresh terraform.tfvars (or a second working dir):
+   instance_name = "brnzybot-prod"
+   # NOTE: GCP's free tier covers ONE e2-micro per account — a second VM is billed
+   # (~$6/mo) unless you co-locate (tight on 1 GB). See the LLM tier for sizing.
+   terraform apply
+   ```
+4. **Create `~/brnzybot.env`** on the new VM with that instance's token + WCL
+   client, then **build the DBs** (`scripts/import-items.py`, `build_strategy_db.py`).
+5. **Deploy to it:** Actions → *Deploy to GCE* → **Run workflow**, and set the
+   `host` (and `user` if different) inputs to the new VM. (Reuse the same
+   `GCE_SSH_KEY` across VMs, or add a second key + workflow.) Push-to-master
+   keeps deploying the dev instance via the `GCE_HOST`/`GCE_USER` secrets.
+
+| Resource | Per-instance | Shareable |
+|---|---|---|
+| Discord token, `brnzybot.db`, WCL client | ✅ separate | — |
+| `tbc_items.db` / `tbc_strategy.db` (read-only) | rebuilt per VM | ✅ (or shared mount) |
+| LiteLLM proxy (only if `ENABLE_LLM`) | — | ✅ one proxy serves both |
+
 ## Health & monitoring
 
 - Liveness: `curl -sf http://localhost:8081/health` → `{"status":"ok"}`.

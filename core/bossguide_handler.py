@@ -100,7 +100,7 @@ def _call_llm(messages: list, system: str, temperature: float = 0.2,
     If image_b64 is provided, the last user message gets the image prepended
     using the OpenAI-compatible vision format.
     """
-    import urllib.request
+    from core import llm
     full_messages = [{"role": "system", "content": system}]
 
     for msg in messages:
@@ -118,22 +118,8 @@ def _call_llm(messages: list, system: str, temperature: float = 0.2,
         else:
             full_messages.append(msg)
 
-    payload = {
-        "model":       config.MODEL_ESCALATION,
-        "messages":    full_messages,
-        "temperature": temperature,
-        "max_tokens":  1600,
-    }
-    headers = {"Content-Type": "application/json"}
-    if config.LITELLM_API_KEY:
-        headers["Authorization"] = f"Bearer {config.LITELLM_API_KEY}"
-
-    body = json.dumps(payload).encode()
-    url  = f"{config.LITELLM_BASE_URL}/chat/completions"
-    req  = urllib.request.Request(url, data=body, headers=headers, method="POST")
-    with urllib.request.urlopen(req, timeout=timeout) as resp:
-        data = json.loads(resp.read())
-    return data["choices"][0]["message"]["content"]
+    return llm.chat(config.MODEL_ESCALATION, full_messages,
+                    temperature=temperature, max_tokens=1600, timeout=timeout)
 
 
 # ---------------------------------------------------------------------------

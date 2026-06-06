@@ -115,23 +115,10 @@ def _build_user_message(message: str) -> str:
 # ---------------------------------------------------------------------------
 
 def _litellm(messages: list) -> str:
-    """POST to LiteLLM OpenAI-compat endpoint. Returns content string."""
-    url = f"{config.LITELLM_BASE_URL}/chat/completions"
-    payload = {
-        "model":       config.OLLAMA_MODEL,   # fast-verdict → llama3.1:8b on Icepick
-        "messages":    messages,
-        "temperature": 0.0,                    # classification must be deterministic
-        "max_tokens":  256,
-    }
-    headers = {"Content-Type": "application/json"}
-    if config.LITELLM_API_KEY:
-        headers["Authorization"] = f"Bearer {config.LITELLM_API_KEY}"
-
-    body = json.dumps(payload).encode()
-    req  = Request(url, data=body, headers=headers, method="POST")
-    with urlopen(req, timeout=TRIAGE_TIMEOUT) as resp:
-        data = json.loads(resp.read())
-    return data["choices"][0]["message"]["content"]
+    """Fast-verdict classification via the shared LLM client (temp 0 = deterministic)."""
+    from core import llm
+    return llm.chat(config.OLLAMA_MODEL, messages, temperature=0.0,
+                    max_tokens=256, timeout=TRIAGE_TIMEOUT)
 
 
 # ---------------------------------------------------------------------------

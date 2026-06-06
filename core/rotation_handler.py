@@ -327,13 +327,33 @@ def analyze(
                 "Could be a stray old-rank button/macro, or intentional (movement, mana). Worth a glance."
             )
 
+    # Estimate fight duration from cast timestamps for ratio-based checks.
+    ts_vals = [ev.get("timestamp", 0) for ev in casts if ev.get("type") == _CAST_TYPE]
+    fight_duration_s = (max(ts_vals) - min(ts_vals)) / 1000.0 if len(ts_vals) >= 2 else 0.0
+
     off: list[str] = []
     for nm, cfg in (profile.get("off_rotation") or {}).items():
         rec = by_name.get(nm)
         if not rec:
             continue
-        if rec["total"] >= int(cfg.get("min_casts", 1)):
-            off.append(f"**{nm}** ×{rec['total']} — {cfg.get('note', 'off-rotation cast')}.")
+        count = rec["total"]
+        # Standard cast-count threshold
+        if count < int(cfg.get("min_casts", 1)):
+            continue
+        # Optional ratio check: flag if count ≥ fraction of the spell's shared cooldown budget
+        ratio_note = ""
+        cd = cfg.get("shared_cooldown_s")
+        ratio_flag = cfg.get("ratio_flag", 0.0)
+        if cd and ratio_flag and fight_duration_s > 0:
+            budget = fight_duration_s / cd
+            fraction = count / budget
+            if fraction >= ratio_flag:
+                pct = int(fraction * 100)
+                ratio_note = (
+                    f" ({count} casts ≈ **{pct}% of the {int(cd)}s cooldown budget** "
+                    f"for a {int(fight_duration_s)}s fight — consistent with rotation use, not interrupts)"
+                )
+        off.append(f"**{nm}** ×{count} — {cfg.get('note', 'off-rotation cast')}.{ratio_note}")
 
     advisories: list[str] = []
     bp = profile.get("breakpoint")
@@ -447,7 +467,17 @@ def handle_rotation_check(
         resolved = _resolve_log(character, realm, region, report, fight)
     except RuntimeError as e:
         return f"Warcraft Logs is unreachable right now ({e}). Try again in a moment."
+
+    # If resolution returned an error string, attempt a fuzzy name match before
+    # surfacing the raw error — "Did you mean X?" saves a round-trip.
     if isinstance(resolved, str):
+        try:
+            from db.server_config import fuzzy_match_character
+            suggestion = fuzzy_match_character(guild_id, character)
+            if suggestion and suggestion.lower() != character.lower():
+                resolved = resolved + f"\n\n💡 Did you mean **{suggestion}**?"
+        except Exception:
+            pass  # fuzzy match is best-effort; don't block the real error
         return resolved
 
     # 2. Resolve the spec: prefer a usable provided/registered spec, otherwise

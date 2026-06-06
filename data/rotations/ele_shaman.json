@@ -14,6 +14,18 @@
     "Flame Shock": 25457
   },
   "off_rotation": {
+    "Earth Shock": {
+      "min_casts": 5,
+      "shared_cooldown_s": 6,
+      "ratio_flag": 0.25,
+      "note": "Earth Shock shares the 6s shock cooldown with Flame Shock — every Earth Shock displaces a Flame Shock tick and the Fire Vulnerability debuff. Reserve Earth Shock for interrupts only; it should not appear as a rotation filler"
+    },
+    "Frost Shock": {
+      "min_casts": 4,
+      "shared_cooldown_s": 6,
+      "ratio_flag": 0.20,
+      "note": "Frost Shock occupies the same 6s shock cooldown as Flame Shock and deals less damage. Should only appear for kiting/slow mechanics, not as a DPS filler"
+    },
     "Healing Wave":        {"min_casts": 3, "note": "healing during a DPS parse — a sign of a heal bound where a nuke should be"},
     "Lesser Healing Wave": {"min_casts": 3, "note": "healing during a DPS parse"},
     "Chain Heal":          {"min_casts": 2, "note": "healing during a DPS parse"}

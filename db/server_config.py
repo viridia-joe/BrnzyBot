@@ -230,6 +230,29 @@ def remove_character(guild_id: str, name: str, path: str = DB_PATH) -> bool:
     return cur.rowcount > 0
 
 
+def fuzzy_match_character(
+    guild_id: str, name: str, cutoff: float = 0.65, path: str = DB_PATH
+) -> str | None:
+    """
+    Return the best-matching registered character name for a guild, or None.
+
+    Uses difflib sequence matching — cutoff 0.65 catches one-or-two character
+    typos ("shermshaman" → "Shermnshamn") without producing false positives on
+    short names.
+    """
+    from difflib import get_close_matches
+    chars = list_characters(guild_id, path=path)
+    if not chars:
+        return None
+    known = [c["display_name"] for c in chars]
+    matches = get_close_matches(name.lower(), [n.lower() for n in known], n=1, cutoff=cutoff)
+    if not matches:
+        return None
+    # Return the original-cased display name
+    match_lower = matches[0]
+    return next((n for n in known if n.lower() == match_lower), None)
+
+
 # ---------------------------------------------------------------------------
 # Pending intents (awaiting clarification)
 # ---------------------------------------------------------------------------

@@ -46,11 +46,12 @@ class StrategyCog(commands.Cog, name="Strategy"):
         await interaction.response.defer(thinking=True)
 
         loop = asyncio.get_running_loop()
+        gid = str(interaction.guild_id)
         try:
             from core.strategy_handler import handle_strategy_question
             result_text = await loop.run_in_executor(
                 None,
-                lambda: handle_strategy_question(question),
+                lambda: handle_strategy_question(question, guild_id=gid),
             )
         except Exception as exc:
             log.exception("strat failed for query: %s", question)
@@ -119,11 +120,12 @@ class StrategyCog(commands.Cog, name="Strategy"):
         thinking_msg = await ctx.reply(thinking(), mention_author=False)
 
         loop = asyncio.get_running_loop()
+        gid = str(ctx.guild.id) if ctx.guild else "dm"
         try:
             from core.strategy_handler import handle_strategy_question
             result_text = await loop.run_in_executor(
                 None,
-                lambda: handle_strategy_question(question),
+                lambda: handle_strategy_question(question, guild_id=gid),
             )
         except Exception as exc:
             log.exception("prefix strat failed for: %s", question)

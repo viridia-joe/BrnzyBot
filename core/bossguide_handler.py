@@ -204,9 +204,10 @@ def _build_assignment_prompt(entry: BossEntry, roster: dict) -> str:
     return "\n".join(lines)
 
 
-def _generate_assignments(entry: BossEntry, roster: dict) -> str:
-    """Call Claude to produce formatted WoW assignments."""
-    if not config.ENABLE_LLM:
+def _generate_assignments(entry: BossEntry, roster: dict,
+                          llm_on: bool = False, guild_id: str = "global") -> str:
+    """Call Claude to produce formatted WoW assignments (Pro/LLM-only)."""
+    if not llm_on:
         return _fallback_template(entry)
     prompt = _build_assignment_prompt(entry, roster)
     try:
@@ -216,6 +217,8 @@ def _generate_assignments(entry: BossEntry, roster: dict) -> str:
             temperature=0.2,
             timeout=60,
         )
+        from core import entitlements
+        entitlements.note_llm_call(guild_id)
         return _format_ra_output(raw)
     except Exception as e:
         log.error("Assignment generation failed for %s: %s", entry.full_name, e)
@@ -274,7 +277,8 @@ def _fallback_template(entry: BossEntry) -> str:
 # ---------------------------------------------------------------------------
 
 def handle_bossguide(boss_name: str,
-                     image_bytes: Optional[bytes] = None
+                     image_bytes: Optional[bytes] = None,
+                     guild_id: str = "global",
                      ) -> Tuple[str, Optional[bytes]]:
     """
     Main entry point for /bossguide command.
@@ -299,15 +303,18 @@ def handle_bossguide(boss_name: str,
     entry = BOSS_DATA[boss_key]
     log.info("bossguide: %s (image=%s)", boss_key, image_bytes is not None)
 
-    # Parse roster image if provided (requires Claude Vision — LLM-only).
+    # Parse roster image if provided (requires Claude Vision — Pro/LLM-only).
+    from core import entitlements
+    llm_on = entitlements.llm_enabled(guild_id)
     roster: dict = {}
-    if image_bytes and config.ENABLE_LLM:
+    if image_bytes and llm_on:
         roster = _parse_roster_image(image_bytes)
+        entitlements.note_llm_call(guild_id)
         log.info("bossguide roster parse: tanks=%s healers=%s dps=%s",
                  roster.get("tanks"), roster.get("healers"), roster.get("dps"))
 
     # Generate text assignments
-    text = _generate_assignments(entry, roster)
+    text = _generate_assignments(entry, roster, llm_on=llm_on, guild_id=guild_id)
 
     # Generate position diagram
     diagram: Optional[bytes] = None

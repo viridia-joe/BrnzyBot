@@ -100,8 +100,8 @@ def handle_general_question(question: str, guild_id: str = "") -> str:
     Enriches with gear or strategy context when detectable.
     Returns a Discord-ready string.
     """
-    import config
-    if not config.ENABLE_LLM:
+    from core import entitlements
+    if not entitlements.llm_enabled(guild_id):
         return (
             "Open-ended Q&A is powered by an AI model that's currently switched off "
             "to save resources. I can still help with these commands:\n"
@@ -137,8 +137,10 @@ def handle_general_question(question: str, guild_id: str = "") -> str:
 
     try:
         from core.gear_reasoning import _litellm, ESCALATION_MODEL, ESCALATION_TIMEOUT
-        return _litellm(ESCALATION_MODEL, messages, temperature=0.3,
-                        timeout=ESCALATION_TIMEOUT)
+        answer = _litellm(ESCALATION_MODEL, messages, temperature=0.3,
+                          timeout=ESCALATION_TIMEOUT)
+        entitlements.note_llm_call(guild_id)
+        return answer
     except Exception as e:
         log.error("General QA LLM call failed: %s", e)
         return (

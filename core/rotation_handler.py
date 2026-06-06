@@ -38,6 +38,7 @@ from collections import Counter
 from dataclasses import dataclass, field
 
 import config
+from core import entitlements
 from core import wcl_client as wcl
 
 try:
@@ -459,8 +460,9 @@ def handle_rotation_check(
                        max_rank_ids=verified_max_ranks(profile))
     out = _format(profile, resolved, analysis, character)
 
-    if config.ENABLE_LLM:
+    if entitlements.llm_enabled(guild_id):
         coached = _coach(profile, analysis, character)
         if coached:
             out += f"\n\n🤖 **Coach:** {coached}"
+            entitlements.note_llm_call(guild_id)
     return out

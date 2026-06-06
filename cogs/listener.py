@@ -126,7 +126,7 @@ class ListenerCog(commands.Cog, name="Listener"):
         loop = asyncio.get_running_loop()
         intent = await loop.run_in_executor(
             None,
-            lambda: classify(content, source="nl", use_llm=True),
+            lambda: classify(content, source="nl", use_llm=True, guild_id=guild_id),
         )
 
         # When directly @mentioned, fall back to general_qa instead of dropping
@@ -288,9 +288,10 @@ class ListenerCog(commands.Cog, name="Listener"):
             loop = asyncio.get_running_loop()
             try:
                 from core.strategy_handler import handle_strategy_question
+                _gid = str(message.guild.id) if message.guild else "dm"
                 result_text = await loop.run_in_executor(
                     None,
-                    lambda: handle_strategy_question(message.clean_content.strip()),
+                    lambda: handle_strategy_question(message.clean_content.strip(), guild_id=_gid),
                 )
             except Exception as exc:
                 log.exception("strategy dispatch failed")

@@ -233,7 +233,7 @@ def handle_gear_question(
     )
 
     node_status = check_nodes(post_alerts=False) if config.ENABLE_LLM else None
-    return annotate(skeleton, context, node_status=node_status, phase=phase)
+    return annotate(skeleton, context, node_status=node_status, phase=phase, guild_id=guild_id)
 
 
 # ---------------------------------------------------------------------------

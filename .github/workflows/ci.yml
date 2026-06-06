@@ -66,3 +66,4 @@ jobs:
         run: |
           python tests/test_audit.py
           python tests/test_gear_offline.py
+          python tests/test_entitlements.py

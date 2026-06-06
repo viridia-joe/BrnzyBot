@@ -255,21 +255,22 @@ offline). Fix: refactor `gear_cache` to call `wcl_client.graphql` + the `get_*`
 helpers; delete its private transport. Knock-on win: gearcheck becomes
 fixture-testable. (Medium effort, high value.)
 
-### 2. Two WCL URL/code parsers (MEDIUM)
-`rotation_handler.parse_report_ref` (:125) vs `core/audit/report.parse_report_url`
-(:41) — different regexes and fight handling (one takes bare 16-char codes, the
-other requires `reports/…{16}` and understands `fight=last`). They've already
-drifted. Fix: one shared `parse_report(url) -> (code, fight)` (put it in
-`wcl_client`). (Low effort.)
+### 2. Two WCL URL/code parsers (MEDIUM) — deferred (marginal)
+`rotation_handler.parse_report_ref` and `core/audit/report.parse_report_url` differ
+for justified reasons: rotation accepts bare 16-char codes and returns an int fight;
+audit requires `reports/…{16}` and understands `fight=last` (string). A clean unify
+fights those differing fight types for ~15 lines of savings — low value, real
+regression risk on two prod commands. Left as-is intentionally.
 
-### 3. `_chunks` duplicated in 4 cogs (LOW–MED)
-`cogs/admin.py:49`, `cogs/audit.py:37`, `cogs/gear.py:40`, `cogs/bossguide.py:35`
-(the last uses 1990/`List`). One Discord-chunk helper in `core/messages.py` (or a
-`cogs/_util.py`), imported everywhere. (Low effort.)
+### 3. `_chunks` duplicated in 4 cogs (LOW–MED) — ✅ DONE
+One impl in `core/messages.py:chunk` (now also breaks on word boundaries, which
+subsumes bossguide's variant); the four cogs delegate to it.
 
-### 4. Duplicate "longest-kill" fight selection (LOW)
-`rotation_handler._best_fight_for_actor` (:159) and `audit/report._select_fight`
-(:476) implement the same pick with slight differences. Share one util. (Low.)
+### 4. Duplicate "longest-kill" fight selection (LOW) — deferred (marginal)
+`rotation_handler._best_fight_for_actor` filters to fights containing a given actor;
+`audit/report._select_fight` honors an explicit fight selector. Genuinely different
+inputs; a shared util would add a params shim for two ~6-line functions. Not worth
+the coupling.
 
 ### 5. Five inline LiteLLM callers (MEDIUM)
 `gear_reasoning._litellm` (:85), `rotation_handler._coach` (:371),
@@ -278,10 +279,11 @@ the `chat/completions` POST (headers, API key, timeout, error handling). Fix: on
 `core/llm.py` `chat(model, messages, …)` client; centralizes ENABLE_LLM/key/
 timeout and stops drift. (Medium effort.)
 
-### 6. Scattered spec normalization (LOW)
-`SPEC_ALIASES.get(...)` is inlined in `gear_handler` (:208, :274) and
-`rotation_handler._resolve_spec_key` (:79); `classifier` already owns the alias
-table. Expose one `classifier.resolve_spec(raw) -> key | None` and call it. (Low.)
+### 6. Scattered spec normalization (LOW) — ✅ DONE
+`classifier.resolve_spec(raw) -> key | None` is now the single source of truth
+(handles canonical keys, aliases, and spacing); gear_handler and
+rotation_handler._resolve_spec_key route through it. Behavior-preserving (verified
+against the old inline logic).
 
 ### 7. Dead/legacy modules (LOW — needs maintainer OK per CLAUDE.md)
 - `core/gearprio.py` — not imported anywhere live (superseded by `gear_handler`).

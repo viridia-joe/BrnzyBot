@@ -1,13 +1,17 @@
 """
-Generate a synthetic 'example log' that covers every TBC P1–P2 progression fight,
-with a mixed raid that exercises each audit check:
+Generate a synthetic 'example log' covering every TBC P1–P2 progression fight,
+with a mixed raid that exercises every audit check. Uses REAL item/gem ids (from
+the committed DBs) so the item-DB-backed checks (empty sockets, meta socket, gem
+color/quality, meta activation) evaluate truthfully:
 
   • enchant severity   — Pyra missing Legs (major→FAIL), Bulwark missing shield
-  • empty sockets       — Pyra has an ungemmed socket (real 3-socket item)
-  • green gems          — Pyra (1) and Stabby (2, →FAIL)
+  • empty sockets       — Pyra (real 3-socket item, one ungemmed)
+  • green gems          — Pyra (1), Stabby (2)
+  • missing meta        — Dotty has a meta socket but no meta gem
+  • INACTIVE meta       — Stabby's meta has 0 blue gems (requirement unmet)
   • missing consumes    — Dotty has no weapon oil
   • potions             — counted from cast events (Pyra used none)
-  • healer end-silence  — Mender goes quiet 65s before the kill (OOM indicator)
+  • healer end-silence  — Mender goes quiet before the kill (OOM indicator)
 
 Writes WCL-shaped fixtures to tests/fixtures/wcl/ that core.wcl_client replays
 when WCL_FIXTURE_DIR is set. Clearly synthetic (report code SYNTH…); real captures
@@ -41,60 +45,61 @@ PROGRESSION = [
 POS = {"Head": 0, "Shoulder": 2, "Chest": 4, "Waist": 5, "Legs": 6, "Feet": 7,
        "Wrist": 8, "Hands": 9, "Back": 14, "Main Hand": 15, "Off Hand": 16, "Relic": 17}
 
-VEST, BELT = 21865, 21846        # real 3-socket / 2-socket items (for empty sockets)
-GEN = "Frostbolt"; POTION = "Super Mana Potion"
+# Real ids from the committed DBs (so colors/sockets/quality resolve authoritatively).
+HELM = 24545                 # has sockets [Meta, Yellow]
+VEST, BELT = 21865, 21846    # 3-socket / 2-socket bodies (empty-socket detection)
+BLUE, BLUE_G = 24033, 23118  # Solid Star of Elune (rare) / Solid Azure Moonstone (green)
+RED, RED_G = 24027, 23094    # Bold Living Ruby (rare) / Teardrop Blood Garnet (green)
+METAC, METAH, METAP, METAT = 34220, 25901, 32409, 25896  # caster/healer/phys/tank meta
+GEN, POTION = "Frostbolt", "Super Mana Potion"
 AB_GEN, AB_POTION = 5000, 9001
-META = {"caster": 34220, "healer": 32410, "phys": 32409, "tank": 32417}
 
-# name, source_id, class, spec, meta-key, missing-enchants, (socket_item,[gem ilvls]),
-# auras, potions, last-cast-ms
+# name, sid, class, spec, missing-enchants, head_gems, body_item, body_gems, auras, potions, last
 RAID = [
-    ("Zappy",   1, "Shaman",  "ele_shaman",         "caster", [],
-     (VEST, [70, 70, 70]), ["Blackened Basilisk", "Flask of Supreme Power", "Superior Wizard Oil"], 1, 298_000),
-    ("Pyra",    2, "Mage",    "fire_mage",           "caster", ["Legs"],
-     (VEST, [70, 60]),     ["Blackened Basilisk", "Flask of Pure Death", "Superior Wizard Oil"], 0, 298_000),
-    ("Dotty",   3, "Warlock", "affliction_warlock",  "caster", [],
-     (BELT, [70, 70]),     ["Blackened Basilisk", "Flask of Pure Death"], 1, 298_000),  # no oil
-    ("Whisper", 4, "Priest",  "shadow_priest",       "caster", [],
-     (BELT, [70, 70]),     ["Blackened Basilisk", "Flask of Pure Death", "Superior Wizard Oil"], 1, 298_000),
-    ("Mender",  5, "Priest",  "holy_priest",         "healer", [],
-     (BELT, [70, 70]),     ["Golden Fish Sticks", "Flask of Mighty Restoration", "Superior Mana Oil"], 1, 235_000),
-    ("Leafy",   6, "Druid",   "resto_druid",         "healer", [],
-     (BELT, [70, 70]),     ["Golden Fish Sticks", "Flask of Mighty Restoration", "Superior Mana Oil"], 1, 298_000),
-    ("Bulwark", 7, "Warrior", "prot_warrior",        "tank",   ["Off Hand"],
-     (VEST, [70, 70, 70]), ["Fisherman's Feast", "Flask of Fortification"], 1, 298_000),
-    ("Stabby",  8, "Rogue",   "combat_rogue",        "phys",   [],
-     (BELT, [60, 60]),     ["Grilled Mudfish", "Flask of Relentless Assault", "Adamantite Sharpening Stone"], 1, 298_000),
+    ("Zappy",   1, "Shaman",  "ele_shaman",        [],          [METAC, BLUE], VEST, [BLUE, RED, RED],
+     ["Blackened Basilisk", "Flask of Supreme Power", "Superior Wizard Oil"], 1, 298_000),
+    ("Pyra",    2, "Mage",    "fire_mage",          ["Legs"],    [METAC, BLUE], VEST, [BLUE_G, RED],
+     ["Blackened Basilisk", "Flask of Pure Death", "Superior Wizard Oil"], 0, 298_000),
+    ("Dotty",   3, "Warlock", "affliction_warlock", [],          [BLUE],        BELT, [BLUE, RED],
+     ["Blackened Basilisk", "Flask of Pure Death"], 1, 298_000),                       # no oil; no meta gem
+    ("Whisper", 4, "Priest",  "shadow_priest",      [],          [METAC, BLUE], BELT, [BLUE, RED],
+     ["Blackened Basilisk", "Flask of Pure Death", "Superior Wizard Oil"], 1, 298_000),
+    ("Mender",  5, "Priest",  "holy_priest",        [],          [METAH, BLUE], BELT, [BLUE, RED],
+     ["Golden Fish Sticks", "Flask of Mighty Restoration", "Superior Mana Oil"], 1, 235_000),
+    ("Leafy",   6, "Druid",   "resto_druid",        [],          [METAH, BLUE], BELT, [BLUE, RED],
+     ["Golden Fish Sticks", "Flask of Mighty Restoration", "Superior Mana Oil"], 1, 298_000),
+    ("Bulwark", 7, "Warrior", "prot_warrior",       ["Off Hand"],[METAT, BLUE], VEST, [BLUE, RED, RED],
+     ["Fisherman's Feast", "Flask of Fortification"], 1, 298_000),
+    ("Stabby",  8, "Rogue",   "combat_rogue",       [],          [METAP, RED],  BELT, [RED_G, RED_G],
+     ["Grilled Mudfish", "Flask of Relentless Assault", "Adamantite Sharpening Stone"], 1, 298_000),
 ]
 
 
-def _gem(ilvl):
-    return {"id": 40000 + ilvl, "itemLevel": ilvl}
-
-
 def _combatant(member):
-    name, sid, cls, spec, metakey, miss, (sock_item, gem_ilvls), auras, _pot, _last = member
     from core.audit.profiles import get_profile
-    prof = get_profile(spec)
-    enchant_slots = [s for s in prof.enchantable_slots if s not in miss]
+    name, sid, cls, spec, miss, head_gems, body_item, body_gems, auras, _pot, _last = member
+    enchant_slots = [s for s in get_profile(spec).enchantable_slots if s not in miss]
 
     gear = [{"id": 0} for _ in range(19)]
     for slot, pos in POS.items():
         gear[pos] = {"id": 30000 + pos, "itemLevel": 120, "quality": 4}
         if slot in enchant_slots:
             gear[pos]["permanentEnchant"] = 1000 + pos
-    # meta gem lives in the head socket
-    gear[0]["gems"] = [{"id": META[metakey], "itemLevel": 90}]
-    # the real socketed item carries the scored gems (drives empty-socket detection)
-    sock_pos = POS["Chest"] if sock_item == VEST else POS["Waist"]
-    gear[sock_pos]["id"] = sock_item
-    gear[sock_pos]["gems"] = [_gem(i) for i in gem_ilvls]
+    def real(pos, slot, item_id, gem_ids):
+        e = {"id": item_id, "itemLevel": 120, "quality": 4,
+             "gems": [{"id": g} for g in gem_ids]}
+        if slot in enchant_slots:        # keep the enchant we'd otherwise overwrite
+            e["permanentEnchant"] = 1000 + pos
+        gear[pos] = e
+
+    real(POS["Head"], "Head", HELM, head_gems)
+    bslot = "Chest" if body_item == VEST else "Waist"
+    real(POS[bslot], bslot, body_item, body_gems)
     return {"sourceID": sid, "gear": gear, "auras": [{"name": a} for a in auras]}
 
 
 def _casts(member):
-    *_, potions, last = member
-    sid = member[1]
+    sid, potions, last = member[1], member[-2], member[-1]
     out = [{"type": "cast", "sourceID": sid, "abilityGameID": AB_GEN, "timestamp": t}
            for t in range(0, last + 1, 15_000)]
     for t in [2_000, 150_000][:potions]:
@@ -119,7 +124,6 @@ def main():
     dump(f"{CODE}.abilities", [
         {"gameID": AB_GEN, "name": GEN, "type": 1},
         {"gameID": AB_POTION, "name": POTION, "type": 1},
-        {"gameID": 9002, "name": "Haste Potion", "type": 1},
     ])
     dump(f"{CODE}.specs", {m[0].lower(): m[3] for m in RAID})
 

@@ -1,0 +1,21 @@
+{
+  "_comment": "TBC meta-gem socket activation requirements. `require` is a min count per color; a meta is INACTIVE if unmet. Compound gems count toward both their colors (Purple = Red+Blue, Green = Yellow+Blue, Orange = Red+Yellow), so 'Blue: 2' is satisfied by purple/green gems too — which makes a false 'inactive' unlikely. The mainstream TBC raiding metas all use the 'at least 2 Blue gems' rule. `verified: false` disables inactive-flagging for that meta (missing-meta detection still applies). Colors/ids come from data/gem_db.json (WowSims).",
+  "34220": {"name": "Chaotic Skyfire Diamond",      "require": {"Blue": 2}, "verified": true},
+  "32409": {"name": "Relentless Earthstorm Diamond", "require": {"Blue": 2}, "verified": true},
+  "25901": {"name": "Insightful Earthstorm Diamond", "require": {"Blue": 2}, "verified": true},
+  "32410": {"name": "Thundering Skyfire Diamond",    "require": {"Blue": 2}, "verified": true},
+  "25896": {"name": "Powerful Earthstorm Diamond",   "require": {"Blue": 2}, "verified": true},
+  "25893": {"name": "Mystical Skyfire Diamond",      "require": {"Blue": 2}, "verified": true},
+  "25895": {"name": "Enigmatic Skyfire Diamond",     "require": {"Blue": 2}, "verified": true},
+  "25890": {"name": "Destructive Skyfire Diamond",   "require": {"Blue": 2}, "verified": true},
+  "35503": {"name": "Ember Skyfire Diamond",         "require": {"Blue": 2}, "verified": true},
+  "35501": {"name": "Eternal Earthstorm Diamond",    "require": {"Blue": 2}, "verified": true},
+  "32641": {"name": "Imbued Unstable Diamond",       "require": {"Blue": 2}, "verified": true},
+  "32640": {"name": "Potent Unstable Diamond",       "require": {"Blue": 2}, "verified": true},
+  "25894": {"name": "Swift Skyfire Diamond",         "require": {"Blue": 2}, "verified": true},
+  "28557": {"name": "Swift Starfire Diamond",        "require": {"Blue": 2}, "verified": true},
+  "28556": {"name": "Swift Windfire Diamond",        "require": {"Blue": 2}, "verified": true},
+  "25898": {"name": "Tenacious Earthstorm Diamond",  "require": {"Blue": 2}, "verified": true},
+  "25899": {"name": "Brutal Earthstorm Diamond",     "require": {"Red": 2},  "verified": false},
+  "25897": {"name": "Bracing Earthstorm Diamond",    "require": {"Yellow": 2}, "verified": false}
+}

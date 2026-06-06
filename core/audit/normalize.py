@@ -17,6 +17,8 @@ Pipeline:  WCL CombatantInfo record ─▶ normalize_combatant() ─▶ {gear, g
 
 from __future__ import annotations
 
+from core.audit import gemdata
+
 # WCL CombatantInfo `gear` is a positional array; index → equipment slot.
 GEAR_SLOTS = [
     "Head", "Neck", "Shoulder", "Shirt", "Chest", "Waist", "Legs", "Feet",
@@ -30,22 +32,10 @@ _COSMETIC_SLOTS = {"Shirt", "Tabard"}
 # Quality ladder — must match the order in checks.check_gems.
 _QUALITY_BY_RANK = ["poor", "common", "uncommon", "rare", "epic", "legendary"]
 
-# TBC gem item-level → quality. Blue (rare) gems are ilvl 70; epic gems 110+;
-# anything below 70 is a green (uncommon) gem — exactly what we want to flag.
+# Fallback only: TBC gem item-level → quality, used when a gem id isn't in the
+# authoritative gem DB (gemdata). Blue (rare) gems are ilvl 70; epic 110+.
 _GEM_RARE_ILVL = 70
 _GEM_EPIC_ILVL = 110
-
-# Known meta-gem item ids. Used only to *confirm* a meta is socketed: a gem id
-# we don't recognise yields meta_present=None ("unknown"), never a false
-# "missing", so an incomplete list can never produce a wrong ❌. Extend freely.
-META_GEM_IDS: set[int] = {
-    34220,  # Chaotic Skyfire Diamond   (caster — crit damage)
-    32409,  # Relentless Earthstorm Diamond (physical — crit damage)
-    32410,  # Insightful Earthstorm Diamond (mana restore)
-    32417,  # Powerful Earthstorm Diamond  (tank — stamina)
-    35503,  # Enigmatic Skyfire Diamond    (caster — spell crit + snare reduce)
-    32412,  # Mystical Skyfire Diamond
-}
 
 
 def _item_quality(q) -> str | None:
@@ -61,10 +51,13 @@ def _item_quality(q) -> str | None:
 
 def _gem_quality(gem: dict) -> str | None:
     """
-    Resolve a single gem's quality. Prefer an explicit ``quality`` if WCL ever
-    supplies one; otherwise infer it from the gem's item level (TBC thresholds).
-    Returns None when unknown so check_gems treats it as "fine" rather than a miss.
+    Resolve a single gem's quality: authoritative gem DB first (by id), then an
+    explicit WCL quality, then an item-level inference. None when unknown so
+    check_gems treats it as "fine" rather than a miss.
     """
+    by_id = gemdata.gem_quality(gem.get("id") or 0)
+    if by_id:
+        return by_id
     explicit = _item_quality(gem.get("quality"))
     if explicit:
         return explicit
@@ -108,8 +101,9 @@ def normalize_combatant(record: dict) -> dict:
         {
           "source_id": int | None,
           "gear":  [{slot, item_id, item_quality, enchant_id, enchant_name, gems:[...]}],
-          "gems":  [{quality, item_id, item_level}],   # flattened across all slots
+          "gems":  [{quality, color, item_id, item_level}],  # flattened across slots
           "meta_present": True | None,                  # never False (see above)
+          "meta_id": int | None,                        # socketed meta gem id, if any
           "auras": [{name}],
           "avg_item_level": float | None,
         }
@@ -120,6 +114,7 @@ def normalize_combatant(record: dict) -> dict:
     gear: list[dict] = []
     gems: list[dict] = []
     meta_present: bool | None = None
+    meta_id: int | None = None
     ilvls: list[float] = []
 
     for idx, g in enumerate(record.get("gear") or []):
@@ -141,13 +136,15 @@ def normalize_combatant(record: dict) -> dict:
                 continue
             entry = {
                 "quality": _gem_quality(gem),
+                "color": gemdata.gem_color(gid),
                 "item_id": gid,
                 "item_level": gem.get("itemLevel", gem.get("item_level")),
             }
             slot_gems.append(entry)
             gems.append(entry)
-            if gid in META_GEM_IDS:
+            if gemdata.is_meta(gid):
                 meta_present = True
+                meta_id = gid
 
         gear.append({
             "slot": slot,
@@ -163,6 +160,7 @@ def normalize_combatant(record: dict) -> dict:
         "gear": gear,
         "gems": gems,
         "meta_present": meta_present,
+        "meta_id": meta_id,
         "auras": _normalize_auras(record.get("auras")),
         "avg_item_level": round(sum(ilvls) / len(ilvls), 1) if ilvls else None,
     }

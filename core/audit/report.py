@@ -261,6 +261,68 @@ def check_parse(best_pct: float | None, avg_pct: float | None) -> CheckResult:
 # Per-combatant assembly (pure: takes already-normalized data)
 # ---------------------------------------------------------------------------
 
+def check_end_activity(cast_times: list[float], fight_window: tuple[float, float],
+                       profile: SpecProfile) -> CheckResult | None:
+    """
+    Healer-only signal. cast_times: ms timestamps of the player's casts;
+    fight_window: (start_ms, end_ms), both report-relative.
+
+    Flags a long trailing silence (no casts well before the kill) as INDICATIVE
+    of going OOM. WARN, never FAIL: a quiet stretch can also be a legitimate
+    end-of-fight lull while the boss dies. Returns None when the profile opts out
+    (DPS/tanks), so it never penalises throughput.
+    """
+    warn_sec = getattr(profile, "end_silence_warn_sec", 0.0)
+    if not warn_sec:
+        return None
+    start, end = fight_window
+    dur = (end - start) / 1000.0
+    if dur <= 0:
+        return CheckResult("end_activity", "End-of-fight activity", Verdict.UNKNOWN,
+                           "no fight timing")
+    if not cast_times:
+        return CheckResult("end_activity", "End-of-fight activity", Verdict.UNKNOWN,
+                           "no cast data")
+    trailing = max(0.0, (end - max(cast_times)) / 1000.0)
+    # Flag only when the silence is both absolutely long and a real share of the
+    # fight, so a short natural lull at the kill doesn't trip it.
+    if trailing >= warn_sec and trailing >= 0.12 * dur:
+        return CheckResult(
+            "end_activity", "End-of-fight activity", Verdict.WARN,
+            f"no casts for the final {trailing:.0f}s of a {dur:.0f}s fight",
+            detail=("A long silence before the kill often means running low on mana. "
+                    "It can also be a normal lull as the boss dies — worth a glance at "
+                    "mana management/regen rather than a throughput judgement."),
+            evidence={"trailing_silence_sec": round(trailing, 1), "fight_sec": round(dur, 1)})
+    return CheckResult("end_activity", "End-of-fight activity", Verdict.PASS,
+                       f"casting through to ~{trailing:.0f}s before the end")
+
+
+_POTION_RE = re.compile(r"potion", re.I)
+
+
+def _tally_casts(casts: list[dict], abilities: list[dict]) -> dict:
+    """
+    From cast events + the report ability table, return
+    {source_id: {"potions": int, "cast_times": [ms]}}.
+
+    Potions are counted as completed casts whose ability name contains "Potion"
+    (Super Mana / Haste / Insane Strength / Destruction / Ironshield / healing…).
+    """
+    name_by_id = {a.get("gameID"): (a.get("name") or "") for a in abilities}
+    out: dict = {}
+    for e in casts:
+        if e.get("type") != "cast":
+            continue
+        rec = out.setdefault(e.get("sourceID"), {"potions": 0, "cast_times": []})
+        ts = e.get("timestamp")
+        if ts is not None:
+            rec["cast_times"].append(ts)
+        if _POTION_RE.search(name_by_id.get(e.get("abilityGameID"), "")):
+            rec["potions"] += 1
+    return out
+
+
 def audit_combatant(
     character: str,
     spec: str,
@@ -286,13 +348,26 @@ def audit_combatant(
                              f"{ilvl:.0f} avg equipped" if ilvl else "—"))
 
     preparation = Section("Preparation")
-    preparation.add(check_consumes(data.get("auras", []), profile))
+    preparation.add(check_consumes(data.get("auras", []), profile,
+                                   potion_count=data.get("potion_count")))
     preparation.add(check_enchants(data.get("gear", []), profile))
     preparation.add(check_gems(data.get("gems", []), profile,
                                meta_present=data.get("meta_present"),
                                empty_sockets=data.get("empty_sockets")))
 
-    report.sections = [baseline, preparation]
+    sections = [baseline, preparation]
+
+    # Execution (healers only, and only when cast data was gathered).
+    cast_times = data.get("cast_times")
+    fight_window = data.get("fight_window")
+    if profile.end_silence_warn_sec and cast_times is not None and fight_window:
+        end_act = check_end_activity(cast_times, fight_window, profile)
+        if end_act is not None:
+            execution = Section("Execution")
+            execution.add(end_act)
+            sections.append(execution)
+
+    report.sections = sections
     return report
 
 
@@ -426,6 +501,22 @@ def build_audit(url: str, character: str, spec: str) -> AuditReport:
 
     norm = normalize_combatant(rec)
     norm["empty_sockets"] = _count_empty_sockets(norm.get("gear", []))
+
+    # One cast fetch powers potion tracking (all specs) and the healer
+    # end-of-fight silence check. Best-effort: never break the audit over it.
+    try:
+        from core import wcl_client
+        tally = _tally_casts(
+            wcl_client.get_casts(report_code, fight["id"], target_id),
+            wcl_client.get_abilities(report_code),
+        ).get(target_id, {"potions": 0, "cast_times": []})
+        norm["potion_count"] = tally["potions"]
+        if profile.end_silence_warn_sec:
+            norm["cast_times"] = tally["cast_times"]
+            norm["fight_window"] = (fight.get("startTime", 0), fight.get("endTime", 0))
+    except Exception as exc:
+        log.warning("cast/potion fetch failed for %s: %s", character, exc)
+
     return audit_combatant(character, spec, profile, norm,
                            report_code=report_code, fight_ids=[fight["id"]])
 
@@ -458,6 +549,19 @@ def build_roster_audit(url: str, resolve_spec) -> RosterAudit:
         return roster
     roster.fight_label = _fight_label(fight)
 
+    # One fight-wide cast fetch powers potion tracking (+ healer end-activity) for
+    # the whole roster, instead of N per-player queries. None = fetch failed →
+    # potions show ❔ rather than a false ❌.
+    cast_tally = None
+    try:
+        from core import wcl_client
+        cast_tally = _tally_casts(
+            wcl_client.get_casts(report_code, fight["id"]),
+            wcl_client.get_abilities(report_code),
+        )
+    except Exception as exc:
+        log.warning("roster cast/potion fetch failed: %s", exc)
+
     seen: set[str] = set()
     for rec in combatants:
         norm = normalize_combatant(rec)
@@ -473,6 +577,12 @@ def build_roster_audit(url: str, resolve_spec) -> RosterAudit:
             roster.skipped.append((name, f"no profile for {spec}" if spec else "unregistered"))
             continue
         norm["empty_sockets"] = _count_empty_sockets(norm.get("gear", []))
+        if cast_tally is not None:
+            t = cast_tally.get(norm.get("source_id"), {"potions": 0, "cast_times": []})
+            norm["potion_count"] = t["potions"]
+            if profile.end_silence_warn_sec:
+                norm["cast_times"] = t["cast_times"]
+                norm["fight_window"] = (fight.get("startTime", 0), fight.get("endTime", 0))
         roster.reports.append(audit_combatant(
             name, spec, profile, norm, report_code=report_code, fight_ids=[fight["id"]]
         ))

@@ -33,20 +33,9 @@ log = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 def _chunks(text: str, limit: int = 1990) -> List[str]:
-    if len(text) <= limit:
-        return [text]
-    parts = []
-    while len(text) > limit:
-        split_at = text.rfind('\n', 0, limit)
-        if split_at <= 0:
-            split_at = text.rfind(' ', 0, limit)
-        if split_at <= 0:
-            split_at = limit
-        parts.append(text[:split_at])
-        text = text[split_at:].lstrip('\n')
-    if text:
-        parts.append(text)
-    return parts
+    """Split into Discord-safe chunks (shared impl in core.messages)."""
+    from core.messages import chunk
+    return chunk(text, limit)
 
 
 async def _find_recent_image(channel: discord.TextChannel, limit: int = 15) -> bytes | None:
@@ -127,10 +116,11 @@ class BossGuideCog(commands.Cog, name="BossGuide"):
                 image_source = " (using recent channel image)"
 
         loop = asyncio.get_running_loop()
+        gid = str(interaction.guild_id)
         try:
             text, diagram_png = await loop.run_in_executor(
                 None,
-                lambda: _run_handler(boss_key, image_bytes),
+                lambda: _run_handler(boss_key, image_bytes, gid),
             )
         except Exception as exc:
             log.exception("bossguide handler failed for %s", boss_key)
@@ -240,10 +230,11 @@ class BossGuideCog(commands.Cog, name="BossGuide"):
             image_bytes = await _find_recent_image(ctx.channel)
 
         loop = asyncio.get_running_loop()
+        gid = str(ctx.guild.id) if ctx.guild else "dm"
         try:
             text, diagram_png = await loop.run_in_executor(
                 None,
-                lambda: _run_handler(boss_key, image_bytes),
+                lambda: _run_handler(boss_key, image_bytes, gid),
             )
         except Exception as exc:
             log.exception("prefix bossguide failed for %s", boss_key)
@@ -274,10 +265,10 @@ class BossGuideCog(commands.Cog, name="BossGuide"):
             )
 
 
-def _run_handler(boss_key: str, image_bytes: bytes | None):
+def _run_handler(boss_key: str, image_bytes: bytes | None, guild_id: str = "global"):
     """Thin wrapper so lambda captures are clean."""
     from core.bossguide_handler import handle_bossguide
-    return handle_bossguide(boss_key, image_bytes)
+    return handle_bossguide(boss_key, image_bytes, guild_id=guild_id)
 
 
 async def setup(bot: commands.Bot) -> None:

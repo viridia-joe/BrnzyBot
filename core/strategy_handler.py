@@ -48,11 +48,12 @@ def _render_deterministic(context_block: str) -> str:
     return context_block.replace("## Strategy Context: ", "## ", 1)
 
 
-def handle_strategy_question(question: str) -> str:
+def handle_strategy_question(question: str, guild_id: str = "global") -> str:
     """
     Run the strategy pipeline for a given question.
     Returns a Discord-ready string. Never posts anything itself.
     """
+    from core import entitlements
     context_block = get_strategy_context(question)
     log.info("Strategy context fetched for query: %s", question[:60])
 
@@ -65,7 +66,7 @@ def handle_strategy_question(question: str) -> str:
     # Deterministic mode: the strategy context block is already a complete,
     # human-readable boss writeup (summary, phases, abilities, strategy variants,
     # role notes). Return it directly instead of having a model narrate it.
-    if not config.ENABLE_LLM:
+    if not entitlements.llm_enabled(guild_id):
         return _render_deterministic(context_block)
 
     prompt_parts = [context_block, "", f"**Question:** {question}"]
@@ -78,6 +79,7 @@ def handle_strategy_question(question: str) -> str:
         from core.gear_reasoning import _litellm, ESCALATION_MODEL, ESCALATION_TIMEOUT
         answer = _litellm(ESCALATION_MODEL, messages, temperature=0.2,
                           timeout=ESCALATION_TIMEOUT)
+        entitlements.note_llm_call(guild_id)
         return answer
     except Exception as e:
         log.error("Strategy LLM call failed: %s", e)

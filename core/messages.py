@@ -8,6 +8,27 @@ voided Goblin Engineering warranties.
 
 import random
 
+DISCORD_MAX = 2000
+
+
+def chunk(text: str, limit: int = DISCORD_MAX) -> list[str]:
+    """Split text into Discord-safe chunks (≤limit), breaking on newlines where possible."""
+    if len(text) <= limit:
+        return [text]
+    parts: list[str] = []
+    while text:
+        if len(text) <= limit:
+            parts.append(text)
+            break
+        split = text.rfind("\n", 0, limit)
+        if split <= 0:               # no newline in window → try a word boundary
+            split = text.rfind(" ", 0, limit)
+        if split <= 0:               # no break point → hard cut
+            split = limit
+        parts.append(text[:split])
+        text = text[split:].lstrip("\n")
+    return parts
+
 THINKING_MESSAGES = [
     # --- Gnomish Engineering (precision, overengineering, polite disasters) ---
     "Recalibrating the Hyper-Dimensional Gear Matrix. Please stand by. Do not tap the glass.",

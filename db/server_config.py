@@ -321,9 +321,15 @@ def count_usage_today(guild_id: str, path: str = DB_PATH) -> int:
     return row["n"] if row else 0
 
 
-# ---------------------------------------------------------------------------
-# Subscriptions
-# ---------------------------------------------------------------------------
+def count_command_month(guild_id: str, command: str, path: str = DB_PATH) -> int:
+    """Count how many times this guild ran a given command this calendar month (UTC)."""
+    month = datetime.utcnow().strftime("%Y-%m-01")
+    with _conn(path) as conn:
+        row = conn.execute(
+            "SELECT COUNT(*) AS n FROM usage_log WHERE guild_id=? AND command=? AND logged_at >= ?",
+            (guild_id, command, month),
+        ).fetchone()
+    return row["n"] if row else 0
 
 FREE_DAILY_LIMIT = 20  # commands per guild per day on free plan
 

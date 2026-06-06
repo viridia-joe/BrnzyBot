@@ -74,8 +74,15 @@ Discord ──▶ bot.py ──▶ cogs/*           (command surface, all I/O)
 
 ## The ENABLE_LLM flag — where it's gated
 
-When you touch model-backed code, these are the existing chokepoints (all check
-`config.ENABLE_LLM`):
+LLM sites now gate on **`core/entitlements.py:llm_enabled(guild_id)`**, which is
+`config.ENABLE_LLM AND is_pro(guild_id)` (plus a monthly cost cap). Pass the
+`guild_id` through to the handler so paid (Pro) guilds get the LLM enhancement and
+free guilds get the deterministic output. A caller with no guild context passes
+`"global"`, which falls back to the old `ENABLE_LLM`-only behavior. Crucially,
+when `ENABLE_LLM` is false (today's prod default) `llm_enabled` is always False —
+so every gate behaves exactly as before until an LLM backend is turned on.
+
+When you touch model-backed code, these are the existing chokepoints:
 
 | Site | Off-mode behavior |
 |---|---|

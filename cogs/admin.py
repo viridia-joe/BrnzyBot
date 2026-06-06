@@ -32,6 +32,7 @@ from db.server_config import (
     get_guild_config,
     list_characters,
     log_usage,
+    upsert_subscription,
     remove_character,
     set_botduel_log_channel,
     set_guild_config,
@@ -47,19 +48,8 @@ DISCORD_MAX = 2000
 
 
 def _chunks(text: str, limit: int = DISCORD_MAX) -> list[str]:
-    if len(text) <= limit:
-        return [text]
-    parts = []
-    while text:
-        if len(text) <= limit:
-            parts.append(text)
-            break
-        split = text.rfind("\n", 0, limit)
-        if split == -1:
-            split = limit
-        parts.append(text[:split])
-        text = text[split:].lstrip("\n")
-    return parts
+    from core.messages import chunk
+    return chunk(text, limit)
 
 log = logging.getLogger(__name__)
 
@@ -93,6 +83,23 @@ class AdminCog(commands.Cog, name="Admin"):
     # /setup realm
     # -----------------------------------------------------------------------
     setup_group = app_commands.Group(name="setup", description="Configure BrnzyBot for this server")
+
+    @setup_group.command(name="pro", description="(bot owner) Grant or revoke this guild's Pro plan.")
+    @app_commands.describe(enabled="True = Pro (LLM features on), False = free plan")
+    async def setup_pro(self, interaction: discord.Interaction, enabled: bool) -> None:
+        # Comping a paid plan is owner-only; the real path is the Stripe webhook.
+        if not await self.bot.is_owner(interaction.user):
+            await interaction.response.send_message(
+                "Only the bot owner can change a guild's plan. Use `/subscribe` to upgrade.",
+                ephemeral=True)
+            return
+        guild_id = str(interaction.guild_id)
+        upsert_subscription(guild_id, plan="pro" if enabled else "free", status="active")
+        state = "**Pro** — LLM features on" if enabled else "**free** — deterministic only"
+        await interaction.response.send_message(
+            f"This guild's plan is now {state}. "
+            f"(LLM enhancement also requires the instance's `ENABLE_LLM` backend to be on.)",
+            ephemeral=True)
 
     @setup_group.command(name="phase", description="Set the current TBC content phase for this guild (1–6).")
     @app_commands.describe(phase="Content phase number (1 = Karazhan, 2 = SSC/TK, etc.)")

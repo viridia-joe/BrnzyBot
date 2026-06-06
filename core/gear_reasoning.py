@@ -391,17 +391,18 @@ def _annotator_prompt(skeleton: str, context_block: str) -> list:
 
 
 def annotate(skeleton: str, context: GearContext, node_status=None,
-             phase: int | None = None) -> str:
+             phase: int | None = None, guild_id: str = "global") -> str:
     """
     Annotate a deterministic upgrade skeleton with LLM commentary.
 
     The skeleton contains all decisions (what to upgrade, in what order, exact EP).
     The LLM adds prose: source locations, crafting notes, strategic observations.
 
-    When the LLM layer is disabled, the skeleton IS the answer — every decision is
-    already deterministic, so we return it directly with a header.
+    When the LLM layer is disabled (or the guild isn't Pro), the skeleton IS the
+    answer — every decision is already deterministic, so we return it with a header.
     """
-    if not config.ENABLE_LLM:
+    from core import entitlements
+    if not entitlements.llm_enabled(guild_id):
         return f"**Gear Upgrade Priority — {context.character}**\n\n{skeleton}"
 
     context_block = context.to_prompt_block(phase=phase)
@@ -414,4 +415,8 @@ def annotate(skeleton: str, context: GearContext, node_status=None,
         # Fall back to the raw skeleton if the LLM is unreachable
         return f"**Gear Upgrade Priority — {context.character}**\n\n{skeleton}"
 
-    return answer or f"**Gear Upgrade Priority — {context.character}**\n\n{skeleton}"
+    if answer:
+        from core import entitlements
+        entitlements.note_llm_call(guild_id)
+        return answer
+    return f"**Gear Upgrade Priority — {context.character}**\n\n{skeleton}"

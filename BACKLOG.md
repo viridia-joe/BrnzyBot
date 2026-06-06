@@ -238,7 +238,12 @@ Considerations:
 Findings from a sweep for duplicated functions / anti-patterns (ranked by value).
 Evidence is `file:line`. None block features; they're consolidation work.
 
-### 1. Duplicate WCL client (HIGH)
+### 1. Duplicate WCL client (HIGH) — ✅ DONE
+`gear_cache` now uses `core/wcl_client.py` (added `get_character` + a flexible
+`get_combatant_info(fight_id|source_id)`); its private OAuth/GraphQL transport is
+deleted. `/gearcheck` inherits retry/breaker/rate-limit/token-persistence and is
+now offline-replayable (`tests/test_gear_offline.py`, in CI). Original note:
+
 `core/gear_cache.py` reimplements the whole WCL transport — OAuth token
 (`_get_token` :381), GraphQL POST (`_http_post` :366, `_wcl_query` :392), and
 `characterData`/`masterData`/`events` queries built with **f-string

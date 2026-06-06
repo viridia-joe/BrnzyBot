@@ -200,6 +200,8 @@ def _insert_unknown_item(item_id: int, item_db_conn: sqlite3.Connection) -> dict
     (name, stats_dict, set_name, slot) matching the _fetch_from_wcl tuple format,
     or None if the lookup fails.
     """
+    if os.environ.get("WCL_FIXTURE_DIR"):
+        return None  # offline replay: never hit the network for unknown items
     data = _wowhead_lookup(item_id)
     if data is None:
         return None
@@ -361,41 +363,10 @@ def load_cached(name: str, realm: str, spec: str, region: str = "us") -> GearSna
 
 
 # ---------------------------------------------------------------------------
-# WCL API helpers (stdlib only)
+# WCL transport lives in core/wcl_client.py (retry, circuit breaker, rate limit,
+# token persistence, offline-fixture replay). gear_cache calls it via the get_*
+# helpers and no longer carries its own OAuth/GraphQL code.
 # ---------------------------------------------------------------------------
-def _http_post(url, data=None, json_data=None, headers=None):
-    hdrs = headers or {}
-    if json_data is not None:
-        body = json.dumps(json_data).encode()
-        hdrs["Content-Type"] = "application/json"
-    elif data is not None:
-        body = urlencode(data).encode()
-        hdrs["Content-Type"] = "application/x-www-form-urlencoded"
-    else:
-        body = b""
-    req = Request(url, data=body, headers=hdrs, method="POST")
-    with urlopen(req, timeout=WCL_TIMEOUT) as resp:
-        return json.loads(resp.read())
-
-
-def _get_token(client_id: str, client_secret: str) -> str:
-    return _http_post(
-        "https://www.warcraftlogs.com/oauth/token",
-        data={
-            "grant_type":    "client_credentials",
-            "client_id":     client_id,
-            "client_secret": client_secret,
-        },
-    )["access_token"]
-
-
-def _wcl_query(token: str, query: str) -> dict:
-    return _http_post(
-        "https://classic.warcraftlogs.com/api/v2/client",
-        json_data={"query": query},
-        headers={"Authorization": f"Bearer {token}"},
-    )
-
 
 WCL_SLOT_MAP = {
     0: "Head", 1: "Neck", 2: "Shoulder", 4: "Chest", 5: "Waist",
@@ -406,54 +377,30 @@ WCL_SLOT_MAP = {
 
 
 def _fetch_from_wcl(name: str, realm: str, spec: str, region: str,
-                    client_id: str, client_secret: str,
                     item_db_conn) -> GearSnapshot | None:
-    """Fetch live gear from WCL. Returns None on any failure."""
+    """Fetch live gear via core.wcl_client (hardened + fixture-replayable).
+    Returns None on any failure (caller then serves cache)."""
+    from core import wcl_client
     try:
-        token = _get_token(client_id, client_secret)
-
-        # Most recent report
-        result = _wcl_query(token, f'''{{
-            characterData {{
-                character(name: "{name}", serverSlug: "{realm}", serverRegion: "{region}") {{
-                    classID
-                    recentReports(limit: 1) {{ data {{ code startTime }} }}
-                }}
-            }}
-        }}''')
-        char = result["data"]["characterData"]["character"]
-        if not char or not char["recentReports"]["data"]:
+        char = wcl_client.get_character(name, realm, region)
+        if not char or not char.get("reports"):
             log.warning("WCL: no reports found for %s@%s", name, realm)
             return None
 
-        report = char["recentReports"]["data"][0]
+        report = char["reports"][0]
         code   = report["code"]
         rtime  = report["startTime"]
 
-        # Actor ID
-        result = _wcl_query(token, f'''{{
-            reportData {{ report(code: "{code}") {{
-                masterData {{ actors(type: "Player") {{ id name }} }}
-            }} }}
-        }}''')
-        actor_id = None
-        for actor in result["data"]["reportData"]["report"]["masterData"]["actors"]:
-            if actor["name"].lower() == name.lower():
-                actor_id = actor["id"]
-                break
-
+        actors = wcl_client.get_master_actors(code)
+        actor_id = next(
+            (a["id"] for a in actors if (a.get("name") or "").lower() == name.lower()),
+            None,
+        )
         if not actor_id:
             log.warning("WCL: actor %s not found in report %s", name, code)
             return None
 
-        # CombatantInfo event
-        result = _wcl_query(token, f'''{{
-            reportData {{ report(code: "{code}") {{
-                events(sourceID: {actor_id}, dataType: CombatantInfo,
-                       startTime: 0, endTime: 999999999999) {{ data }}
-            }} }}
-        }}''')
-        events = result["data"]["reportData"]["report"]["events"]["data"]
+        events = wcl_client.get_combatant_info(code, source_id=actor_id)
         if not events:
             log.warning("WCL: no CombatantInfo for %s in %s", name, code)
             return None
@@ -521,7 +468,7 @@ def _fetch_from_wcl(name: str, realm: str, spec: str, region: str,
             from_cache=False,
         )
 
-    except (URLError, HTTPError, KeyError, json.JSONDecodeError, TimeoutError) as e:
+    except (RuntimeError, URLError, HTTPError, KeyError, ValueError, TypeError, TimeoutError) as e:
         log.warning("WCL fetch failed for %s: %s", name, e)
         return None
 
@@ -667,33 +614,23 @@ def fetch_character_spec(
       4. Map specID → spec_key via WCL_SPEC_MAP.
       5. Fall back to WCL_CLASS_DEFAULT_SPEC if specID lookup fails.
     """
-    client_id     = os.environ.get("WCL_CLIENT_ID", "")
-    client_secret = os.environ.get("WCL_CLIENT_SECRET", "")
-    if not client_id or not client_secret:
+    from core import wcl_client
+    # Needs creds, unless we're replaying fixtures (offline dev/test).
+    if not os.environ.get("WCL_FIXTURE_DIR") and not (
+            os.environ.get("WCL_CLIENT_ID") and os.environ.get("WCL_CLIENT_SECRET")):
         return None
 
     try:
-        token = _get_token(client_id, client_secret)
-
         # Step 1: classID + recent report
-        r1 = _wcl_query(token, f'''{{
-            characterData {{
-                character(name: "{name}", serverSlug: "{realm}", serverRegion: "{region}") {{
-                    classID
-                    name
-                    recentReports(limit: 1) {{ data {{ code startTime }} }}
-                }}
-            }}
-        }}''')
-        char = r1["data"]["characterData"]["character"]
+        char = wcl_client.get_character(name, realm, region)
         if not char:
             log.warning("WCL spec lookup: no character found for %s@%s/%s", name, realm, region)
             return None
 
         class_id     = char["classID"]
         display_name = char["name"]
-        reports      = char["recentReports"]["data"]
-        log.info("WCL spec lookup: %s@%s → classID=%d name=%s reports=%d",
+        reports      = char.get("reports") or []
+        log.info("WCL spec lookup: %s@%s → classID=%s name=%s reports=%d",
                  name, realm, class_id, display_name, len(reports))
 
         if not reports:
@@ -707,30 +644,18 @@ def fetch_character_spec(
         code = reports[0]["code"]
 
         # Step 2: actor ID
-        r2 = _wcl_query(token, f'''{{
-            reportData {{ report(code: "{code}") {{
-                masterData {{ actors(type: "Player") {{ id name }} }}
-            }} }}
-        }}''')
-        actor_id = None
-        for actor in r2["data"]["reportData"]["report"]["masterData"]["actors"]:
-            if actor["name"].lower() == display_name.lower():
-                actor_id = actor["id"]
-                break
-
+        actors = wcl_client.get_master_actors(code)
+        actor_id = next(
+            (a["id"] for a in actors if (a.get("name") or "").lower() == display_name.lower()),
+            None,
+        )
         if not actor_id:
             log.warning("WCL spec lookup: actor %s not in report %s", display_name, code)
             spec_key = WCL_CLASS_DEFAULT_SPEC.get(class_id)
             return (display_name, spec_key, class_id) if spec_key else None
 
         # Step 3: CombatantInfo specID
-        r3 = _wcl_query(token, f'''{{
-            reportData {{ report(code: "{code}") {{
-                events(sourceID: {actor_id}, dataType: CombatantInfo,
-                       startTime: 0, endTime: 999999999999) {{ data }}
-            }} }}
-        }}''')
-        events = r3["data"]["reportData"]["report"]["events"]["data"]
+        events = wcl_client.get_combatant_info(code, source_id=actor_id)
         spec_key = None
         if events:
             event    = events[-1]
@@ -761,7 +686,7 @@ def fetch_character_spec(
             return None
         return display_name, spec_key, class_id
 
-    except (URLError, HTTPError, KeyError, json.JSONDecodeError, TimeoutError) as e:
+    except (RuntimeError, URLError, HTTPError, KeyError, ValueError, TypeError, TimeoutError) as e:
         log.warning("WCL spec lookup failed for %s@%s: %s", name, realm, e)
         return None
 
@@ -779,14 +704,13 @@ def get_gear(name: str, realm: str, spec: str, region: str = "us",
 
     item_db_conn: open sqlite3 connection to tbc_items.db (for name/stat resolution)
     """
-    client_id     = os.environ.get("WCL_CLIENT_ID", "")
-    client_secret = os.environ.get("WCL_CLIENT_SECRET", "")
+    have_creds = bool(os.environ.get("WCL_CLIENT_ID") and os.environ.get("WCL_CLIENT_SECRET"))
+    use_wcl = bool(item_db_conn) and (have_creds or os.environ.get("WCL_FIXTURE_DIR"))
 
     snapshot = None
 
-    if client_id and client_secret and item_db_conn:
-        snapshot = _fetch_from_wcl(name, realm, spec, region,
-                                   client_id, client_secret, item_db_conn)
+    if use_wcl:
+        snapshot = _fetch_from_wcl(name, realm, spec, region, item_db_conn)
         if snapshot:
             cache_snapshot(snapshot)
             log.info("Gear fetched from WCL for %s (%s)", name, spec)

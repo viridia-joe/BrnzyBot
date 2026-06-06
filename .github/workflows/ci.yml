@@ -63,4 +63,6 @@ jobs:
       - name: Unit tests
         env:
           ENABLE_LLM: "false"
-        run: python tests/test_audit.py
+        run: |
+          python tests/test_audit.py
+          python tests/test_gear_offline.py

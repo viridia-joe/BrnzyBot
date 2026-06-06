@@ -103,6 +103,7 @@ class ListenerCog(commands.Cog, name="Listener"):
 
     async def _handle_nl(self, message: discord.Message, was_mentioned: bool = False) -> None:
         """Run NL triage and dispatch resulting intent."""
+        guild_id = str(message.guild.id) if message.guild else "dm"
         content = message.clean_content.strip()
         if not content:
             return

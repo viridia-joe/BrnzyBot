@@ -287,8 +287,11 @@ def write_baseline(spec_key: str, encounter_slug: str, data: dict) -> None:
     out_dir = BASELINE_DIR / spec_key
     out_dir.mkdir(parents=True, exist_ok=True)
     out_path = out_dir / f"{encounter_slug}.json"
-    with open(out_path, "w", encoding="utf-8") as f:
+    # Write to a temp file then atomic-rename so the bot never reads a partial file.
+    tmp_path = out_path.with_suffix(".json.tmp")
+    with open(tmp_path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
+    os.replace(tmp_path, out_path)  # atomic on POSIX and Windows
     log.info("  Written → %s", out_path)
 
 

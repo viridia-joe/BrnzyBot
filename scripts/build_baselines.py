@@ -51,26 +51,27 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 # Configuration — zones and specs to build baselines for
 # ---------------------------------------------------------------------------
 
-# WCL TBC Classic zone IDs.  SSC and TK share zone 1010 on classic.warcraftlogs.com.
+# WCL TBC Anniversary zone ID. Zone 1056 = TBC Anniversary SSC+TK (latest parses 2025-2026).
+# Zone 1010 = original TBC Classic (2021-22, archived). Zone 1052 = TBC Classic S2 (2022).
 TBC_ZONES = {
-    "SSC+TK": 1010,  # Serpentshrine Cavern + The Eye (both Phase 2, same WCL zone)
+    "SSC+TK (Anniversary)": 1056,
 }
 
 # Encounters to build baselines for: {slug: (encounter_id, display_name)}
-# IDs confirmed via --discover against classic.warcraftlogs.com zone 1010.
+# IDs confirmed via --discover against zone 1056 (TBC Anniversary, latest parses June 2026).
 ENCOUNTERS: dict[str, tuple[int, str]] = {
-    # SSC (encounter IDs 623-628)
-    "hydross_the_unstable":       (623, "Hydross the Unstable"),
-    "the_lurker_below":           (624, "The Lurker Below"),
-    "leotheras_the_blind":        (625, "Leotheras the Blind"),
-    "fathom_lord_karathress":     (626, "Fathom-Lord Karathress"),
-    "morogrim_tidewalker":        (627, "Morogrim Tidewalker"),
-    "lady_vashj":                 (628, "Lady Vashj"),
-    # TK (encounter IDs 730-733)
-    "alar":                       (730, "Al'ar"),
-    "void_reaver":                (731, "Void Reaver"),
-    "high_astromancer_solarian":  (732, "High Astromancer Solarian"),
-    "kaelthas_sunstrider":        (733, "Kael'thas Sunstrider"),
+    # SSC (Anniversary encounter IDs 100623-100628)
+    "hydross_the_unstable":       (100623, "Hydross the Unstable"),
+    "the_lurker_below":           (100624, "The Lurker Below"),
+    "leotheras_the_blind":        (100625, "Leotheras the Blind"),
+    "fathom_lord_karathress":     (100626, "Fathom-Lord Karathress"),
+    "morogrim_tidewalker":        (100627, "Morogrim Tidewalker"),
+    "lady_vashj":                 (100628, "Lady Vashj"),
+    # TK (Anniversary encounter IDs 100730-100733)
+    "alar":                       (100730, "Al'ar"),
+    "void_reaver":                (100731, "Void Reaver"),
+    "high_astromancer_solarian":  (100732, "High Astromancer Solarian"),
+    "kaelthas_sunstrider":        (100733, "Kael'thas Sunstrider"),
 }
 
 # Specs to build baselines for: {spec_key: (class_id, spec_id)}

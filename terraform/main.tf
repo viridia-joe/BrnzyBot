@@ -17,7 +17,7 @@ provider "google" {
 # A reserved static IP doesn't change across VM restarts or re-creates.
 # This is the address you put in GitHub secrets as GCE_HOST.
 resource "google_compute_address" "brnzybot" {
-  name   = "brnzybot-ip"
+  name   = "${var.instance_name}-ip"
   region = var.region
 }
 
@@ -27,14 +27,14 @@ resource "google_compute_address" "brnzybot" {
 #   - Up to 720 hours/month free
 #   - 30 GB standard disk free
 resource "google_compute_instance" "brnzybot" {
-  name         = "brnzybot"
-  machine_type = "e2-micro"
+  name         = var.instance_name
+  machine_type = var.machine_type
   zone         = var.zone
 
   boot_disk {
     initialize_params {
       image = "ubuntu-os-cloud/ubuntu-2204-lts"
-      size  = 20   # GB — stays within the 30 GB free-tier allotment
+      size  = var.boot_disk_size   # GB — 30 GB total is free-tier
       type  = "pd-standard"
     }
   }
@@ -54,7 +54,7 @@ resource "google_compute_instance" "brnzybot" {
   # Bootstraps Docker + creates the brnz user on first boot (~2 min)
   metadata_startup_script = file("${path.module}/startup.sh")
 
-  tags = ["brnzybot"]
+  tags = [var.instance_name]
 
   # Grant the VM's service account permission to write to Cloud Logging and Monitoring.
   # Without this the gcplogs Docker driver fails with "Unauthenticated".
@@ -76,7 +76,7 @@ resource "google_compute_instance" "brnzybot" {
 # Only SSH needs to be open. The webhook uses Cloudflare Tunnel (outbound
 # connection from the container to Cloudflare) — no inbound HTTP port needed.
 resource "google_compute_firewall" "allow-ssh" {
-  name    = "brnzybot-allow-ssh"
+  name    = "${var.instance_name}-allow-ssh"
   network = "default"
 
   allow {
@@ -85,5 +85,5 @@ resource "google_compute_firewall" "allow-ssh" {
   }
 
   source_ranges = ["0.0.0.0/0"]
-  target_tags   = ["brnzybot"]
+  target_tags   = [var.instance_name]
 }

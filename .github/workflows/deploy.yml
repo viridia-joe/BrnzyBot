@@ -7,35 +7,48 @@ on:
       - "*.md"
       - "docs/**"
       - ".gitignore"
-  workflow_dispatch:   # allow manual deploys from the Actions tab
+  workflow_dispatch:   # manual deploy; optionally target a different instance
+    inputs:
+      host:
+        description: "Override target host (defaults to the GCE_HOST secret)"
+        required: false
+        default: ""
+      user:
+        description: "Override SSH user (defaults to the GCE_USER secret)"
+        required: false
+        default: ""
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    # Manual runs can target a second instance (e.g. the prod bot) via inputs;
+    # push deploys fall back to the GCE_HOST/GCE_USER secrets (the dev instance).
+    env:
+      GCE_HOST: ${{ github.event.inputs.host || secrets.GCE_HOST }}
+      GCE_USER: ${{ github.event.inputs.user || secrets.GCE_USER }}
 
     steps:
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
+          # A second instance with its own key needs its own secret; reuse the
+          # same key across VMs to deploy both with this one workflow.
           ssh-private-key: ${{ secrets.GCE_SSH_KEY }}
 
       - name: Add GCE host to known_hosts
-        run: |
-          ssh-keyscan -H ${{ secrets.GCE_HOST }} >> ~/.ssh/known_hosts
+        run: ssh-keyscan -H "$GCE_HOST" >> ~/.ssh/known_hosts
 
       - name: Deploy
-        env:
-          GCE_HOST: ${{ secrets.GCE_HOST }}
-          GCE_USER: ${{ secrets.GCE_USER }}
         run: |
           ssh ${GCE_USER}@${GCE_HOST} '
             set -e
 
-            # First-time setup: clone the repo if it is not already a git repo
+            # First-time setup: clone the repo if it is not already a git repo.
+            # The URL is templated from this repo (no hardcoded owner/name).
             if [ ! -d ~/brnzybot-git/.git ]; then
               rm -rf ~/brnzybot-git
-              git clone https://github.com/viridia-joe/BrnzyBot.git ~/brnzybot-git
+              git clone ${{ github.server_url }}/${{ github.repository }}.git ~/brnzybot-git
             fi
 
             cd ~/brnzybot-git
@@ -57,9 +70,6 @@ jobs:
           '
 
       - name: Verify health
-        env:
-          GCE_HOST: ${{ secrets.GCE_HOST }}
-          GCE_USER: ${{ secrets.GCE_USER }}
         run: |
           sleep 15
           ssh ${GCE_USER}@${GCE_HOST} 'curl -sf http://localhost:8081/health && echo " bot OK"'

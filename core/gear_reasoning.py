@@ -24,7 +24,6 @@ import random
 import re
 from dataclasses import dataclass
 from urllib.error import URLError, HTTPError
-from urllib.request import Request, urlopen
 
 import config
 from core.gear_context import GearContext
@@ -84,22 +83,10 @@ def _fallback_verdict() -> CriticVerdict:
 
 def _litellm(model: str, messages: list, temperature: float = 0.3,
              timeout: int = REASONING_TIMEOUT) -> str:
-    url = f"{config.LITELLM_BASE_URL}/chat/completions"
-    payload = {
-        "model":       model,
-        "messages":    messages,
-        "temperature": temperature,
-        "max_tokens":  2048,   # gear checks with priority summaries need room
-    }
-    headers = {"Content-Type": "application/json"}
-    if config.LITELLM_API_KEY:
-        headers["Authorization"] = f"Bearer {config.LITELLM_API_KEY}"
-
-    body = json.dumps(payload).encode()
-    req  = Request(url, data=body, headers=headers, method="POST")
-    with urlopen(req, timeout=timeout) as resp:
-        data = json.loads(resp.read())
-    return data["choices"][0]["message"]["content"]
+    # gear checks with priority summaries need room → 2048 tokens
+    from core import llm
+    return llm.chat(model, messages, temperature=temperature,
+                    max_tokens=2048, timeout=timeout)
 
 
 # ---------------------------------------------------------------------------

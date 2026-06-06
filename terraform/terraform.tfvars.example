@@ -8,3 +8,11 @@ ssh_public_key = "ssh-ed25519 AAAA... your-key-here"
 # region = "us-central1"
 # zone   = "us-central1-a"
 # ssh_user = "brnz"
+
+# Second instance (e.g. a prod bot on your guild's Discord, separate from dev):
+# give it a distinct name so its VM/IP/firewall/tag don't collide.
+# instance_name = "brnzybot-prod"
+
+# Paid / LLM tier — bump the box (billed, not free tier):
+# machine_type   = "e2-standard-2"   # 2 vCPU / 8 GB — can host a small local LLM
+# boot_disk_size = 30

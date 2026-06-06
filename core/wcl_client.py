@@ -226,45 +226,10 @@ def graphql(query: str, variables: dict = None) -> dict:
     raise last_exc
 
 
-# ---------------------------------------------------------------------------
-# Query: discover recent reports for the configured guild (§5.1)
-# ---------------------------------------------------------------------------
-_REPORTS_QUERY = """
-query GuildReports($guildName: String!, $serverSlug: String!, $region: String!) {
-  reportData {
-    reports(
-      guildName: $guildName
-      guildServerSlug: $serverSlug
-      guildServerRegion: $region
-      limit: 10
-    ) {
-      data {
-        code
-        title
-        startTime
-        endTime
-      }
-    }
-  }
-}
-"""
-
-
-def get_recent_reports() -> list[dict]:
-    """
-    Returns the 10 most recent reports for the configured guild.
-    Each dict has: code, title, startTime, endTime (ms since Unix epoch).
-    """
-    data = graphql(_REPORTS_QUERY, {
-        "guildName":  config.GUILD_NAME,
-        "serverSlug": config.SERVER_SLUG,
-        "region":     config.REGION,
-    })
-    return (
-        data.get("reportData", {})
-            .get("reports", {})
-            .get("data", [])
-    )
+# NOTE: a former get_recent_reports() (guild-wide report discovery) was removed —
+# it referenced config.GUILD_NAME/SERVER_SLUG/REGION, which don't exist (only
+# DEFAULT_REALM/DEFAULT_REGION do), so it would have crashed if called. Per-guild
+# report discovery goes through get_character_recent_reports(name, realm, region).
 
 
 # ---------------------------------------------------------------------------

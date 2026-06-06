@@ -393,12 +393,13 @@ def triage_with_llm(text: str, source: str = "nl") -> Intent:
 # Main entry point
 # ---------------------------------------------------------------------------
 
-def classify(text: str, source: str = "unknown", use_llm: bool = True) -> Intent:
+def classify(text: str, source: str = "unknown", use_llm: bool = True,
+             guild_id: str = "global") -> Intent:
     """
     Classify a message into an Intent.
 
     1. Try deterministic parse (instant, no LLM).
-    2. If that fails and use_llm=True, try LLM triage.
+    2. If that fails and use_llm=True and the guild may use the LLM, try triage.
     3. If all else fails, return Intent.unknown().
     """
     # Deterministic first
@@ -406,13 +407,16 @@ def classify(text: str, source: str = "unknown", use_llm: bool = True) -> Intent
     if intent is not None:
         return intent
 
-    # LLM triage for natural language — only when the model layer is enabled.
+    # LLM triage for natural language — only when the model layer is enabled
+    # for this guild (Pro). Free/disabled → unknown (deterministic).
     if use_llm:
-        import config
-        if not config.ENABLE_LLM:
-            log.debug("Deterministic parse failed and LLM disabled — returning unknown: %r", text[:80])
+        from core import entitlements
+        if not entitlements.llm_enabled(guild_id):
+            log.debug("Deterministic parse failed and LLM off for guild — unknown: %r", text[:80])
             return Intent.unknown(raw=text, source=source)
         log.debug("Deterministic parse failed, trying LLM triage: %r", text[:80])
-        return triage_with_llm(text, source=source)
+        intent = triage_with_llm(text, source=source)
+        entitlements.note_llm_call(guild_id)
+        return intent
 
     return Intent.unknown(raw=text, source=source)

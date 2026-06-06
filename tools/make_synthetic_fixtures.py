@@ -132,8 +132,15 @@ def main():
     for fid in range(1, len(PROGRESSION) + 1):
         dump(f"{CODE}.combatant.{fid}", combatants)
         dump(f"{CODE}.casts.{fid}", casts)
-    for m in RAID:
-        dump(f"recent_reports.{m[0].lower()}", [{"code": CODE, "startTime": 1}])
+    # Per-character fixtures so /gearcheck + auto-register replay too.
+    classid = {"Warrior": 1, "Paladin": 2, "Hunter": 3, "Rogue": 4, "Priest": 5,
+               "Shaman": 7, "Mage": 8, "Warlock": 9, "Druid": 11}
+    for m, combatant in zip(RAID, combatants):
+        name, sid, cls = m[0], m[1], m[2]
+        dump(f"recent_reports.{name.lower()}", [{"code": CODE, "startTime": 1}])
+        dump(f"character.{name.lower()}", {"classID": classid.get(cls, 0),
+                                           "name": name, "reports": [{"code": CODE, "startTime": 1}]})
+        dump(f"{CODE}.combatant.src.{sid}", [combatant])
 
     print(f"wrote synthetic fixtures for {CODE}: {len(PROGRESSION)} fights, "
           f"{len(RAID)} raiders → {FIXTURE_WCL_DIR}")

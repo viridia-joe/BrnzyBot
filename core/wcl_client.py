@@ -425,10 +425,11 @@ def get_pre_death_window(
 # Query: combatant info — gear + consumables + talents (§5.5)
 # ---------------------------------------------------------------------------
 _COMBATANT_QUERY = """
-query CombatantInfo($code: String!, $fightID: Int!) {
+query CombatantInfo($code: String!, $fightIDs: [Int], $sourceID: Int) {
   reportData {
     report(code: $code) {
-      events(fightIDs: [$fightID], dataType: CombatantInfo) {
+      events(fightIDs: $fightIDs, sourceID: $sourceID, dataType: CombatantInfo,
+             startTime: 0, endTime: 999999999999) {
         data
       }
     }
@@ -437,14 +438,27 @@ query CombatantInfo($code: String!, $fightID: Int!) {
 """
 
 
-def get_combatant_info(report_code: str, fight_id: int) -> list[dict]:
+def get_combatant_info(report_code: str, fight_id: int | None = None,
+                       source_id: int | None = None) -> list[dict]:
     """
-    Returns CombatantInfo records for all players in a fight.
-    Each record includes gear[], auras[] (flask/food at pull), talents[].
+    CombatantInfo records (gear[], auras[], talents[], specID, race…).
+    Pass `fight_id` for one fight's combatants (audit), or `source_id` to pull a
+    single actor's CombatantInfo across the whole report (gear lookup). Both may
+    be combined; either may be omitted.
     """
     if _fixture_dir():
-        return _fixture(f"{report_code}.combatant.{fight_id}", [])
-    data = graphql(_COMBATANT_QUERY, {"code": report_code, "fightID": fight_id})
+        if fight_id is not None:
+            rows = _fixture(f"{report_code}.combatant.{fight_id}", [])
+        else:
+            rows = _fixture(f"{report_code}.combatant.src.{source_id}", None)
+            if rows is None:
+                rows = _fixture(f"{report_code}.combatant", [])
+        return [r for r in rows if source_id is None or r.get("sourceID") == source_id]
+    data = graphql(_COMBATANT_QUERY, {
+        "code": report_code,
+        "fightIDs": [fight_id] if fight_id is not None else None,
+        "sourceID": source_id,
+    })
     return (
         data.get("reportData", {})
             .get("report", {})
@@ -468,6 +482,37 @@ query CharReports($name: String!, $serverSlug: String!, $region: String!, $limit
   }
 }
 """
+
+
+_CHARACTER_QUERY = """
+query Character($name: String!, $serverSlug: String!, $region: String!) {
+  characterData {
+    character(name: $name, serverSlug: $serverSlug, serverRegion: $region) {
+      classID
+      name
+      recentReports(limit: 1) { data { code startTime } }
+    }
+  }
+}
+"""
+
+
+def get_character(name: str, realm: str, region: str = "us") -> dict | None:
+    """
+    Returns {classID, name, reports:[{code, startTime}]} for a character, or None
+    if WCL has no record. Used by gear fetch + auto-register spec detection.
+    """
+    if _fixture_dir():
+        return _fixture(f"character.{name.lower()}", None)
+    data = graphql(_CHARACTER_QUERY, {"name": name, "serverSlug": realm, "region": region})
+    char = (data.get("characterData") or {}).get("character")
+    if not char:
+        return None
+    return {
+        "classID": char.get("classID"),
+        "name": char.get("name") or name,
+        "reports": (char.get("recentReports") or {}).get("data", []),
+    }
 
 
 def get_character_recent_reports(

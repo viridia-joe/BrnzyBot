@@ -111,7 +111,20 @@ deeper-audit checklist below for reference in case other gaps surface:
   `NOT IN` filter and with `/srprio`'s `Raid` filter — quantify how many epics have
   no source.
 
-### Part B — BiS-equivalence harness (regression guard across all three tools)
+### Part B — BiS-equivalence harness — ✅ SHIPPED (internal-consistency tier)
+`tests/test_bis_equivalence.py` (in CI) pins `/gearprio` and `/gearcheck` against
+the optimizer's own BiS, fully hermetic (the committed item-DB fixture has 4,500+
+real items, so `solve_bis` runs offline and yields the genuine per-phase BiS).
+Covers destro_warlock + ele_shaman at Phase 2: wearing BiS → gearprio reports no
+upgrades & gearcheck confirms BiS; downgrade a slot → gearprio recommends the BiS
+piece back. This is the contract the double-subtraction bug broke. EP_DELTA=5 ties.
+
+**Still open (the externally-grounded tier):** (1) compare `solve_bis` to a
+**human-verified** curated BiS list per spec/phase (`data/bis/<spec>_p<N>.json`) to
+catch the optimizer/weights/item-data being wrong (internal consistency can't);
+(2) the `/srprio` raid-loot assertion needs item-DB `source_type='Raid'` data the
+fixture lacks (host-only). Original plan retained below.
+
 A test harness that pins gearprio / gearcheck / srprio against a **known, curated
 BiS per spec per phase** and flags any disagreement beyond a small EP tolerance.
 

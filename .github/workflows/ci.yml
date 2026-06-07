@@ -72,3 +72,4 @@ jobs:
           python tests/test_content_encoding.py
           python tests/test_healer_analysis.py
           python tests/test_srprio.py
+          python tests/test_gearprio.py

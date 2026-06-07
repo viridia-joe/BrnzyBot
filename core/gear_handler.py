@@ -88,8 +88,23 @@ def _build_upgrade_priority(character, spec, snapshot, context, phase: int = 1,
         log.warning("solve_upgrades failed in priority build: %s", e)
         return []
 
-    # Map slot → weakest currently equipped item (min EP).
-    # For dual slots (Ring, Trinket) we replace the weaker one.
+    return _upgrade_entries(opt.slots, context, snapshot)
+
+
+def _upgrade_entries(opt_slots, context, snapshot) -> list[PriorityEntry]:
+    """
+    Turn the optimizer's optimal-set slots into ranked upgrade entries.
+
+    IMPORTANT — value semantics: in upgrades mode the optimizer reports a swap's
+    `SlotResult.ep` as the **marginal EP gain** over the item currently worn in
+    that slot (base EP minus equipped EP), NOT the candidate's absolute EP. So the
+    net gain is `sr.ep` directly. (A previous version did `sr.ep - cur_ep`, which
+    subtracted the equipped EP a second time — net = base − 2×equipped — so an
+    upgrade only surfaced if it was worth *double* the equipped item, hiding nearly
+    every real upgrade and making /gearprio report "at or near BiS" always.)
+    `gearcheck` (handle_gear_list) already reads `sr.ep` as the gain.
+    """
+    # Map slot → equipped item to display as the "from" (weaker piece for dual slots).
     slot_items: dict = defaultdict(list)
     for g in context.gear_summary:
         slot_items[g["slot"]].append((g["name"], g["ep"]))
@@ -104,14 +119,14 @@ def _build_upgrade_priority(character, spec, snapshot, context, phase: int = 1,
     equipped_set   = {item["name"]: item.get("set_name", "") for item in snapshot.gear}
 
     entries = []
-    for sr in opt.slots:
-        cur_name, cur_ep = current_ep.get(sr.slot, ("", 0.0))
-        if not cur_name or cur_name == sr.item_name:
-            continue
-        if sr.item_name in equipped_names:
+    for sr in opt_slots:
+        # Only swaps are recommendations; kept/equipped items are not.
+        if getattr(sr, "was_equipped", False) or sr.item_name in equipped_names:
             continue
 
-        raw_net  = sr.ep - cur_ep
+        cur_name, cur_ep = current_ep.get(sr.slot, ("(empty)", 0.0))
+        raw_net  = sr.ep                       # optimizer already gives marginal gain
+        to_ep    = cur_ep + sr.ep              # reconstruct absolute EP for display
         set_name = equipped_set.get(cur_name, "")
         set_cost = context.set_bonus_cost(set_name) if set_name else 0.0
         net_ep   = raw_net - set_cost
@@ -123,7 +138,7 @@ def _build_upgrade_priority(character, spec, snapshot, context, phase: int = 1,
                 from_name=cur_name,
                 from_ep=round(cur_ep, 1),
                 to_name=sr.item_name,
-                to_ep=round(sr.ep, 1),
+                to_ep=round(to_ep, 1),
                 net_ep=round(net_ep, 1),
                 raw_net=round(raw_net, 1),
                 set_cost=round(set_cost, 1),

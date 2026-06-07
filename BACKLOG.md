@@ -44,10 +44,19 @@ The work is mostly *connecting it to Discord*, not building from scratch.
 
 ## /gearprio weapon upgrades dropped by slot-name mismatch (latent bug)
 
-**Priority:** Medium
-**Effort:** Low-Medium
+**Priority:** Low (downgraded)
+**Effort:** Low
 
-Found while diagnosing the Phase-1 "no upgrades" report. In
+**Update:** the headline "no upgrades ever" turned out to be a separate
+double-subtraction bug in `_build_upgrade_priority` (now fixed + tested — see
+`tests/test_gearprio.py`). Because the fix uses the optimizer's marginal gain
+(`sr.ep`) directly, weapon upgrades now **surface with the correct EP gain** even
+when slot names don't match — the mismatch only leaves the "from"/absolute-EP
+*display* slightly off for staves/2H (shows `(empty)` as the from-slot). So this is
+now cosmetic. Remaining nicety: share `/srprio`'s `_canon_slot` normalizer so the
+"from" item renders correctly for weapons.
+
+Original finding: In
 `gear_handler._build_upgrade_priority`, candidate slots from the optimizer
 (`opt.slots`, item-DB slot names) are matched against equipped EP keyed by WCL
 slot names (`context.gear_summary[].slot`, from `gear_cache.WCL_SLOT_MAP`). They
@@ -77,9 +86,16 @@ match** (`Back`/`Shoulder`), so if those BiS pieces are reachable in the set pha
 they should have surfaced. There is likely a second, deeper bug in the candidate
 pool or the priority filter. Don't assume the phase fix closed this.
 
-### Part A — root-cause review (why obvious upgrades are missed)
-Investigate, with Brnz (destro warlock) as the test case, why a non-BiS slot
-yields no recommendation. Concrete things to check:
+### Part A — root-cause review (why obvious upgrades are missed) — ✅ ROOT CAUSE FOUND
+**Resolved:** the cause was a double-subtraction in
+`gear_handler._build_upgrade_priority` — the optimizer reports a swap's `sr.ep` as
+the *marginal gain* over the equipped item, but the priority builder did
+`sr.ep - cur_ep`, subtracting the equipped EP again (net = base − 2×equipped). An
+upgrade only passed the `net_ep > 0` gate if worth **double** the equipped item, so
+essentially every real upgrade was filtered → "at or near BiS" always. Fixed (uses
+the marginal gain directly) and locked with `tests/test_gearprio.py`. The
+phase-misconfig (guild stuck at Phase 1) was a compounding red herring. Leaving the
+deeper-audit checklist below for reference in case other gaps surface:
 - **Dump the candidate pool** for the spec at the relevant phase
   (`gear_optimizer` query at `:411`): are the known BiS cloak/shoulders even *in*
   the DB? What `phase`, `source_type`, `quality`, `class_restriction`, `armor_type`

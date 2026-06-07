@@ -74,3 +74,4 @@ jobs:
           python tests/test_srprio.py
           python tests/test_gearprio.py
           python tests/test_bis_equivalence.py
+          python tests/test_item_restrictions.py

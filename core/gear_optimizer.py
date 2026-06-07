@@ -77,6 +77,13 @@ GEMS_PATH        = config.GEMS_PATH
 # Slots that allow two items simultaneously
 DUAL_SLOTS = {"Ring", "Trinket"}
 
+# Weapon (main/off/2H) slots, and the DB weapon_type values that are actual
+# weapons (vs off-hand frills/shields). A real weapon must match the spec's
+# allowed weapon_types; non-weapon off-hands are gated by class instead.
+WEAPON_SLOTS = {"Main Hand", "Off Hand", "One Hand", "Two-Hand", "Weapon"}
+REAL_WEAPON_TYPES = {"Mace", "Sword", "Axe", "Dagger", "Fist", "Polearm",
+                     "Staff", "Gun", "Bow", "Crossbow", "Thrown", "Wand"}
+
 # Slots where no item is required (ranged / relic slot is optional in TBC)
 OPTIONAL_SLOTS = {"Wand", "Ranged", "Totem", "Idol", "Libram"}
 
@@ -355,6 +362,7 @@ def _load_candidates(
     """
     weights    = spec_data.get("weights", {})
     armor_types = spec_data.get("armor_types", [])
+    allowed_weapon_types = set(spec_data.get("weapon_types", []) or [])
     class_name  = spec_data.get("class", "")
     expansion   = spec_data.get("expansion", "tbc")
 
@@ -411,7 +419,7 @@ def _load_candidates(
     c.execute(f"""
         SELECT item_id, name, slot, armor_type, is_unique,
                class_restriction, stats, sockets, socket_bonus,
-               set_name, source_type, source_name, phase
+               set_name, source_type, source_name, phase, weapon_type
         FROM items
         WHERE (
             ({quality_filter}
@@ -426,7 +434,8 @@ def _load_candidates(
     for row in c.fetchall():
         (item_id, name, slot, armor_type, is_unique,
          class_restriction_json, stats_json, sockets_json,
-         socket_bonus_json, set_name, source_type, source_name, phase) = row
+         socket_bonus_json, set_name, source_type, source_name, phase,
+         weapon_type) = row
 
         if not slot:
             continue
@@ -462,6 +471,15 @@ def _load_candidates(
         except (json.JSONDecodeError, TypeError):
             cr = []
         if cr and class_name and class_name not in cr:
+            continue
+
+        # Weapon proficiency: a real weapon must be a type the spec can wield
+        # (e.g. Warlocks can't use Maces/Axes/Polearms). Off-hand frills/shields
+        # carry weapon_type 'Off Hand'/'Shield'/'' and are gated elsewhere — only
+        # validate actual weapons. Skip when the spec declares no weapon_types.
+        if (allowed_weapon_types and slot in WEAPON_SLOTS
+                and weapon_type in REAL_WEAPON_TYPES
+                and weapon_type not in allowed_weapon_types):
             continue
 
         # Profession filter: BoP crafted items require the character to have

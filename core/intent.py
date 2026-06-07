@@ -84,3 +84,27 @@ class Intent:
     @classmethod
     def unknown(cls, raw: str = "", source: str = "unknown") -> "Intent":
         return cls(command="unknown", raw_message=raw, source=source, confidence=0.0)
+
+
+# ---------------------------------------------------------------------------
+# TriageResult — moved here from core/triage.py (legacy Ollama classifier)
+# ---------------------------------------------------------------------------
+
+@dataclass
+class TriageResult:
+    intent:          str        # "lookup" | "reasoning" | "strategy" | "chatter"
+    character:       str        # character/player name, verbatim from message
+    realm:           str        # realm name if mentioned, empty = use server default
+    items_mentioned: list       # item names extracted verbatim from message
+    slot_mentioned:  str        # gear slot if mentioned (Head, Chest, etc.), else ""
+    requires_gear:   bool       # True = needs WCL/cache fetch before answering
+    raw_response:    str        # model's raw output (for debugging)
+    parse_failed:    bool       # True = fell back to safe defaults
+
+    @property
+    def needs_reasoning(self) -> bool:
+        return self.intent == "reasoning"
+
+    @property
+    def is_gear_question(self) -> bool:
+        return self.intent in ("lookup", "reasoning")

@@ -27,7 +27,7 @@ from urllib.error import URLError, HTTPError
 
 import config
 from core.gear_context import GearContext
-from core.triage import TriageResult
+from core.intent import TriageResult
 
 log = logging.getLogger(__name__)
 

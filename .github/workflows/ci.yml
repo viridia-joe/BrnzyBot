@@ -69,3 +69,4 @@ jobs:
           python tests/test_entitlements.py
           python tests/test_fight_diagrams.py
           python tests/test_rotation.py
+          python tests/test_content_encoding.py

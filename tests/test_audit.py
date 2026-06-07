@@ -349,6 +349,11 @@ def test_offline_roster_audit_against_fixtures():
     assert "no casts for the final" in out        # healer end-of-fight silence
     assert "INACTIVE" in out                       # meta activation (requirement unmet)
     assert "no meta gem socketed" in out           # missing meta gem (the critical gap)
+    # Execution section: rotation_handler.analyze wired into the audit. DPS specs
+    # get a Rotation verdict; the synthetic fire_mage casts a generic "Frostbolt"
+    # which is off the fire rotation, so it surfaces as off-rotation.
+    assert "### Execution" in out                   # rotation analysis is rendered
+    assert "Off-rotation" in out                    # fire_mage Frostbolt spam flagged
 
 
 # --- plain-asserts harness for CI (no pytest needed) ------------------------

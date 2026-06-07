@@ -1,5 +1,33 @@
 # Backlog
 
+## Item-DB source data is empty — populate source_type (host)
+
+**Priority:** High
+**Effort:** Medium
+
+**Root issue surfaced via /gearprio:** all 4,513 items in the DB have an empty
+`source_type`, so every source-based filter in the optimizer
+(`include_world_boss`, `include_arena`, `include_pvp`) is a silent no-op, and
+`/srprio`'s `source_type='Raid'` filter returns nothing. This let nearly
+unobtainable gear (Doomwalker's Talon of the Tempest; arena Gladiator's pieces)
+outrank obtainable raid loot in upgrade advice.
+
+**Stopgaps already shipped** (source-data-independent, in `gear_optimizer`):
+- World-boss exclusion via curated `data/world_boss_items.json` (id denylist,
+  honored when `include_world_boss=False`).
+- Arena exclusion via name fallback ("Gladiator's") when `include_arena=False`.
+
+**Durable fix (needs the host):**
+- Populate `source_type`/`source_name` on the prod item DB. `enrich_item_sources.py`
+  exists but (a) was evidently never run against the shipped DB, and (b) has **no
+  World Boss classification** — add detection for the TBC world bosses
+  (Doomwalker, Doom Lord Kazzak) by the community dataset's drop/boss name, and
+  confirm Arena/PvP/Raid get tagged. Then the existing `source_type` filters and
+  `/srprio` work without the curated stopgaps.
+- Honor (battleground) gear still leaks when `include_pvp=False` (no name fallback
+  added — patterns are messier than arena's "Gladiator's"). Covered once source
+  data is populated.
+
 ## Reaction-Based Feedback Harvesting (👍 / 👎 / ❌ on bot responses)
 
 **Priority:** Medium

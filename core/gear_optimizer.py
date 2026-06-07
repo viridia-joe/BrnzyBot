@@ -73,6 +73,7 @@ WEIGHTS_DIR      = config.WEIGHTS_DIR
 SET_BONUSES_PATH = config.SET_BONUSES_PATH
 PROFESSIONS_PATH = config.PROFESSIONS_PATH
 GEMS_PATH        = config.GEMS_PATH
+WORLD_BOSS_PATH  = os.path.join(os.path.dirname(WEIGHTS_DIR), "world_boss_items.json")
 
 # Slots that allow two items simultaneously
 DUAL_SLOTS = {"Ring", "Trinket"}
@@ -250,6 +251,28 @@ def _load_gems() -> dict:
         return json.load(f)
 
 
+_world_boss_ids: set | None = None
+
+
+def _load_world_boss_ids() -> set:
+    """Curated set of world-boss-drop item_ids to exclude when include_world_boss
+    is off (the item DB has no source data to drive the source_type filter)."""
+    global _world_boss_ids
+    if _world_boss_ids is None:
+        ids: set[int] = set()
+        try:
+            with open(WORLD_BOSS_PATH, encoding="utf-8-sig") as f:
+                data = json.load(f)
+            for boss, items in data.items():
+                if boss.startswith("_") or not isinstance(items, dict):
+                    continue
+                ids.update(int(k) for k in items)
+        except (FileNotFoundError, ValueError) as e:
+            log.warning("world-boss list unavailable: %s", e)
+        _world_boss_ids = ids
+    return _world_boss_ids
+
+
 # ---------------------------------------------------------------------------
 # Profession detection
 # ---------------------------------------------------------------------------
@@ -363,6 +386,7 @@ def _load_candidates(
     weights    = spec_data.get("weights", {})
     armor_types = spec_data.get("armor_types", [])
     allowed_weapon_types = set(spec_data.get("weapon_types", []) or [])
+    world_boss_ids = _load_world_boss_ids()
     class_name  = spec_data.get("class", "")
     expansion   = spec_data.get("expansion", "tbc")
 
@@ -480,6 +504,21 @@ def _load_candidates(
         if (allowed_weapon_types and slot in WEAPON_SLOTS
                 and weapon_type in REAL_WEAPON_TYPES
                 and weapon_type not in allowed_weapon_types):
+            continue
+
+        # World-boss drops: nearly unobtainable on crowded servers. The source
+        # data is empty so the source_type filter can't catch them — use the
+        # curated id list. Equipped items are always kept as a baseline.
+        if (not params.include_world_boss and item_id not in equipped_ids
+                and item_id in world_boss_ids):
+            continue
+
+        # Arena gear name fallback: source_type is empty in the DB so the SQL
+        # source filter is a no-op. TBC arena gear is reliably named
+        # "[Season] Gladiator's …" — exclude it when arena is opted out so the
+        # include_arena flag actually does something. (Equipped items kept.)
+        if (not params.include_arena and item_id not in equipped_ids
+                and "gladiator's" in name.lower()):
             continue
 
         # Profession filter: BoP crafted items require the character to have

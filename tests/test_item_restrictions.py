@@ -71,6 +71,35 @@ def test_other_specs_keep_their_weapons():
     assert present <= allowed, f"ele_shaman offered disallowed weapons: {present - allowed}"
 
 
+def _names(spec_key, **params_kw):
+    spec = json.load(open(os.path.join("data", "weights", f"{spec_key}.json")))
+    db = sqlite3.connect(config.ITEM_DB_PATH)
+    try:
+        cands = _load_candidates(db, spec, OptimizeParams(phase=2, mode="bis", **params_kw), set())
+    finally:
+        db.close()
+    return {c["name"] for c in cands}
+
+
+def test_world_boss_gear_excluded_by_default():
+    # Talon of the Tempest is a Doomwalker (world boss) drop. Source data is empty
+    # so only the curated id list catches it; default include_world_boss is False.
+    off = _names("destro_warlock", include_world_boss=False, include_arena=True)
+    on  = _names("destro_warlock", include_world_boss=True,  include_arena=True)
+    assert "Talon of the Tempest" not in off, "world-boss Talon leaked into candidates"
+    assert "Talon of the Tempest" in on, "include_world_boss=True should restore it"
+
+
+def test_arena_gear_excluded_when_opted_out():
+    # source_type is empty so the SQL filter is a no-op; the name fallback handles it.
+    off = _names("destro_warlock", include_arena=False, include_world_boss=True)
+    on  = _names("destro_warlock", include_arena=True,  include_world_boss=True)
+    gladiator_off = {n for n in off if "gladiator's" in n.lower()}
+    gladiator_on  = {n for n in on  if "gladiator's" in n.lower()}
+    assert not gladiator_off, f"arena gear leaked with arena off: {list(gladiator_off)[:5]}"
+    assert gladiator_on, "arena gear should be present when arena is on"
+
+
 def _main():
     tests = [v for k, v in sorted(globals().items())
              if k.startswith("test_") and callable(v)]

@@ -1,0 +1,18 @@
+{
+  "_comment": "Curated denylist of TBC WORLD-BOSS drops (Doomwalker, Doom Lord Kazzak). The item DB carries no source data, and enrich_item_sources doesn't classify world bosses, so the optimizer's include_world_boss=False filter has nothing to act on — letting nearly-unobtainable world-boss gear (e.g. Talon of the Tempest from Doomwalker) outrank obtainable raid loot. The optimizer excludes these item_ids when include_world_boss is False (equipped items are exempt). REVIEW/EXTEND: these are the items we're confident about; add more world-boss drops as needed. Keys are boss names; values map item_id -> name for readability.",
+  "Doomwalker": {
+    "30723": "Talon of the Tempest",
+    "28782": "Crystalheart Pulse-Staff",
+    "28772": "Sunfury Bow of the Phoenix",
+    "28134": "Brooch of Heightened Potential",
+    "28778": "Terror Pit Girdle",
+    "30067": "Velvet Boots of the Guardian",
+    "32377": "Mantle of Darkness",
+    "30084": "Pauldrons of the Argent Sentinel",
+    "29352": "Cobalt Band of Tyrigosa",
+    "30541": "Stormsong Kilt"
+  },
+  "Doom Lord Kazzak": {
+    "30902": "Cataclysm's Edge"
+  }
+}

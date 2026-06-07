@@ -68,3 +68,4 @@ jobs:
           python tests/test_gear_offline.py
           python tests/test_entitlements.py
           python tests/test_fight_diagrams.py
+          python tests/test_rotation.py

@@ -35,12 +35,12 @@ def _load() -> None:
     if _loaded:
         return
     try:
-        with open(os.path.join(_DATA, "gem_db.json"), encoding="utf-8") as f:
+        with open(os.path.join(_DATA, "gem_db.json"), encoding="utf-8-sig") as f:
             _GEMS = {int(k): v for k, v in json.load(f).items()}
     except (FileNotFoundError, ValueError):
         _GEMS = {}
     try:
-        with open(os.path.join(_DATA, "meta_gems.json"), encoding="utf-8") as f:
+        with open(os.path.join(_DATA, "meta_gems.json"), encoding="utf-8-sig") as f:
             _META = {int(k): v for k, v in json.load(f).items() if k.isdigit()}
     except (FileNotFoundError, ValueError):
         _META = {}

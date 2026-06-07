@@ -305,17 +305,21 @@ against the old inline logic).
 
 ## Scrub Em-Dashes from User-Facing Content (de-AI-ify the prose)
 
-**Priority:** Medium
+**Priority:** Low
 **Effort:** Low
 
-Em-dashes (`—`) are a giveaway that copy was machine-written, and they stand out
-in the heartbeat lore/tips/jokes and the boss-strategy text the bot posts. Replace
-them with natural human punctuation (comma, period, parenthetical, or " - ") so the
-flavor reads like a guildmate wrote it.
+Em-dashes (`—`) read as machine-written and stand out in the boss-strategy text
+the bot posts. Replace them with natural human punctuation (comma, period,
+parenthetical, or " - ") so the flavor reads like a guildmate wrote it.
 
-**Scope — user-facing *content* only, NOT code:**
-- `data/fun_content.json` — heartbeat `lore` / `tips` / `jokes` / `spammacros`
-  (currently clean, but the scrub belongs here too as content is added).
+**Done:** `data/fun_content.json` (heartbeat `lore`/`tips`/`jokes`/`spammacros`).
+What looked like em-dashes here was actually **mojibake** — UTF-8 em-dashes
+double-encoded to `â€"` (the "weird placeholder ae" players saw, posted every
+8 h by the heartbeat). All 143 were repaired to " - " in place (BOM + PowerShell
+formatting preserved). If new heartbeat content is added, watch for the same
+double-encoding on save.
+
+**Remaining — genuine `—` in the strat prose:**
 - `data/boss_strats.json` (~58), `data/strategy/*.json` — karazhan (~78),
   gruuls_lair (~23), magtheridon (~11): the `/strat` and `/bossguide` prose.
 - `data/diagrams/*.json` label/caption strings.

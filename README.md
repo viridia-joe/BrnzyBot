@@ -113,6 +113,10 @@ provisioned by Terraform and deployed by GitHub Actions on every push to
 databases into the data volume — is in
 [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
+**New to this and setting it up for the first time?** Follow the start-from-zero
+guide: [`docs/SETUP_OPERA_WIPE_SOCIETY.md`](docs/SETUP_OPERA_WIPE_SOCIETY.md) —
+Discord app → GCP VM → live bot, with nothing assumed.
+
 ---
 
 ## Repository layout

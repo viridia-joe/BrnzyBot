@@ -291,6 +291,7 @@ def handle_gear_list(
 
     # Run BIS solve for per-slot comparison
     bis_by_slot: dict[str, list] = {}
+    equipped_phase_by_name: dict[str, int] = {}
     bis_ok = False
     if os.path.exists(ITEM_DB_PATH):
         try:
@@ -313,10 +314,25 @@ def handle_gear_list(
                     bis_ok = True
                     log.info("BIS solve slots for %s (%s): %s", character, spec,
                              {k: [r.item_name for r in v] for k, v in bis_by_slot.items()})
+
+                # Build item_name → phase lookup for equipped items so we can
+                # correctly show 🥇 vs 🔥 when the equipped item is better than
+                # anything in the DB (gain < 0 case).
+                equipped_ids = [g.get("item_id", 0) for g in getattr(snapshot, "gear", []) if g.get("item_id")]
+                equipped_phase_by_name: dict[str, int] = {}
+                if equipped_ids:
+                    placeholders = ",".join("?" * len(equipped_ids))
+                    rows = item_db2.execute(
+                        f"SELECT name, phase FROM items WHERE item_id IN ({placeholders})",
+                        equipped_ids,
+                    ).fetchall()
+                    for name, item_phase in rows:
+                        equipped_phase_by_name[name] = item_phase or 1
             finally:
                 item_db2.close()
         except Exception as e:
             log.warning("BIS solve failed for gear list: %s", e)
+            equipped_phase_by_name = {}
 
     # Build slot → list of equipped items (preserves dual-slot order)
     equipped_by_slot: dict[str, list] = defaultdict(list)
@@ -428,13 +444,21 @@ def handle_gear_list(
                 line = f"{_bis_marker(sr.phase, phase)} **{slot}** {cur_name}{set_tag} `{cur_ep:.1f}`"
                 vdesc = "BiS ✓"
             elif sr.item_name in equipped_names:
-                line = f"{_bis_marker(sr.phase, phase)} **{slot}** {cur_name}{set_tag} `{cur_ep:.1f}`"
+                # BiS item is already worn in this or another slot — cur_name is
+                # whatever's actually in this slot; use its phase for the marker.
+                cur_phase = equipped_phase_by_name.get(cur_name, sr.phase)
+                line = f"{_bis_marker(cur_phase, phase)} **{slot}** {cur_name}{set_tag} `{cur_ep:.1f}`"
                 vdesc = f"BiS ({sr.item_name}) already worn"
             else:
                 gain = sr.ep
                 bis_ep = cur_ep + gain
                 pct_off = gain / bis_ep if bis_ep > 0 else 0
-                if pct_off <= 0.10:
+                if gain <= 0:
+                    # Equipped item is better than anything in the DB — it IS BiS.
+                    # Use the equipped item's actual phase for the 🥇/🔥 marker.
+                    cur_phase = equipped_phase_by_name.get(cur_name, phase)
+                    marker = _bis_marker(cur_phase, phase)
+                elif pct_off <= 0.10:
                     marker = "🔥"
                 elif pct_off <= 0.20:
                     marker = "➡️"

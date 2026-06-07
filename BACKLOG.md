@@ -1,5 +1,70 @@
 # Backlog
 
+## Reaction-Based Feedback Harvesting (👍 / 👎 / ❌ on bot responses)
+
+**Priority:** Medium
+**Effort:** Medium
+
+Let anyone grade a bot response by reacting to it — no command, no typing. An
+agent later harvests the flagged posts and reviews them. The bar is "any idiot can
+hit an X or a thumbs-down," and we get a queue of real-world wrong/poor answers to
+learn from. Motivating case: `/gearprio` returning "NO UPGRADES … at or near BIS"
+when it was actually phase-misconfigured (see the phase-gating note below) — a 👎
+should have captured that instantly.
+
+**Big head start — `core/feedback.py` already exists but is UNWIRED.** It has
+`log_emoji(message_id, emoji, direction)` → `feedback.jsonl`, plus reply-correction
+handling, designed as "Layer 5 signal capture." Nothing imports it: there is no
+`on_raw_reaction_add` listener in any cog, so no reaction is ever captured today.
+The work is mostly *connecting it to Discord*, not building from scratch.
+
+**Remaining work:**
+- Add a reaction listener cog (`on_raw_reaction_add` — raw survives restarts /
+  uncached messages). Map 👎 / ❌ / 😡 → negative, 👍 / 🎯 → positive; only act on
+  reactions to the **bot's own** messages.
+- Capture the **input + full response text**, not just a 👎. `feedback.log_emoji`
+  only gets a message id, but on a raw reaction event Discord won't hand us the
+  original text — so log responses at post-time keyed by message id (a small
+  `db/` table or extend feedback.jsonl) recording command+args+response. The
+  harvester needs the actual answer that got the 👎.
+- Surface the queue: a `tools/feedback_cli.py` (offline, like `audit_cli`) listing
+  negative-flagged responses with their inputs, and/or an owner-only `/feedback
+  review` digest, for an agent to read and act on.
+
+**Considerations:**
+- Privacy/noise: only log the bot's own messages; debounce duplicates; first
+  negative per (message, user).
+- Deterministic + dependency-light (the existing jsonl or a DB table + stdlib CLI).
+  No LLM needed to collect; an agent reviews later.
+- Scope v1 to capture + list; auto-triage/auto-fix is a later phase.
+- Reconcile with the existing reply-correction path in `core/feedback.py` so the
+  two channels share storage instead of diverging.
+- Storing response text per message costs RAM/disk on the 1 GB box; cap/prune old
+  positives, keep negatives longer.
+
+## /gearprio weapon upgrades dropped by slot-name mismatch (latent bug)
+
+**Priority:** Medium
+**Effort:** Low-Medium
+
+Found while diagnosing the Phase-1 "no upgrades" report. In
+`gear_handler._build_upgrade_priority`, candidate slots from the optimizer
+(`opt.slots`, item-DB slot names) are matched against equipped EP keyed by WCL
+slot names (`context.gear_summary[].slot`, from `gear_cache.WCL_SLOT_MAP`). They
+agree for armor, but **diverge for weapons**: equipped weapons come back as
+`Main Hand` / `Off Hand` / `Wand`, while DB weapon items also live under
+`Two-Hand`, `One Hand`, `Weapon`, `Ranged`. So a two-hand/one-hand weapon upgrade
+has `current_ep.get(sr.slot) == ("", 0.0)` → `not cur_name` → the swap is silently
+dropped. Net effect: weapon upgrades can never surface in `/gearprio` for casters
+whose weapon is a staff (most of them).
+
+**Fix:** normalize both sides to a canonical weapon family before the lookup (map
+`{Main Hand, One Hand, Two-Hand, Weapon}` → one key; keep `Off Hand`, `Ranged`,
+`Wand` consistent). Validate against a real snapshot once the gearprio path is
+fixture-testable (see the offline-harness item) before trusting it — weapon EP is
+high-stakes. (Note: `/srprio` shares `_canon_slot`, which already does this; the
+two could share one normalizer.)
+
 ## Raid Audit (`/audit <warcraftlogs-url>`)
 
 **Priority:** High

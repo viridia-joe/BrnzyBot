@@ -165,7 +165,15 @@ def _format_priority_skeleton(character: str, spec_desc: str, context,
             )
 
     if not entries:
-        lines.append("\nNO UPGRADES FOUND for current phase. Character is at or near BIS.")
+        phase_label = _PHASE_LABELS.get(phase, f"Phase {phase}")
+        lines.append(
+            f"\nNo upgrades found **within {phase_label} loot** — {character} is at or near "
+            f"BiS for this phase.\n"
+            f"⚙️ If your guild is further along, the search is phase-gated: only "
+            f"{phase_label} (and earlier) items are considered. Set the actual phase with "
+            f"`/setup phase <n>` (currently **{phase}**) and re-run — later-tier upgrades "
+            f"are excluded until then."
+        )
         return "\n".join(lines)
 
     lines.append(f"\nRANKED UPGRADE LIST ({len(entries)} items, sorted by net EP gain):")

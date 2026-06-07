@@ -47,6 +47,17 @@ Considerations:
 
 ## Soft Reserve Priority (`/srprio <character> <raid>`)
 
+**Status:** ✅ Shipped — `core/srprio_handler.py` (resolver + raid-scoped loot
+filter + EP ranking, reusing `gear_context.compute_item_ep`, no scipy), wired to
+`/srprio` and `!srprio`/`!sr` in `cogs/gear.py`, covered by `tests/test_srprio.py`
+(in CI). **One caveat to verify on the host:** the instance filter keys on the
+item DB's `source_type='Raid'` + `source_name` ("Zone - Boss"); the committed
+fixture DB has empty source columns, so the resolver/ranking are unit-tested but
+the live loot output must be sanity-checked once against the enriched VM item DB
+(run `core/enrich_item_sources.py` there if source data is missing). If a raid
+resolves but returns no loot, the handler says so explicitly rather than implying
+"no upgrades."
+
 **Priority:** Medium
 **Effort:** Medium
 

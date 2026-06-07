@@ -11,6 +11,9 @@ Commands:
 
     /gearcheck <character> [spec]
     !gearcheck <character> [spec]
+
+    /srprio <character> <raid> [spec]
+    !srprio <character> <raid>
 """
 
 from __future__ import annotations
@@ -27,6 +30,7 @@ from core.classifier import classify
 from core.intent import Intent
 from core.messages import thinking
 from core.gear_handler import handle_gear_question, handle_gear_list
+from core.srprio_handler import handle_srprio, raid_choices
 from db.server_config import (
     get_character, list_characters, add_character, get_guild_config,
     log_usage, check_rate_limit,
@@ -393,6 +397,132 @@ class GearCog(commands.Cog, name="Gear"):
         except Exception as exc:
             log.exception("gearcheck failed for %s", display)
             result_text = f"Gear check failed for **{display}**: {exc}"
+
+        if auto_note:
+            result_text = result_text + "\n\n" + auto_note
+
+        chunks = _chunks(result_text)
+        await thinking_msg.edit(content=chunks[0])
+        for chunk in chunks[1:]:
+            await thinking_msg.reply(chunk, mention_author=False)
+
+
+    # -----------------------------------------------------------------------
+    # /srprio — soft-reserve priority for a specific raid (top 5 upgrades)
+    # -----------------------------------------------------------------------
+    @app_commands.command(
+        name="srprio",
+        description="Top-5 items to soft-reserve in a specific raid, ranked by upgrade value.",
+    )
+    @app_commands.describe(
+        character="Character name",
+        raid="Raid instance (e.g. Karazhan, Gruul, SSC, TK). Soft reserve is raids only.",
+        spec="Override spec. Uses registered spec if omitted.",
+        phase="Phase to consider (1–5). Defaults to guild's current phase.",
+    )
+    async def slash_srprio(
+        self,
+        interaction: discord.Interaction,
+        character: str,
+        raid: str,
+        spec: str | None = None,
+        phase: int | None = None,
+    ) -> None:
+        guild_id = str(interaction.guild_id)
+
+        allowed, _ = check_rate_limit(guild_id)
+        if not allowed:
+            await interaction.response.send_message(
+                "This server has hit the free plan daily limit (20 commands). "
+                "Upgrade to Pro for unlimited usage — use `/subscribe`.",
+                ephemeral=True,
+            )
+            return
+
+        display, reg_spec, realm, region = _resolve_character(character, guild_id)
+        auto_note = None
+        if display is None:
+            auto_result = await _try_auto_register(
+                character, guild_id, added_by=str(interaction.user.id)
+            )
+            if auto_result is None:
+                await interaction.response.send_message(reg_spec, ephemeral=True)
+                return
+            display, reg_spec, realm, region, auto_note = auto_result
+
+        resolved_spec = spec or reg_spec
+        await interaction.response.defer(thinking=True)
+        log_usage(guild_id, str(interaction.user.id), "srprio")
+
+        loop = asyncio.get_running_loop()
+        try:
+            result_text = await loop.run_in_executor(
+                None,
+                lambda: handle_srprio(
+                    character=display,
+                    spec=resolved_spec,
+                    realm=realm,
+                    raid=raid,
+                    region=region or "us",
+                    guild_id=guild_id,
+                    phase_override=phase,
+                ),
+            )
+        except Exception as exc:
+            log.exception("srprio failed for %s", display)
+            result_text = f"SR priority failed for **{display}**: {exc}"
+
+        if auto_note:
+            result_text = result_text + "\n\n" + auto_note
+
+        try:
+            for chunk in _chunks(result_text):
+                await asyncio.wait_for(interaction.followup.send(chunk), timeout=15)
+        except asyncio.TimeoutError:
+            log.error("followup.send timed out for srprio %s", display)
+
+    # -----------------------------------------------------------------------
+    # !srprio <character> <raid…> — prefix command (alias: !sr)
+    # -----------------------------------------------------------------------
+    @commands.command(name="srprio", aliases=["sr"])
+    async def prefix_srprio(self, ctx: commands.Context, *args: str) -> None:
+        guild_id = str(ctx.guild.id) if ctx.guild else "dm"
+        if len(args) < 2:
+            await ctx.reply(
+                f"Usage: `!srprio <character> <raid>` — raids only ({raid_choices()}).",
+                mention_author=False,
+            )
+            return
+        char_name, raid = args[0], " ".join(args[1:])
+
+        display, spec, realm, region = _resolve_character(char_name, guild_id)
+        auto_note = None
+        if display is None:
+            auto_result = await _try_auto_register(
+                char_name, guild_id, added_by=str(ctx.author.id)
+            )
+            if auto_result is None:
+                await ctx.reply(spec, mention_author=False)
+                return
+            display, spec, realm, region, auto_note = auto_result
+
+        thinking_msg = await ctx.reply(thinking(), mention_author=False)
+        loop = asyncio.get_running_loop()
+        try:
+            result_text = await loop.run_in_executor(
+                None,
+                lambda: handle_srprio(
+                    character=display,
+                    spec=spec,
+                    realm=realm,
+                    raid=raid,
+                    region=region or "us",
+                    guild_id=guild_id,
+                ),
+            )
+        except Exception as exc:
+            log.exception("srprio failed for %s", display)
+            result_text = f"SR priority failed for **{display}**: {exc}"
 
         if auto_note:
             result_text = result_text + "\n\n" + auto_note

@@ -65,6 +65,64 @@ fixture-testable (see the offline-harness item) before trusting it — weapon EP
 high-stakes. (Note: `/srprio` shares `_canon_slot`, which already does this; the
 two could share one normalizer.)
 
+## Gear Correctness Review + BiS-Equivalence Test Harness
+
+**Priority:** High
+**Effort:** High (phased — the review is Medium, the per-spec BiS data is the long pole)
+
+Two linked pieces, prompted by `/gearprio brnz` reporting "no upgrades" while Brnz
+visibly lacks BiS cloak and shoulders. The phase misconfig (guild stuck at Phase 1)
+explains *some* of it, but **cloak/shoulders are armor slots whose names already
+match** (`Back`/`Shoulder`), so if those BiS pieces are reachable in the set phase
+they should have surfaced. There is likely a second, deeper bug in the candidate
+pool or the priority filter. Don't assume the phase fix closed this.
+
+### Part A — root-cause review (why obvious upgrades are missed)
+Investigate, with Brnz (destro warlock) as the test case, why a non-BiS slot
+yields no recommendation. Concrete things to check:
+- **Dump the candidate pool** for the spec at the relevant phase
+  (`gear_optimizer` query at `:411`): are the known BiS cloak/shoulders even *in*
+  the DB? What `phase`, `source_type`, `quality`, `class_restriction`, `armor_type`
+  do they carry? The query requires `phase >= 1 AND phase <= N`, `quality IN
+  (Epic,Rare,Uncommon)`, and `source_type NOT IN (...)` — any of these can silently
+  drop a real BiS item (e.g. a badge/rep cloak mis-tagged `phase 0`, or a source
+  the filter excludes).
+- **Trace `_build_upgrade_priority`**: the `net_ep > 0` gate, the `set_bonus_cost`
+  (the Brnz output showed "breaking one piece costs 0 EP" — verify set-cost isn't
+  mis-zeroed, and conversely isn't eating real gains), and the slot-key match
+  (the weapon-slot bug above is one instance — audit *all* slots, not just weapons).
+- **Item-DB source coverage**: empty/zero `source_type` rows interact with the
+  `NOT IN` filter and with `/srprio`'s `Raid` filter — quantify how many epics have
+  no source.
+
+### Part B — BiS-equivalence harness (regression guard across all three tools)
+A test harness that pins gearprio / gearcheck / srprio against a **known, curated
+BiS per spec per phase** and flags any disagreement beyond a small EP tolerance.
+
+- **Ground truth:** `data/bis/<spec>_p<N>.json` — community-accepted BiS item ids
+  per slot, per phase (author for the dev's mains first: destro warlock, ele
+  shaman; expand later). This is the long-pole content.
+- **Tolerance:** treat items within a small Δ in equivalence points (e.g. ≤ 5 EP
+  or ≤ 2%) as *equivalent* — multiple items are often near-tied. Only deviations
+  **beyond** Δ are warnings/failures.
+- **Assertions:**
+  1. `gearcheck` on a BiS-equipped synthetic snapshot → every slot reads BiS ✓
+     (gap ≤ Δ). A "better item available" on a BiS slot is a bug.
+  2. `gearprio` on BiS gear → no upgrades (≤ Δ). Then downgrade one slot on purpose
+     → gearprio must recommend the BiS piece back for that slot. **This is the test
+     that would have caught the Brnz cloak/shoulders miss.**
+  3. `solve_bis` output vs the curated BiS list → same items per slot within Δ EP;
+     a mismatch means either bad weights or bad item data — warn with the EP delta.
+  4. `srprio <raid>` for a character missing a raid BiS item → that item appears in
+     the top-5 for its raid.
+- **Deps/offline:** needs the BiS items present in the item DB. The synthetic
+  fixture DB is too thin; either extend it with the curated BiS ids or run this
+  tier against the real DB on the host (gate with a skip when items are absent,
+  like the existing offline roster test). Wire into CI once it can run hermetically.
+
+This harness is the durable answer to "is the optimizer actually right?" — it turns
+gear correctness from eyeball spot-checks into an asserted contract.
+
 ## Raid Audit (`/audit <warcraftlogs-url>`)
 
 **Priority:** High

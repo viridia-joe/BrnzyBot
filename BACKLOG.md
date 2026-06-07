@@ -1,32 +1,59 @@
 # Backlog
 
-## Item-DB source data is empty — populate source_type (host)
+## ⭐ Populate item-DB source data (source_type / source_name) — KEYSTONE
 
-**Priority:** High
+**Priority:** Highest
 **Effort:** Medium
 
-**Root issue surfaced via /gearprio:** all 4,513 items in the DB have an empty
-`source_type`, so every source-based filter in the optimizer
-(`include_world_boss`, `include_arena`, `include_pvp`) is a silent no-op, and
-`/srprio`'s `source_type='Raid'` filter returns nothing. This let nearly
-unobtainable gear (Doomwalker's Talon of the Tempest; arena Gladiator's pieces)
-outrank obtainable raid loot in upgrade advice.
+This is the keystone gear-data fix. Multiple features are quietly degraded until
+it's done, and several shipped stopgaps exist only to paper over it.
 
-**Stopgaps already shipped** (source-data-independent, in `gear_optimizer`):
-- World-boss exclusion via curated `data/world_boss_items.json` (id denylist,
-  honored when `include_world_boss=False`).
-- Arena exclusion via name fallback ("Gladiator's") when `include_arena=False`.
+**The problem:** all 4,513 items in the shipped DB have an empty `source_type`
+(and `source_name`). Source data is *the* signal for "where does this item come
+from / can I realistically get it," so its absence silently breaks everything that
+reasons about obtainability or location:
 
-**Durable fix (needs the host):**
-- Populate `source_type`/`source_name` on the prod item DB. `enrich_item_sources.py`
-  exists but (a) was evidently never run against the shipped DB, and (b) has **no
-  World Boss classification** — add detection for the TBC world bosses
-  (Doomwalker, Doom Lord Kazzak) by the community dataset's drop/boss name, and
-  confirm Arena/PvP/Raid get tagged. Then the existing `source_type` filters and
-  `/srprio` work without the curated stopgaps.
-- Honor (battleground) gear still leaks when `include_pvp=False` (no name fallback
-  added — patterns are messier than arena's "Gladiator's"). Covered once source
-  data is populated.
+- **/gearprio & /gearcheck obtainability filters** — `include_world_boss`,
+  `include_arena`, `include_pvp` are all no-ops, so unobtainable gear (Doomwalker's
+  Talon of the Tempest, arena Gladiator's pieces, honor gear) outranks obtainable
+  raid loot. This is what produced the "weird" weapon picks.
+- **/srprio** — the entire feature filters on `source_type='Raid'` + `source_name`
+  ("Zone - Boss"); with empty source it returns **nothing** for every raid. It
+  cannot work at all until this lands.
+- **Upgrade prose** — gearprio's "source:" annotations and gearcheck's per-item
+  "where from" are blank, so advice can't say where to go get the item.
+
+**Stopgaps already shipped (delete once this is done):**
+- `data/world_boss_items.json` — curated Doomwalker/Kazzak id denylist
+  (`gear_optimizer`, honored when `include_world_boss=False`).
+- Arena name fallback ("Gladiator's") when `include_arena=False`.
+- These are brittle (hand-curated / name-matched) and exist only because there's
+  no source data.
+
+**Plan (host-side — needs network + the real DB):**
+1. **Fix `core/enrich_item_sources.py`** before running it:
+   - Add a **World Boss** classification — detect the TBC world bosses (Doomwalker,
+     Doom Lord Kazzak) by the community dataset's drop/boss name → `source_type='World Boss'`.
+     (Today it only emits Raid / Heroic Dungeon / Dungeon / Drop / Crafted / Quest /
+     Badge / Vendor / Reputation — never World Boss, so the filter could never work.)
+   - Sanity-check that **Arena** vs **Honor PvP** and **Raid** (with `Zone - Boss`
+     `source_name`) classify correctly — these drive `/srprio` and the PvP filters.
+2. **Run it against the prod/host item DB** (it pulls the nexus-devs
+   `wow-classic-items` dataset; needs network + WCL-less, just HTTP). Commit/ship the
+   enriched DB the same way the item DB is built today.
+3. **Validate** a handful of known items after enriching:
+   - Talon of the Tempest → `World Boss` (Doomwalker)
+   - any `…Gladiator's…` → `Arena`
+   - The Nexus Key → `Raid` / `Tempest Keep`
+   - a Kara drop → `Raid` with `source_name` like `Karazhan - <boss>`
+4. **Retire the stopgaps**: drop the `world_boss_items.json` denylist + the arena
+   name fallback in `gear_optimizer` once `source_type` does the job; add a honor-PvP
+   path (now possible via `source_type`, which the name fallback never covered).
+5. **Tighten tests**: with real source data, extend `tests/test_item_restrictions.py`
+   to assert via `source_type` (not the curated list), and turn on the `/srprio`
+   raid-loot tier of `tests/test_bis_equivalence.py` (currently skipped — the fixture
+   DB has no source data). Consider shipping a small **enriched** fixture slice so CI
+   can exercise source-dependent logic hermetically.
 
 ## Reaction-Based Feedback Harvesting (👍 / 👎 / ❌ on bot responses)
 

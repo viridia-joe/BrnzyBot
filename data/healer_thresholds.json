@@ -1,0 +1,45 @@
+{
+  "_comment": "Healer gear thresholds for TBC Classic (level 70), Phase 1 approximations. Throughput/regen is harder to judge from gear than tank survival, so these are guide-rails, not hard rules. base_mana = approximate naked mana pool incl. base Intellect, no gear/buffs; estimated pool = base_mana + gear_Intellect * mana_per_intellect. +Healing and MP5 are summed from equipped item stats (gear only; gems/enchants/buffs add more). Crit/haste use the WCL character-sheet rating (gem/enchant-inclusive) and are shown as the rating contribution, not total.",
+
+  "_conversions": {
+    "spell_crit_rating_per_pct": 22.08,
+    "spell_haste_rating_per_pct": 15.77,
+    "mana_per_intellect": 15
+  },
+
+  "resto_shaman": {
+    "name": "Restoration Shaman",
+    "base_mana": 3835,
+    "healing":   {"minimum": 1200, "comfortable": 1500, "well_geared": 1800},
+    "mp5":       {"minimum": 50,   "comfortable": 80,   "well_geared": 100},
+    "mana_pool": {"minimum": 8000, "comfortable": 9500, "well_geared": 11000},
+    "regen_note": "Chain Heal specialist — MP5 > Spirit (no while-casting Spirit regen talent). Mana Tide Totem covers spike pressure."
+  },
+
+  "holy_paladin": {
+    "name": "Holy Paladin",
+    "base_mana": 3553,
+    "healing":   {"minimum": 1100, "comfortable": 1400, "well_geared": 1700},
+    "mp5":       {"minimum": 25,   "comfortable": 45,   "well_geared": 65},
+    "mana_pool": {"minimum": 8500, "comfortable": 10500, "well_geared": 12500},
+    "regen_note": "Crit is king (Illumination refunds mana on crit heals) — value SpellCrit and Intellect over MP5/Spirit. Flash of Light spam means a big mana pool matters most."
+  },
+
+  "holy_priest": {
+    "name": "Holy Priest",
+    "base_mana": 3463,
+    "healing":   {"minimum": 1200, "comfortable": 1500, "well_geared": 1800},
+    "mp5":       {"minimum": 40,   "comfortable": 70,   "well_geared": 95},
+    "mana_pool": {"minimum": 8000, "comfortable": 9500, "well_geared": 11000},
+    "regen_note": "Spirit-based regen via Meditation (regen continues while casting). Spirit AND MP5 both matter; crit fuels Surge of Light/Holy Concentration."
+  },
+
+  "resto_druid": {
+    "name": "Restoration Druid",
+    "base_mana": 3496,
+    "healing":   {"minimum": 1200, "comfortable": 1500, "well_geared": 1800},
+    "mp5":       {"minimum": 25,   "comfortable": 45,   "well_geared": 65},
+    "mana_pool": {"minimum": 8000, "comfortable": 9500, "well_geared": 11000},
+    "regen_note": "HoT specialist — Spirit is very valuable (Intensity gives while-casting regen; Tree of Life aura). Spell haste speeds HoT application. MP5 matters less than for shamans."
+  }
+}

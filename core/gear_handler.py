@@ -23,6 +23,7 @@ from core.gear_reasoning import annotate
 from core.node_health import check_nodes
 from core.gear_optimizer import solve_upgrades, solve_bis, OptimizeParams
 from core.classifier import resolve_spec
+from core.healer_analysis import analyze_healer
 from db.server_config import get_guild_phase
 
 ITEM_DB_PATH = config.ITEM_DB_PATH
@@ -488,5 +489,11 @@ def handle_gear_list(
         lines.append("")
         for w in context.warnings:
             lines.append(f"⚠ {w}")
+
+    # Healer specs get a throughput/regen section (deterministic, gear-based).
+    healer_block = analyze_healer(spec, snapshot)
+    if healer_block:
+        lines.append("")
+        lines.append(healer_block)
 
     return "\n".join(lines)

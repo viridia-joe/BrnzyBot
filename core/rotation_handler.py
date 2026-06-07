@@ -81,7 +81,9 @@ def load_profile(spec: str) -> dict | None:
     path = _profile_path(_resolve_spec_key(spec))
     if not os.path.exists(path):
         return None
-    with open(path, encoding="utf-8") as f:
+    # utf-8-sig: rotation JSONs are sometimes saved with a BOM (PowerShell on the
+    # author's box) — plain utf-8 would JSONDecodeError on every load.
+    with open(path, encoding="utf-8-sig") as f:
         return json.load(f)
 
 
@@ -99,7 +101,7 @@ def load_baseline(spec: str, fight_name: str) -> dict | None:
         path = os.path.join(BASELINES_DIR, spec_key, f"{name}.json")
         if os.path.exists(path):
             try:
-                with open(path, encoding="utf-8") as f:
+                with open(path, encoding="utf-8-sig") as f:  # tolerate a BOM
                     return json.load(f)
             except Exception:
                 pass

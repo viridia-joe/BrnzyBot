@@ -373,6 +373,42 @@ def _tally_casts(casts: list[dict], abilities: list[dict]) -> dict:
     return out
 
 
+def _rotation_execution(spec: str, casts, abilities, fight_name: str = "") -> list:
+    """
+    Bridge the rotation engine into the audit's Execution section. Runs
+    rotation_handler.analyze for any spec that has a rotation profile and returns
+    a list of CheckResults (downranks → FAIL, off-rotation → WARN, baseline CPM →
+    INFO, else a PASS). Empty list when no profile or no cast data.
+    """
+    if not casts:
+        return []
+    from core import rotation_handler as RH
+    prof = RH.load_profile(spec)
+    if not prof:
+        return []
+    baseline = RH.load_baseline(spec, fight_name) if fight_name else None
+    a = RH.analyze(casts, abilities or [], prof,
+                   max_rank_ids=RH.verified_max_ranks(prof), baseline=baseline)
+
+    out = []
+    if a.downranks:
+        out.append(CheckResult("rotation_ranks", "Spell ranks", Verdict.FAIL,
+                               a.downranks[0],
+                               detail="; ".join(a.downranks[1:])))
+    if a.off_rotation:
+        out.append(CheckResult("rotation_offspec", "Off-rotation", Verdict.WARN,
+                               "; ".join(a.off_rotation)))
+    if not a.downranks and not a.off_rotation:
+        out.append(CheckResult("rotation", "Rotation", Verdict.PASS,
+                               "no downranked nukes or off-rotation spells"))
+    # Surface the baseline cast-rate comparison (if a baseline was available).
+    for adv in a.advisories:
+        if adv.startswith("**Cast-rate vs top"):
+            out.append(CheckResult("cpm", "Cast rate", Verdict.INFO,
+                                   adv.split("\n", 1)[0].replace("**", "")))
+    return out
+
+
 def audit_combatant(
     character: str,
     spec: str,
@@ -409,15 +445,21 @@ def audit_combatant(
 
     sections = [baseline, preparation]
 
-    # Execution (healers only, and only when cast data was gathered).
+    # Execution: rotation analysis (reuses the rotation engine) for any spec with
+    # a rotation profile, plus the healer end-of-fight silence check.
+    execution = Section("Execution")
+    execution.checks.extend(_rotation_execution(
+        spec, data.get("casts"), data.get("abilities"), data.get("fight_name", "")))
+
     cast_times = data.get("cast_times")
     fight_window = data.get("fight_window")
     if profile.end_silence_warn_sec and cast_times is not None and fight_window:
         end_act = check_end_activity(cast_times, fight_window, profile)
         if end_act is not None:
-            execution = Section("Execution")
             execution.add(end_act)
-            sections.append(execution)
+
+    if execution.checks:
+        sections.append(execution)
 
     report.sections = sections
     return report
@@ -561,11 +603,14 @@ def build_audit(url: str, character: str, spec: str) -> AuditReport:
     # end-of-fight silence check. Best-effort: never break the audit over it.
     try:
         from core import wcl_client
-        tally = _tally_casts(
-            wcl_client.get_casts(report_code, fight["id"], target_id),
-            wcl_client.get_abilities(report_code),
-        ).get(target_id, {"potions": 0, "cast_times": []})
+        raw_casts = wcl_client.get_casts(report_code, fight["id"], target_id)
+        abilities = wcl_client.get_abilities(report_code)
+        tally = _tally_casts(raw_casts, abilities).get(
+            target_id, {"potions": 0, "cast_times": []})
         norm["potion_count"] = tally["potions"]
+        norm["casts"] = raw_casts            # for the Execution rotation check
+        norm["abilities"] = abilities
+        norm["fight_name"] = fight.get("name", "")
         if profile.end_silence_warn_sec:
             norm["cast_times"] = tally["cast_times"]
             norm["fight_window"] = (fight.get("startTime", 0), fight.get("endTime", 0))
@@ -608,14 +653,19 @@ def build_roster_audit(url: str, resolve_spec) -> RosterAudit:
     # the whole roster, instead of N per-player queries. None = fetch failed →
     # potions show ❔ rather than a false ❌.
     cast_tally = None
+    all_casts: list = []
+    abilities: list = []
     try:
         from core import wcl_client
-        cast_tally = _tally_casts(
-            wcl_client.get_casts(report_code, fight["id"]),
-            wcl_client.get_abilities(report_code),
-        )
+        all_casts = wcl_client.get_casts(report_code, fight["id"])
+        abilities = wcl_client.get_abilities(report_code)
+        cast_tally = _tally_casts(all_casts, abilities)
     except Exception as exc:
         log.warning("roster cast/potion fetch failed: %s", exc)
+    # Group raw casts per source for the rotation Execution check.
+    casts_by_source: dict = {}
+    for c in all_casts:
+        casts_by_source.setdefault(c.get("sourceID"), []).append(c)
 
     seen: set[str] = set()
     for rec in combatants:
@@ -635,6 +685,9 @@ def build_roster_audit(url: str, resolve_spec) -> RosterAudit:
         if cast_tally is not None:
             t = cast_tally.get(norm.get("source_id"), {"potions": 0, "cast_times": []})
             norm["potion_count"] = t["potions"]
+            norm["casts"] = casts_by_source.get(norm.get("source_id"), [])
+            norm["abilities"] = abilities
+            norm["fight_name"] = fight.get("name", "")
             if profile.end_silence_warn_sec:
                 norm["cast_times"] = t["cast_times"]
                 norm["fight_window"] = (fight.get("startTime", 0), fight.get("endTime", 0))

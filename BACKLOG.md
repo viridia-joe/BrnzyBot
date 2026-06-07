@@ -45,6 +45,50 @@ Considerations:
 - If no log found for that spec, say so: "No Restoration logs found in last 20 reports for Jaina"
 - May need to map user-friendly names to internal spec names: "Holy" → could be holy_priest, holy_paladin — need class context
 
+## Soft Reserve Priority (`/srprio <character> <raid>`)
+
+**Priority:** Medium
+**Effort:** Medium
+
+A soft-reserve helper: given a character and **one specific raid instance**, list
+the **top 5 items to soft-reserve**, ranked by how much each upgrades that
+character's current gear/spec. Answers the question raiders actually ask before a
+run: "what should I SR in here tonight?"
+
+**Scope (deliberately narrow):**
+- **Instance-scoped, required.** The raid must be named and the output is limited
+  to *that instance's* loot table only — no cross-raid aggregation. `/srprio brnz kara`.
+- **Raids only.** Karazhan, Gruul's Lair, Magtheridon's Lair, SSC, Tempest Keep
+  (later: Hyjal, Black Temple, ZA, Sunwell). Never 5-mans / heroics / world bosses.
+- **Up to 5 items**, in priority order, for the character. Fewer if the instance
+  holds fewer upgrades (don't pad).
+
+**How it reuses what we have:**
+- The optimizer already scores items by EP vs the player's current gear
+  (`gear_optimizer` + `data/weights/<spec>.json`). SRPrio = run that scoring but
+  **filter the candidate pool to items whose source is the named instance**, then
+  take the 5 highest marginal-EP upgrades (one entry per item, not per slot).
+- Item→instance mapping comes from the item DB's source data
+  (`core/enrich_item_sources.py` / `fix_item_sources.py` populate boss/zone). Need
+  a clean `instance` (zone) field + a fuzzy raid-name resolver
+  ("kara"/"karazhan"/"kz" → Karazhan), mirroring `classifier.resolve_spec`.
+
+**Output (deterministic; no LLM needed):**
+```
+SR priority for Brnz (destro_warlock) — Karazhan
+ 1. Staff of Infinite Mysteries   (Nightbane)     +84 EP
+ 2. Tirisfal Wand of Ascendancy    (Curator)       +31 EP
+ ...up to 5
+```
+
+**Considerations:**
+- Marginal EP vs *current* gear (a BiS item already worn shouldn't appear).
+- Note set-bonus completions within the instance as a tiebreaker, but keep the
+  first cut to raw per-item EP gain.
+- Token-drop items (tier): score the final piece they purchase, not the token.
+- Verify item→instance source coverage against the item DB before trusting it —
+  same gear-correctness-data caution as the gems/enchants feature.
+
 ## Healer Analysis
 
 **Priority:** Medium
@@ -272,12 +316,11 @@ subsumes bossguide's variant); the four cogs delegate to it.
 inputs; a shared util would add a params shim for two ~6-line functions. Not worth
 the coupling.
 
-### 5. Five inline LiteLLM callers (MEDIUM)
-`gear_reasoning._litellm` (:85), `rotation_handler._coach` (:371),
-`bossguide_handler` (:132), `classifier` (:378), `triage` (:117) each hand-build
-the `chat/completions` POST (headers, API key, timeout, error handling). Fix: one
-`core/llm.py` `chat(model, messages, …)` client; centralizes ENABLE_LLM/key/
-timeout and stops drift. (Medium effort.)
+### 5. Five inline LiteLLM callers (MEDIUM) — ✅ DONE
+All five sites (`gear_reasoning`, `rotation_handler`, `bossguide_handler`,
+`classifier`, `triage`) now route through `core/llm.py:chat(model, messages, …)`;
+none hand-build the `chat/completions` POST anymore. ENABLE_LLM/key/timeout/error
+handling are centralized in the one client.
 
 ### 6. Scattered spec normalization (LOW) — ✅ DONE
 `classifier.resolve_spec(raw) -> key | None` is now the single source of truth
@@ -286,12 +329,17 @@ rotation_handler._resolve_spec_key route through it. Behavior-preserving (verifi
 against the old inline logic).
 
 ### 7. Dead/legacy modules (LOW — needs maintainer OK per CLAUDE.md)
-- `core/gearprio.py` — not imported anywhere live (superseded by `gear_handler`).
-- `core/compute-upgrades.py` — standalone legacy script (hyphenated, references
-  `~/.openclaw/scripts`); superseded by the optimizer.
+- ~~`core/gearprio.py`~~ ✅ **removed** — was an unimported v1 wrapper; the
+  `/gearprio` command runs through `gear_handler.handle_gear_question` →
+  `gear_optimizer.solve_upgrades` (MIP) → `gear_reasoning.annotate`.
+- ~~`core/compute-upgrades.py`~~ ✅ **removed** — hyphenated standalone legacy
+  script (old `~/.openclaw/` workflow), superseded by the optimizer.
 - `core/triage.py` — only `TriageResult` is still used (by `gear_reasoning`); the
   rest is the old local-Ollama path. Extract `TriageResult` to `intent.py`, drop
   the rest.
+- **Sibling left in place:** `scripts/compute-upgrades.py` + `workspace-templates/`
+  are the same legacy `~/.openclaw` workflow (CLAUDE.md marks them unused). Nuke
+  together in a future housekeeping pass if desired.
 
 ### 8. Resolved this session
 - Hand-typed `META_GEM_IDS` had wrong ids/names → replaced by authoritative

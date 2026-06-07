@@ -189,6 +189,7 @@ class GearCog(commands.Cog, name="Gear"):
         await interaction.response.defer(thinking=True)
         log_usage(guild_id, str(interaction.user.id), "gearprio")
 
+        _spec_explicit = spec is not None
         loop = asyncio.get_running_loop()
         try:
             result_text = await loop.run_in_executor(
@@ -202,6 +203,7 @@ class GearCog(commands.Cog, name="Gear"):
                     guild_id=guild_id,
                     phase_override=phase,
                     include_arena=arena,
+                    spec_explicit=_spec_explicit,
                 ),
             )
         except Exception as exc:
@@ -296,6 +298,7 @@ class GearCog(commands.Cog, name="Gear"):
         await interaction.response.defer(thinking=True)
         log_usage(guild_id, str(interaction.user.id), "gearcheck")
 
+        _spec_explicit = spec is not None
         loop = asyncio.get_running_loop()
         try:
             result_text = await loop.run_in_executor(
@@ -309,6 +312,7 @@ class GearCog(commands.Cog, name="Gear"):
                     guild_id=guild_id,
                     phase_override=phase,
                     include_arena=arena,
+                    spec_explicit=_spec_explicit,
                 ),
             )
         except Exception as exc:

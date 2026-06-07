@@ -17,7 +17,7 @@ from dataclasses import dataclass, field
 log = logging.getLogger(__name__)
 
 import config
-from core.gear_cache import get_gear
+from core.gear_cache import get_gear, find_gear_for_spec
 from core.gear_context import build_context
 from core.gear_reasoning import annotate
 from core.node_health import check_nodes
@@ -218,6 +218,7 @@ def handle_gear_question(
     guild_id: str = "global",
     phase_override: int | None = None,
     include_arena: bool = True,
+    spec_explicit: bool = False,
 ) -> str:
     """
     Upgrade priority pipeline:
@@ -232,8 +233,19 @@ def handle_gear_question(
     spec = resolve_spec(spec) or spec.strip().lower()
 
     item_db = sqlite3.connect(ITEM_DB_PATH) if os.path.exists(ITEM_DB_PATH) else None
+    spec_search_note: str | None = None
     try:
-        snapshot = get_gear(character, realm, spec, region=region, item_db_conn=item_db)
+        if spec_explicit:
+            snapshot = find_gear_for_spec(character, realm, spec, region=region,
+                                          item_db_conn=item_db)
+            if snapshot is None:
+                # Fall back to most-recent log with a note
+                spec_search_note = (
+                    f"_No {spec} logs found in last 10 reports — showing most recent log instead._"
+                )
+                snapshot = get_gear(character, realm, spec, region=region, item_db_conn=item_db)
+        else:
+            snapshot = get_gear(character, realm, spec, region=region, item_db_conn=item_db)
     finally:
         if item_db:
             item_db.close()
@@ -257,7 +269,10 @@ def handle_gear_question(
     )
 
     node_status = check_nodes(post_alerts=False) if config.ENABLE_LLM else None
-    return annotate(skeleton, context, node_status=node_status, phase=phase, guild_id=guild_id)
+    result = annotate(skeleton, context, node_status=node_status, phase=phase, guild_id=guild_id)
+    if spec_search_note:
+        result = spec_search_note + "\n\n" + result
+    return result
 
 
 # ---------------------------------------------------------------------------
@@ -287,6 +302,7 @@ def handle_gear_list(
     guild_id: str = "global",
     phase_override: int | None = None,
     include_arena: bool = True,
+    spec_explicit: bool = False,
 ) -> str:
     """
     Return a deterministic head-to-toe gear list comparing equipped gear vs BIS.
@@ -298,8 +314,18 @@ def handle_gear_list(
     spec = resolve_spec(spec) or spec.strip().lower()
 
     item_db = sqlite3.connect(ITEM_DB_PATH) if os.path.exists(ITEM_DB_PATH) else None
+    spec_search_note: str | None = None
     try:
-        snapshot = get_gear(character, realm, spec, region=region, item_db_conn=item_db)
+        if spec_explicit:
+            snapshot = find_gear_for_spec(character, realm, spec, region=region,
+                                          item_db_conn=item_db)
+            if snapshot is None:
+                spec_search_note = (
+                    f"_No {spec} logs found in last 10 reports — showing most recent log instead._"
+                )
+                snapshot = get_gear(character, realm, spec, region=region, item_db_conn=item_db)
+        else:
+            snapshot = get_gear(character, realm, spec, region=region, item_db_conn=item_db)
     finally:
         if item_db:
             item_db.close()
@@ -519,4 +545,7 @@ def handle_gear_list(
         lines.append("")
         lines.append(healer_block)
 
-    return "\n".join(lines)
+    result = "\n".join(lines)
+    if spec_search_note:
+        result = spec_search_note + "\n\n" + result
+    return result

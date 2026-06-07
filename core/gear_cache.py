@@ -692,6 +692,134 @@ def fetch_character_spec(
 
 
 # ---------------------------------------------------------------------------
+# Spec-search: walk recent reports to find one where the character played
+# the requested spec (used when the user explicitly overrides spec).
+# ---------------------------------------------------------------------------
+
+def find_gear_for_spec(
+    name: str,
+    realm: str,
+    spec_key: str,
+    region: str = "us",
+    max_reports: int = 10,
+    item_db_conn=None,
+) -> GearSnapshot | None:
+    """
+    Walk the character's recent WCL reports (up to *max_reports*) looking for
+    one where they played *spec_key*.  Returns the first matching GearSnapshot,
+    or None if none of the reports match.
+
+    Used when a user explicitly passes a spec to /gearcheck or /gearprio and
+    their most recent log doesn't match that spec.
+    """
+    from core import wcl_client
+
+    if not os.environ.get("WCL_FIXTURE_DIR") and not (
+            os.environ.get("WCL_CLIENT_ID") and os.environ.get("WCL_CLIENT_SECRET")):
+        return None
+
+    try:
+        reports = wcl_client.get_character_recent_reports(name, realm, region, limit=max_reports)
+    except Exception as e:
+        log.warning("find_gear_for_spec: get_character_recent_reports failed: %s", e)
+        return None
+
+    if not reports:
+        return None
+
+    close_item_db = False
+    if item_db_conn is None and os.path.exists(ITEM_DB_PATH):
+        item_db_conn = sqlite3.connect(ITEM_DB_PATH)
+        close_item_db = True
+
+    try:
+        for report in reports:
+            code  = report.get("code")
+            rtime = report.get("startTime", 0)
+            if not code:
+                continue
+            try:
+                actors = wcl_client.get_master_actors(code)
+                actor_id = next(
+                    (a["id"] for a in actors if (a.get("name") or "").lower() == name.lower()),
+                    None,
+                )
+                if not actor_id:
+                    continue
+
+                events = wcl_client.get_combatant_info(code, source_id=actor_id)
+                if not events:
+                    continue
+
+                event   = events[-1]
+                spec_id = event.get("specID")
+                found_spec = WCL_SPEC_MAP.get(spec_id)
+
+                if found_spec != spec_key:
+                    log.debug(
+                        "find_gear_for_spec: %s report %s specID=%s → %s (want %s), skipping",
+                        name, code, spec_id, found_spec, spec_key,
+                    )
+                    continue
+
+                # Spec matches — build and return a GearSnapshot from this report
+                log.info(
+                    "find_gear_for_spec: found %s playing %s in report %s",
+                    name, spec_key, code,
+                )
+                gear = []
+                if item_db_conn:
+                    c = item_db_conn.cursor()
+                    for i, gear_item in enumerate(event.get("gear", [])):
+                        item_id = gear_item.get("id", 0)
+                        slot    = WCL_SLOT_MAP.get(i)
+                        if not slot or item_id == 0:
+                            continue
+                        c.execute("SELECT name, stats, set_name, slot FROM items WHERE item_id = ?", (item_id,))
+                        row = c.fetchone()
+                        if row is None:
+                            looked_up = _insert_unknown_item(item_id, item_db_conn)
+                            if looked_up:
+                                row = (looked_up["name"], json.dumps(looked_up["stats"]), "", looked_up["slot"])
+                        item_name = row[0] if row else f"Unknown ({item_id})"
+                        stats     = json.loads(row[1]) if row and row[1] else {}
+                        set_name  = row[2] if row else ""
+                        if slot == "Wand" and row and row[3] in ("Ranged", "Totem"):
+                            slot = row[3]
+                        enchant = gear_item.get("permanentEnchant", 0) or 0
+                        gems    = [g["id"] for g in gear_item.get("gems", [])
+                                   if isinstance(g, dict) and g.get("id", 0)]
+                        gear.append({
+                            "slot": slot, "item_id": item_id, "name": item_name,
+                            "stats": stats, "set_name": set_name or "",
+                            "enchant": enchant, "gems": gems,
+                        })
+
+                combat_stats = {k: event.get(k, 0) for k in
+                                ["hitSpell", "hitMelee", "hitRanged", "critSpell", "hasteSpell"]}
+                combat_stats["race"] = event.get("race", 0)
+                faction = event.get("faction", -1)
+
+                snapshot = GearSnapshot(
+                    character=name, realm=realm, spec=spec_key, region=region,
+                    report_code=code, report_time=rtime,
+                    fetched_at=int(time.time()), gear=gear,
+                    combat_stats=combat_stats, faction=faction, from_cache=False,
+                )
+                cache_snapshot(snapshot)
+                return snapshot
+
+            except Exception as e:
+                log.debug("find_gear_for_spec: error processing report %s: %s", code, e)
+                continue
+    finally:
+        if close_item_db and item_db_conn:
+            item_db_conn.close()
+
+    return None
+
+
+# ---------------------------------------------------------------------------
 # Public entry point
 # ---------------------------------------------------------------------------
 def get_gear(name: str, realm: str, spec: str, region: str = "us",

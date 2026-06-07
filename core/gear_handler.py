@@ -545,6 +545,73 @@ def handle_gear_list(
         lines.append("")
         lines.append(healer_block)
 
+    # Gems & Enchants summary — uses the audit profiles for per-spec requirements.
+    try:
+        from core.audit.profiles import get_profile
+        from core.audit.report import check_enchants, check_gems, check_meta
+        from core.audit import gemdata
+        from core.audit.checks import Verdict
+
+        profile = get_profile(spec)
+        if profile is not None and snapshot.gear:
+            norm_gear, norm_gems = [], []
+            meta_id, meta_socket = None, False
+            for g in snapshot.gear:
+                enchant_id = g.get("enchant") or None
+                raw_gems = g.get("gems") or []
+                slot_gems = []
+                for gid in raw_gems:
+                    if not gid:
+                        continue
+                    entry = {"quality": gemdata.gem_quality(gid), "color": gemdata.gem_color(gid), "item_id": gid, "item_level": None}
+                    slot_gems.append(entry)
+                    norm_gems.append(entry)
+                    if gemdata.is_meta(gid):
+                        meta_id = gid
+                norm_gear.append({"slot": g.get("slot", ""), "item_id": g.get("item_id"), "enchant_id": enchant_id, "enchant_name": "", "gems": slot_gems})
+
+            empty_sockets = None
+            if os.path.exists(ITEM_DB_PATH):
+                try:
+                    import json as _json
+                    idb = sqlite3.connect(ITEM_DB_PATH)
+                    empty = 0
+                    try:
+                        cur = idb.cursor()
+                        for g in norm_gear:
+                            iid = g.get("item_id")
+                            if not iid:
+                                continue
+                            row = cur.execute("SELECT sockets FROM items WHERE item_id = ?", (iid,)).fetchone()
+                            if not row or not row[0]:
+                                continue
+                            try:
+                                colors = _json.loads(row[0])
+                            except (ValueError, TypeError):
+                                continue
+                            if any(str(c).lower() == "meta" for c in colors):
+                                meta_socket = True
+                            nonmeta = sum(1 for c in colors if str(c).lower() != "meta")
+                            socketed = sum(1 for gm in g.get("gems", []) if not gemdata.is_meta(gm.get("item_id") or 0))
+                            empty += max(0, nonmeta - socketed)
+                    finally:
+                        idb.close()
+                    empty_sockets = empty
+                except Exception as e:
+                    log.debug("socket count failed: %s", e)
+
+            _ICON = {Verdict.PASS: "✅", Verdict.INFO: "ℹ️", Verdict.WARN: "⚠️", Verdict.FAIL: "❌", Verdict.UNKNOWN: "❔"}
+            enc_result  = check_enchants(norm_gear, profile)
+            gem_result  = check_gems(norm_gems, profile, empty_sockets)
+            meta_result = check_meta({"meta_socket": meta_socket, "meta_id": meta_id, "gems": norm_gems}, profile)
+            checks = [enc_result, gem_result] + ([meta_result] if meta_result else [])
+            lines.append("")
+            lines.append("**Gems & Enchants**")
+            for r in checks:
+                lines.append(f"{_ICON.get(r.verdict, '❔')} {r.label}: {r.summary}")
+    except Exception as e:
+        log.debug("gems/enchants check skipped: %s", e)
+
     result = "\n".join(lines)
     if spec_search_note:
         result = spec_search_note + "\n\n" + result

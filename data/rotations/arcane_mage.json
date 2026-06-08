@@ -23,7 +23,7 @@
     "off_rotation":  {
                          "Fireball":  {
                                           "min_casts":  5,
-                                          "note":  "an arcane build casting Fireball heavily â€” check spec/macros"
+                                          "note":  "an arcane build casting Fireball heavily "” check spec/macros"
                                       }
                      },
     "advisory":  "Arcane Blast gains damage and cost per stack; the standard rotation manages stacks rather than spamming blindly, dropping to Arcane Missiles or Frostbolt to conserve mana. Frostbolt as an occasional filler is normal, not an anomaly."

@@ -24,7 +24,7 @@
     "off_rotation":  {
                          "Incinerate":  {
                                             "min_casts":  3,
-                                            "note":  "Incinerate is for the fire/Conflagrate build â€” a Shadow Bolt destro lock should be casting Shadow Bolt"
+                                            "note":  "Incinerate is for the fire/Conflagrate build "” a Shadow Bolt destro lock should be casting Shadow Bolt"
                                         },
                          "Searing Pain":  {
                                               "min_casts":  3,

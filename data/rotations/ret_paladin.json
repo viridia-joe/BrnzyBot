@@ -22,19 +22,19 @@
     "off_rotation":  {
                          "Holy Light":  {
                                             "min_casts":  5,
-                                            "note":  "large heal â€” a ret paladin healing heavily in a DPS parse indicates an emergency or wrong role assignment"
+                                            "note":  "large heal "” a ret paladin healing heavily in a DPS parse indicates an emergency or wrong role assignment"
                                         },
                          "Flash of Light":  {
                                                 "min_casts":  8,
-                                                "note":  "fast heal â€” some spot-healing is normal but heavy Flash of Light use is a DPS loss"
+                                                "note":  "fast heal "” some spot-healing is normal but heavy Flash of Light use is a DPS loss"
                                             },
                          "Holy Shield":  {
                                              "min_casts":  3,
-                                             "note":  "Protection ability requiring a shield â€” wrong spec/gear for Ret"
+                                             "note":  "Protection ability requiring a shield "” wrong spec/gear for Ret"
                                          },
                          "Shield of Righteousness":  {
                                                          "min_casts":  3,
-                                                         "note":  "Protection ability â€” wrong spec for Ret"
+                                                         "note":  "Protection ability "” wrong spec for Ret"
                                                      }
                      },
     "breakpoint":  {
@@ -42,7 +42,7 @@
                                       "Crusader Strike",
                                       "Judgement"
                                   ],
-                       "note":  "The TBC Ret rotation is tight: Crusader Strike (6s cooldown) â†’ Judge â†’ reapply Seal â†’ fill with auto attacks. Judgement should appear roughly every 8-10 seconds. Consecration is mana-expensive but contributes meaningful DPS â€” high mana rogues or those with good gear use it consistently."
+                       "note":  "The TBC Ret rotation is tight: Crusader Strike (6s cooldown) â†’ Judge â†’ reapply Seal â†’ fill with auto attacks. Judgement should appear roughly every 8-10 seconds. Consecration is mana-expensive but contributes meaningful DPS "” high mana rogues or those with good gear use it consistently."
                    },
-    "advisory":  "IMPORTANT: Divine Storm does NOT exist in TBC Classic â€” it was added in Wrath 3.0. Any Ret parse in TBC will not show Divine Storm. Sanctity Aura (+10% holy damage) should be active â€” confirm the paladin is using Sanctity and not Devotion or Retribution Aura unless the raid leader assigned otherwise. Avenging Wrath (\u0027wings\u0027, +20% damage for 20s, 3-minute cooldown) should appear regularly. Exorcism is only usable against Undead and Demons â€” it will not appear on non-undead bosses."
+    "advisory":  "IMPORTANT: Divine Storm does NOT exist in TBC Classic "” it was added in Wrath 3.0. Any Ret parse in TBC will not show Divine Storm. Sanctity Aura (+10% holy damage) should be active "” confirm the paladin is using Sanctity and not Devotion or Retribution Aura unless the raid leader assigned otherwise. Avenging Wrath (\u0027wings\u0027, +20% damage for 20s, 3-minute cooldown) should appear regularly. Exorcism is only usable against Undead and Demons "” it will not appear on non-undead bosses."
 }

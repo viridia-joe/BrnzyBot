@@ -21,11 +21,11 @@
     "off_rotation":  {
                          "Sinister Strike":  {
                                                  "min_casts":  20,
-                                                 "note":  "Combat combo builder â€” a Subtlety build should use Hemorrhage as its primary combo point generator"
+                                                 "note":  "Combat combo builder "” a Subtlety build should use Hemorrhage as its primary combo point generator"
                                              },
                          "Mutilate":  {
                                           "min_casts":  5,
-                                          "note":  "Assassination combo builder â€” wrong spec"
+                                          "note":  "Assassination combo builder "” wrong spec"
                                       }
                      },
     "breakpoint":  {
@@ -33,7 +33,7 @@
                                       "Hemorrhage",
                                       "Eviscerate"
                                   ],
-                       "note":  "Hemorrhage applies a stacking physical damage taken debuff â€” the main reason to bring Subtlety to a raid. If no other rogues or warriors are maintaining this debuff, it provides real value. In a full melee group it may be redundant."
+                       "note":  "Hemorrhage applies a stacking physical damage taken debuff "” the main reason to bring Subtlety to a raid. If no other rogues or warriors are maintaining this debuff, it provides real value. In a full melee group it may be redundant."
                    },
-    "advisory":  "Subtlety is rarely brought to SSC/TK raids for DPS â€” it underperforms Combat and Assassination on sustained single-target. Its primary raid value is the Hemorrhage debuff (+3 stacks of increased physical damage taken) and utility. If you see a Subtlety rogue in the log, confirm the Hemorrhage debuff is being maintained and the spec choice is intentional."
+    "advisory":  "Subtlety is rarely brought to SSC/TK raids for DPS "” it underperforms Combat and Assassination on sustained single-target. Its primary raid value is the Hemorrhage debuff (+3 stacks of increased physical damage taken) and utility. If you see a Subtlety rogue in the log, confirm the Hemorrhage debuff is being maintained and the spec choice is intentional."
 }

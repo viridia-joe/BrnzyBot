@@ -23,11 +23,11 @@
     "off_rotation":  {
                          "Chain Lightning":  {
                                                  "min_casts":  5,
-                                                 "note":  "AoE spell â€” heavy single-target use is a significant DPS loss vs melee + shocks"
+                                                 "note":  "AoE spell "” heavy single-target use is a significant DPS loss vs melee + shocks"
                                              },
                          "Chain Heal":  {
                                             "min_casts":  3,
-                                            "note":  "healing during a DPS parse â€” indicates emergency or wrong role"
+                                            "note":  "healing during a DPS parse "” indicates emergency or wrong role"
                                         },
                          "Healing Wave":  {
                                               "min_casts":  3,
@@ -35,7 +35,7 @@
                                           },
                          "Lightning Bolt":  {
                                                 "min_casts":  5,
-                                                "note":  "caster spell â€” Enhancement DPS comes from melee, not spellcasting; heavy LB use means out of melee range or wrong spec"
+                                                "note":  "caster spell "” Enhancement DPS comes from melee, not spellcasting; heavy LB use means out of melee range or wrong spec"
                                             }
                      },
     "breakpoint":  {
@@ -43,7 +43,7 @@
                                       "Stormstrike",
                                       "Earth Shock"
                                   ],
-                       "note":  "Stormstrike is the signature Enhancement ability â€” it should appear every 8 seconds. Earth Shock should weave between melee swings on a consistent timer. The bulk of Enhancement DPS is from white hits (melee auto attacks) empowered by Windfury Weapon procs, which don\u0027t show as casts in the log â€” a low spell cast count is normal and correct."
+                       "note":  "Stormstrike is the signature Enhancement ability "” it should appear every 8 seconds. Earth Shock should weave between melee swings on a consistent timer. The bulk of Enhancement DPS is from white hits (melee auto attacks) empowered by Windfury Weapon procs, which don\u0027t show as casts in the log "” a low spell cast count is normal and correct."
                    },
-    "advisory":  "IMPORTANT: Lava Lash does NOT exist in TBC Classic â€” it was added in Wrath. Windfury Weapon (main hand) is the core DPS mechanic â€” it must be on the MH weapon. Expose Weakness procs on hits and reduces the target\u0027s armor, providing significant raid DPS contribution that doesn\u0027t appear in the hunter\u0027s personal damage. Bloodlust/Heroism is the Enhancement shaman\u0027s biggest raid cooldown. Shamanistic Rage provides both a DPS burst and mana restoration â€” use it on cooldown."
+    "advisory":  "IMPORTANT: Lava Lash does NOT exist in TBC Classic "” it was added in Wrath. Windfury Weapon (main hand) is the core DPS mechanic "” it must be on the MH weapon. Expose Weakness procs on hits and reduces the target\u0027s armor, providing significant raid DPS contribution that doesn\u0027t appear in the hunter\u0027s personal damage. Bloodlust/Heroism is the Enhancement shaman\u0027s biggest raid cooldown. Shamanistic Rage provides both a DPS burst and mana restoration "” use it on cooldown."
 }

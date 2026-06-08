@@ -30,16 +30,16 @@
     "off_rotation":  {
                          "Searing Pain":  {
                                               "min_casts":  3,
-                                              "note":  "a fire filler â€” Affliction should fill with Shadow Bolt, not Searing Pain"
+                                              "note":  "a fire filler "” Affliction should fill with Shadow Bolt, not Searing Pain"
                                           },
                          "Rain of Fire":  {
                                               "min_casts":  3,
-                                              "note":  "AoE filler used on single-target â€” usually a misclick or wrong build"
+                                              "note":  "AoE filler used on single-target "” usually a misclick or wrong build"
                                           },
                          "Hellfire":  {
                                           "min_casts":  2,
                                           "note":  "self-damaging AoE on a single-target parse"
                                       }
                      },
-    "advisory":  "Affliction\u0027s damage is in keeping every DoT at full uptime â€” Shadow Bolt is only the gap-filler between refreshes."
+    "advisory":  "Affliction\u0027s damage is in keeping every DoT at full uptime "” Shadow Bolt is only the gap-filler between refreshes."
 }

@@ -21,11 +21,11 @@
     "off_rotation":  {
                          "Sinister Strike":  {
                                                  "min_casts":  10,
-                                                 "note":  "Combat combo builder â€” an Assassination/Mutilate build should be using Mutilate, not Sinister Strike"
+                                                 "note":  "Combat combo builder "” an Assassination/Mutilate build should be using Mutilate, not Sinister Strike"
                                              },
                          "Hemorrhage":  {
                                             "min_casts":  10,
-                                            "note":  "Subtlety combo builder â€” wrong spec"
+                                            "note":  "Subtlety combo builder "” wrong spec"
                                         }
                      },
     "breakpoint":  {
@@ -35,5 +35,5 @@
                                   ],
                        "note":  "Mutilate generates 2 combo points per cast, making it a faster combo builder than Sinister Strike when positioned behind the target. Deadly Poison must be applied to both weapons for Envenom to be effective. A parse with no Envenom casts may indicate wrong weapon enchants."
                    },
-    "advisory":  "Mutilate requires being behind the target â€” positioning on bosses is critical. Deadly Poison stacks fuel Envenom (the Assassination finisher). Cold Blood (guarantees a critical strike on a 3-minute cooldown) should be paired with Envenom for maximum burst. Unlike Combat, Assassination performs poorly when the hunter cannot maintain behind positioning â€” flag this as a potential log note."
+    "advisory":  "Mutilate requires being behind the target "” positioning on bosses is critical. Deadly Poison stacks fuel Envenom (the Assassination finisher). Cold Blood (guarantees a critical strike on a 3-minute cooldown) should be paired with Envenom for maximum burst. Unlike Combat, Assassination performs poorly when the hunter cannot maintain behind positioning "” flag this as a potential log note."
 }

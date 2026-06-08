@@ -26,23 +26,23 @@
     "off_rotation":  {
                          "Aspect of the Monkey":  {
                                                       "min_casts":  5,
-                                                      "note":  "should be in Aspect of the Hawk for ranged DPS â€” Monkey is melee avoidance only"
+                                                      "note":  "should be in Aspect of the Hawk for ranged DPS "” Monkey is melee avoidance only"
                                                   },
                          "Aspect of the Viper":  {
                                                      "min_casts":  15,
-                                                     "note":  "sustained Viper use means running OOM â€” check consumables and shot frequency"
+                                                     "note":  "sustained Viper use means running OOM "” check consumables and shot frequency"
                                                  },
                          "Wing Clip":  {
                                            "min_casts":  5,
-                                           "note":  "melee slow on a ranged DPS parse â€” usually a wrong keybind"
+                                           "note":  "melee slow on a ranged DPS parse "” usually a wrong keybind"
                                        },
                          "Volley":  {
                                         "min_casts":  5,
-                                        "note":  "AoE channel used on a single-target encounter â€” likely misfired"
+                                        "note":  "AoE channel used on a single-target encounter "” likely misfired"
                                     },
                          "Raptor Strike":  {
                                                "min_casts":  3,
-                                               "note":  "melee attack on a ranged parse â€” hunter likely got in melee range"
+                                               "note":  "melee attack on a ranged parse "” hunter likely got in melee range"
                                            }
                      },
     "breakpoint":  {
@@ -50,7 +50,7 @@
                                       "Aimed Shot",
                                       "Steady Shot"
                                   ],
-                       "note":  "Aimed Shot has a 2.5s cast time â€” weaving it cleanly without clipping auto shots is the core MM skill. Steady Shot fills between Aimed Shot casts. Unlike BM, MM damage is almost entirely from the hunter (not the pet), so cast consistency matters more."
+                       "note":  "Aimed Shot has a 2.5s cast time "” weaving it cleanly without clipping auto shots is the core MM skill. Steady Shot fills between Aimed Shot casts. Unlike BM, MM damage is almost entirely from the hunter (not the pet), so cast consistency matters more."
                    },
-    "advisory":  "Trueshot Aura (+100 ranged AP to all party/raid members) is MM\u0027s primary raid contribution alongside personal damage. Aimed Shot should appear on cooldown â€” a parse with very few Aimed Shots suggests the keybind is wrong or the cooldown is being missed. Note: Chimera Shot does NOT exist in TBC Classic â€” it was added in Wrath. Rapid Fire is a 5-minute cooldown and should appear at least twice in a full boss fight."
+    "advisory":  "Trueshot Aura (+100 ranged AP to all party/raid members) is MM\u0027s primary raid contribution alongside personal damage. Aimed Shot should appear on cooldown "” a parse with very few Aimed Shots suggests the keybind is wrong or the cooldown is being missed. Note: Chimera Shot does NOT exist in TBC Classic "” it was added in Wrath. Rapid Fire is a 5-minute cooldown and should appear at least twice in a full boss fight."
 }

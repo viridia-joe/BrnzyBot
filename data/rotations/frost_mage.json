@@ -21,8 +21,8 @@
     "off_rotation":  {
                          "Fireball":  {
                                           "min_casts":  5,
-                                          "note":  "a frost mage casting Fireball heavily â€” check spec/macros"
+                                          "note":  "a frost mage casting Fireball heavily "” check spec/macros"
                                       }
                      },
-    "advisory":  "Frostbolt should be the overwhelming majority of casts. Ice Lance is a low-damage instant â€” only valuable while moving or with Fingers of Frost procs."
+    "advisory":  "Frostbolt should be the overwhelming majority of casts. Ice Lance is a low-damage instant "” only valuable while moving or with Fingers of Frost procs."
 }

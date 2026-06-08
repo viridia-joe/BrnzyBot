@@ -24,8 +24,8 @@
     "off_rotation":  {
                          "Frostbolt":  {
                                            "min_casts":  5,
-                                           "note":  "a fire mage casting Frostbolt â€” check spec/macros"
+                                           "note":  "a fire mage casting Frostbolt "” check spec/macros"
                                        }
                      },
-    "advisory":  "Scorch is only for maintaining the 5-stack Improved Scorch debuff â€” beyond keeping it up, every Scorch should be a Fireball. Heavy Scorch counts can mean over-scorching."
+    "advisory":  "Scorch is only for maintaining the 5-stack Improved Scorch debuff "” beyond keeping it up, every Scorch should be a Fireball. Heavy Scorch counts can mean over-scorching."
 }

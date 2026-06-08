@@ -29,6 +29,7 @@ def _content_files():
     ]
     files += glob.glob(os.path.join(data, "strategy", "*.json"))
     files += glob.glob(os.path.join(data, "diagrams", "*.json"))
+    files += glob.glob(os.path.join(data, "rotations", "*.json"))
     return [f for f in files if os.path.exists(f)]
 
 

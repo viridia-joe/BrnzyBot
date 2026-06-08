@@ -5,8 +5,21 @@
   "role": "caster_dps",
   "source": "Icy Veins / Wowhead TBC guides + WCL top parses",
   "summary": "Keep your DoTs rolling (Corruption, Curse of Agony, Unstable Affliction, Siphon Life) and fill with Shadow Bolt. Maintain Curse of the Elements if you're the assigned curse.",
-  "core_spells": ["Shadow Bolt", "Corruption", "Curse of Agony", "Unstable Affliction", "Siphon Life", "Curse of the Elements"],
-  "downrank_watch": ["Shadow Bolt", "Corruption", "Curse of Agony", "Unstable Affliction", "Siphon Life"],
+  "core_spells": [
+    "Shadow Bolt",
+    "Corruption",
+    "Curse of Agony",
+    "Unstable Affliction",
+    "Siphon Life",
+    "Curse of the Elements"
+  ],
+  "downrank_watch": [
+    "Shadow Bolt",
+    "Corruption",
+    "Curse of Agony",
+    "Unstable Affliction",
+    "Siphon Life"
+  ],
   "ranks_verified": true,
   "max_rank_ids": {
     "Shadow Bolt": 25307,
@@ -16,10 +29,19 @@
     "Siphon Life": 30911
   },
   "off_rotation": {
-    "Searing Pain": {"min_casts": 3, "note": "a fire filler — Affliction should fill with Shadow Bolt, not Searing Pain"},
-    "Rain of Fire": {"min_casts": 3, "note": "AoE filler used on single-target — usually a misclick or wrong build"},
-    "Hellfire":     {"min_casts": 2, "note": "self-damaging AoE on a single-target parse"}
+    "Searing Pain": {
+      "min_casts": 3,
+      "note": "a fire filler  -  Affliction should fill with Shadow Bolt, not Searing Pain"
+    },
+    "Rain of Fire": {
+      "min_casts": 3,
+      "note": "AoE filler used on single-target  -  usually a misclick or wrong build"
+    },
+    "Hellfire": {
+      "min_casts": 2,
+      "note": "self-damaging AoE on a single-target parse"
+    }
   },
-  "advisory": "Affliction's damage is in keeping every DoT at full uptime — Shadow Bolt is only the gap-filler between refreshes.",
+  "advisory": "Affliction's damage is in keeping every DoT at full uptime  -  Shadow Bolt is only the gap-filler between refreshes.",
   "notes_verified": false
 }

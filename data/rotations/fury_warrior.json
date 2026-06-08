@@ -5,24 +5,40 @@
   "role": "melee_dps",
   "source": "Icy Veins / Wowhead TBC guides + WCL top Fury parses",
   "summary": "Bloodthirst on cooldown, Whirlwind on cooldown, Heroic Strike as the rage dump (off-GCD). Execute spam below 20%. Maintain Rampage (AP buff on crits). Death Wish on cooldown.",
-
-  "core_spells": ["Bloodthirst", "Whirlwind", "Heroic Strike", "Execute", "Death Wish", "Berserker Rage"],
-
-  "downrank_watch": ["Heroic Strike", "Execute"],
+  "core_spells": [
+    "Bloodthirst",
+    "Whirlwind",
+    "Heroic Strike",
+    "Execute",
+    "Death Wish",
+    "Berserker Rage"
+  ],
+  "downrank_watch": [
+    "Heroic Strike",
+    "Execute"
+  ],
   "ranks_verified": false,
-
   "off_rotation": {
-    "Mortal Strike": {"min_casts": 5,  "note": "Arms ability — a Fury warrior should not be casting Mortal Strike; check spec"},
-    "Shield Bash":   {"min_casts": 3,  "note": "interrupt that requires a shield — Fury warriors use two weapons; this suggests a wrong stance or keybind"},
-    "Shield Block":  {"min_casts": 3,  "note": "defensive shield cooldown — wrong spec for Fury DPS"}
+    "Mortal Strike": {
+      "min_casts": 5,
+      "note": "Arms ability  -  a Fury warrior should not be casting Mortal Strike; check spec"
+    },
+    "Shield Bash": {
+      "min_casts": 3,
+      "note": "interrupt that requires a shield  -  Fury warriors use two weapons; this suggests a wrong stance or keybind"
+    },
+    "Shield Block": {
+      "min_casts": 3,
+      "note": "defensive shield cooldown  -  wrong spec for Fury DPS"
+    }
   },
-
   "breakpoint": {
-    "spells": ["Bloodthirst", "Whirlwind"],
-    "note": "Bloodthirst and Whirlwind should both appear on their respective cooldowns. Heroic Strike is the rage dump — it replaces (not delays) the next auto attack when queued, so high Heroic Strike counts with good timing indicate good rage management. Rampage (5-stack AP buff from crits) should maintain near-100% uptime once ramped up."
+    "spells": [
+      "Bloodthirst",
+      "Whirlwind"
+    ],
+    "note": "Bloodthirst and Whirlwind should both appear on their respective cooldowns. Heroic Strike is the rage dump  -  it replaces (not delays) the next auto attack when queued, so high Heroic Strike counts with good timing indicate good rage management. Rampage (5-stack AP buff from crits) should maintain near-100% uptime once ramped up."
   },
-
-  "advisory": "Fury is the dominant TBC warrior DPS spec. Dual-wield with fast off-hand maximizes white hit and Whirlwind damage. Death Wish (+20% damage, ~3-minute cooldown) should appear regularly. Execute replaces the normal rotation below 20% — a surge in Execute casts at the end of a fight is expected and correct. Berserker Stance vs Battle Stance swap may appear depending on rage and encounter.",
-
+  "advisory": "Fury is the dominant TBC warrior DPS spec. Dual-wield with fast off-hand maximizes white hit and Whirlwind damage. Death Wish (+20% damage, ~3-minute cooldown) should appear regularly. Execute replaces the normal rotation below 20%  -  a surge in Execute casts at the end of a fight is expected and correct. Berserker Stance vs Battle Stance swap may appear depending on rage and encounter.",
   "notes_verified": false
 }

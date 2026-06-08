@@ -5,8 +5,17 @@
   "role": "caster_dps",
   "source": "Icy Veins / Wowhead TBC guides + WCL top parses",
   "summary": "Shadow Bolt spam with Immolate and Curse of Agony kept up. Maintain Curse of the Elements if assigned.",
-  "core_spells": ["Shadow Bolt", "Immolate", "Curse of Agony", "Curse of the Elements"],
-  "downrank_watch": ["Shadow Bolt", "Immolate", "Curse of Agony"],
+  "core_spells": [
+    "Shadow Bolt",
+    "Immolate",
+    "Curse of Agony",
+    "Curse of the Elements"
+  ],
+  "downrank_watch": [
+    "Shadow Bolt",
+    "Immolate",
+    "Curse of Agony"
+  ],
   "ranks_verified": true,
   "max_rank_ids": {
     "Shadow Bolt": 25307,
@@ -14,8 +23,14 @@
     "Curse of Agony": 27218
   },
   "off_rotation": {
-    "Incinerate":   {"min_casts": 3, "note": "Incinerate is for the fire/Conflagrate build — a Shadow Bolt destro lock should be casting Shadow Bolt"},
-    "Searing Pain": {"min_casts": 3, "note": "a low-value fire filler"}
+    "Incinerate": {
+      "min_casts": 3,
+      "note": "Incinerate is for the fire/Conflagrate build  -  a Shadow Bolt destro lock should be casting Shadow Bolt"
+    },
+    "Searing Pain": {
+      "min_casts": 3,
+      "note": "a low-value fire filler"
+    }
   },
   "advisory": "Shadow Bolt is the primary nuke for the DS/Ruin build. Keep Immolate up for the Improved Immolate bonus and let Shadow Bolt fill the rest.",
   "notes_verified": false

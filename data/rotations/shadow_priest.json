@@ -5,8 +5,22 @@
   "role": "caster_dps",
   "source": "Icy Veins / Wowhead TBC guides + WCL top parses",
   "summary": "Keep Shadow Word: Pain and Vampiric Touch up, Mind Blast on cooldown, Mind Flay as filler. Devouring Plague and Shadow Word: Death on cooldown.",
-  "core_spells": ["Mind Blast", "Mind Flay", "Shadow Word: Pain", "Vampiric Touch", "Devouring Plague", "Shadow Word: Death"],
-  "downrank_watch": ["Mind Blast", "Mind Flay", "Shadow Word: Pain", "Vampiric Touch", "Devouring Plague", "Shadow Word: Death"],
+  "core_spells": [
+    "Mind Blast",
+    "Mind Flay",
+    "Shadow Word: Pain",
+    "Vampiric Touch",
+    "Devouring Plague",
+    "Shadow Word: Death"
+  ],
+  "downrank_watch": [
+    "Mind Blast",
+    "Mind Flay",
+    "Shadow Word: Pain",
+    "Vampiric Touch",
+    "Devouring Plague",
+    "Shadow Word: Death"
+  ],
   "ranks_verified": true,
   "max_rank_ids": {
     "Mind Blast": 25375,
@@ -17,12 +31,27 @@
     "Shadow Word: Death": 32996
   },
   "off_rotation": {
-    "Smite":        {"min_casts": 3, "note": "a holy nuke — Shadowform spriests should not be casting Smite"},
-    "Holy Fire":    {"min_casts": 3, "note": "a holy nuke — wrong school for Shadowform"},
-    "Greater Heal": {"min_casts": 3, "note": "healing during a DPS parse"},
-    "Flash Heal":   {"min_casts": 4, "note": "healing during a DPS parse"},
-    "Heal":         {"min_casts": 3, "note": "healing during a DPS parse"}
+    "Smite": {
+      "min_casts": 3,
+      "note": "a holy nuke  -  Shadowform spriests should not be casting Smite"
+    },
+    "Holy Fire": {
+      "min_casts": 3,
+      "note": "a holy nuke  -  wrong school for Shadowform"
+    },
+    "Greater Heal": {
+      "min_casts": 3,
+      "note": "healing during a DPS parse"
+    },
+    "Flash Heal": {
+      "min_casts": 4,
+      "note": "healing during a DPS parse"
+    },
+    "Heal": {
+      "min_casts": 3,
+      "note": "healing during a DPS parse"
+    }
   },
-  "advisory": "Mind Flay is filler only — never clip a Mind Blast or refresh window for it. Vampiric Touch and Shadow Word: Pain should have near-100% uptime.",
+  "advisory": "Mind Flay is filler only  -  never clip a Mind Blast or refresh window for it. Vampiric Touch and Shadow Word: Pain should have near-100% uptime.",
   "notes_verified": false
 }

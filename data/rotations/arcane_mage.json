@@ -5,8 +5,16 @@
   "role": "caster_dps",
   "source": "Icy Veins / Wowhead TBC guides + WCL top parses",
   "summary": "Arcane Blast is the core nuke; manage stacks and use Arcane Missiles / Frostbolt as a mana-friendly filler when needed.",
-  "core_spells": ["Arcane Blast", "Arcane Missiles", "Frostbolt"],
-  "downrank_watch": ["Arcane Missiles", "Frostbolt", "Fireball"],
+  "core_spells": [
+    "Arcane Blast",
+    "Arcane Missiles",
+    "Frostbolt"
+  ],
+  "downrank_watch": [
+    "Arcane Missiles",
+    "Frostbolt",
+    "Fireball"
+  ],
   "ranks_verified": true,
   "max_rank_ids": {
     "Arcane Missiles": 38699,
@@ -14,7 +22,10 @@
     "Fireball": 38692
   },
   "off_rotation": {
-    "Fireball": {"min_casts": 5, "note": "an arcane build casting Fireball heavily — check spec/macros"}
+    "Fireball": {
+      "min_casts": 5,
+      "note": "an arcane build casting Fireball heavily  -  check spec/macros"
+    }
   },
   "advisory": "Arcane Blast gains damage and cost per stack; the standard rotation manages stacks rather than spamming blindly, dropping to Arcane Missiles or Frostbolt to conserve mana. Frostbolt as an occasional filler is normal, not an anomaly.",
   "notes_verified": false

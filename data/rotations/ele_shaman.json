@@ -5,8 +5,16 @@
   "role": "caster_dps",
   "source": "Icy Veins / Wowhead TBC guides + WCL top parses",
   "summary": "Lightning Bolt is your filler; cast Chain Lightning on cooldown and keep Flame Shock ticking.",
-  "core_spells": ["Chain Lightning", "Lightning Bolt", "Flame Shock"],
-  "downrank_watch": ["Lightning Bolt", "Chain Lightning", "Flame Shock"],
+  "core_spells": [
+    "Chain Lightning",
+    "Lightning Bolt",
+    "Flame Shock"
+  ],
+  "downrank_watch": [
+    "Lightning Bolt",
+    "Chain Lightning",
+    "Flame Shock"
+  ],
   "ranks_verified": true,
   "max_rank_ids": {
     "Lightning Bolt": 25449,
@@ -14,13 +22,25 @@
     "Flame Shock": 25457
   },
   "off_rotation": {
-    "Healing Wave":        {"min_casts": 3, "note": "healing during a DPS parse — a sign of a heal bound where a nuke should be"},
-    "Lesser Healing Wave": {"min_casts": 3, "note": "healing during a DPS parse"},
-    "Chain Heal":          {"min_casts": 2, "note": "healing during a DPS parse"}
+    "Healing Wave": {
+      "min_casts": 3,
+      "note": "healing during a DPS parse  -  a sign of a heal bound where a nuke should be"
+    },
+    "Lesser Healing Wave": {
+      "min_casts": 3,
+      "note": "healing during a DPS parse"
+    },
+    "Chain Heal": {
+      "min_casts": 2,
+      "note": "healing during a DPS parse"
+    }
   },
   "breakpoint": {
-    "spells": ["Chain Lightning", "Lightning Bolt"],
-    "note": "Lightning Bolt is the filler with Chain Lightning woven on cooldown. As spell power scales, Chain Lightning's higher per-cast damage makes it increasingly worth casting on every cooldown — a near-zero Chain Lightning count usually means DPS left on the table."
+    "spells": [
+      "Chain Lightning",
+      "Lightning Bolt"
+    ],
+    "note": "Lightning Bolt is the filler with Chain Lightning woven on cooldown. As spell power scales, Chain Lightning's higher per-cast damage makes it increasingly worth casting on every cooldown  -  a near-zero Chain Lightning count usually means DPS left on the table."
   },
   "notes_verified": false
 }

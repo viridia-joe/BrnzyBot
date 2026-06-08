@@ -69,6 +69,7 @@ jobs:
           python tests/test_entitlements.py
           python tests/test_fight_diagrams.py
           python tests/test_rotation.py
+          python tests/test_json_validity.py
           python tests/test_content_encoding.py
           python tests/test_healer_analysis.py
           python tests/test_srprio.py

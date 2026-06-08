@@ -5,24 +5,41 @@
   "role": "melee_dps",
   "source": "Icy Veins / Wowhead TBC guides + WCL top Combat parses",
   "summary": "Sinister Strike to build combo points, keep Slice and Dice rolling at all times, maintain Rupture, Eviscerate as the dump finisher. Blade Flurry and Adrenaline Rush on cooldown.",
-
-  "core_spells": ["Sinister Strike", "Slice and Dice", "Rupture", "Eviscerate", "Blade Flurry", "Adrenaline Rush"],
-
-  "downrank_watch": ["Sinister Strike", "Eviscerate", "Rupture"],
+  "core_spells": [
+    "Sinister Strike",
+    "Slice and Dice",
+    "Rupture",
+    "Eviscerate",
+    "Blade Flurry",
+    "Adrenaline Rush"
+  ],
+  "downrank_watch": [
+    "Sinister Strike",
+    "Eviscerate",
+    "Rupture"
+  ],
   "ranks_verified": false,
-
   "off_rotation": {
-    "Backstab":   {"min_casts": 10, "note": "dagger+behind combo builder — Combat builds use Sinister Strike, not Backstab; heavy Backstab means wrong spec or action bar"},
-    "Mutilate":   {"min_casts": 5,  "note": "Assassination combo builder — wrong spec entirely for a Combat build"},
-    "Hemorrhage": {"min_casts": 10, "note": "Subtlety combo builder — wrong spec for Combat"}
+    "Backstab": {
+      "min_casts": 10,
+      "note": "dagger+behind combo builder  -  Combat builds use Sinister Strike, not Backstab; heavy Backstab means wrong spec or action bar"
+    },
+    "Mutilate": {
+      "min_casts": 5,
+      "note": "Assassination combo builder  -  wrong spec entirely for a Combat build"
+    },
+    "Hemorrhage": {
+      "min_casts": 10,
+      "note": "Subtlety combo builder  -  wrong spec for Combat"
+    }
   },
-
   "breakpoint": {
-    "spells": ["Sinister Strike", "Eviscerate"],
-    "note": "Slice and Dice uptime is the single most important metric for Combat — it should be up nearly 100% of the fight after the opener. Sinister Strike should be the dominant spell after auto attacks. Rupture adds sustained bleed damage and should maintain high uptime."
+    "spells": [
+      "Sinister Strike",
+      "Eviscerate"
+    ],
+    "note": "Slice and Dice uptime is the single most important metric for Combat  -  it should be up nearly 100% of the fight after the opener. Sinister Strike should be the dominant spell after auto attacks. Rupture adds sustained bleed damage and should maintain high uptime."
   },
-
-  "advisory": "Combat (Swords/Maces) is the dominant TBC raid rogue spec. Slice and Dice must never drop — refreshing it at 1 stack is fine. Adrenaline Rush doubles energy regeneration for 15s and should be used on cooldown. Blade Flurry adds a second swing for 15s — excellent on multi-target. Expose Armor (if assigned by raid leader) replaces one Eviscerate every 30s.",
-
+  "advisory": "Combat (Swords/Maces) is the dominant TBC raid rogue spec. Slice and Dice must never drop  -  refreshing it at 1 stack is fine. Adrenaline Rush doubles energy regeneration for 15s and should be used on cooldown. Blade Flurry adds a second swing for 15s  -  excellent on multi-target. Expose Armor (if assigned by raid leader) replaces one Eviscerate every 30s.",
   "notes_verified": false
 }

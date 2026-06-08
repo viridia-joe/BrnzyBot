@@ -117,7 +117,7 @@ def _load_raid_candidates(db: sqlite3.Connection, raid_key: str,
     rows = db.execute(
         f"""SELECT name, slot, stats, source_name, phase, armor_type, class_restriction
             FROM items
-            WHERE source_type = 'Raid'
+            WHERE source_type IN ('Raid', '25-man Raid', '10-man Raid', 'Raid10')
               AND ({like_clauses})
               AND phase <= ?
               AND quality IN ('Epic', 'Legendary', 'Rare')""",

@@ -1,39 +1,27 @@
-﻿{
-    "spec":  "assassination_rogue",
-    "display":  "Assassination Rogue (Mutilate)",
-    "class":  "Rogue",
-    "role":  "melee_dps",
-    "summary":  "Mutilate builds 2 combo points per cast (requires daggers, must be behind target). Keep Slice and Dice up, maintain Rupture, Envenom as the finisher when Deadly Poison stacks are available. Cold Blood guarantees a crit.",
-    "core_spells":  [
-                        "Mutilate",
-                        "Slice and Dice",
-                        "Rupture",
-                        "Envenom",
-                        "Eviscerate",
-                        "Cold Blood"
-                    ],
-    "downrank_watch":  [
-                           "Eviscerate",
-                           "Rupture",
-                           "Mutilate"
-                       ],
-    "ranks_verified":  false,
-    "off_rotation":  {
-                         "Sinister Strike":  {
-                                                 "min_casts":  10,
-                                                 "note":  "Combat combo builder "” an Assassination/Mutilate build should be using Mutilate, not Sinister Strike"
-                                             },
-                         "Hemorrhage":  {
-                                            "min_casts":  10,
-                                            "note":  "Subtlety combo builder "” wrong spec"
-                                        }
-                     },
-    "breakpoint":  {
-                       "spells":  [
-                                      "Mutilate",
-                                      "Envenom"
-                                  ],
-                       "note":  "Mutilate generates 2 combo points per cast, making it a faster combo builder than Sinister Strike when positioned behind the target. Deadly Poison must be applied to both weapons for Envenom to be effective. A parse with no Envenom casts may indicate wrong weapon enchants."
-                   },
-    "advisory":  "Mutilate requires being behind the target "” positioning on bosses is critical. Deadly Poison stacks fuel Envenom (the Assassination finisher). Cold Blood (guarantees a critical strike on a 3-minute cooldown) should be paired with Envenom for maximum burst. Unlike Combat, Assassination performs poorly when the hunter cannot maintain behind positioning "” flag this as a potential log note."
+{
+  "spec": "assassination_rogue",
+  "display": "Assassination Rogue (Mutilate)",
+  "class": "Rogue",
+  "role": "melee_dps",
+  "source": "Icy Veins / Wowhead TBC guides + WCL top Assassination parses",
+  "summary": "Mutilate builds 2 combo points per cast (requires daggers, must be behind target). Keep Slice and Dice up, maintain Rupture, Envenom as the finisher when Deadly Poison stacks are available. Cold Blood guarantees a crit.",
+
+  "core_spells": ["Mutilate", "Slice and Dice", "Rupture", "Envenom", "Eviscerate", "Cold Blood"],
+
+  "downrank_watch": ["Eviscerate", "Rupture", "Mutilate"],
+  "ranks_verified": false,
+
+  "off_rotation": {
+    "Sinister Strike": {"min_casts": 10, "note": "Combat combo builder — an Assassination/Mutilate build should be using Mutilate, not Sinister Strike"},
+    "Hemorrhage":      {"min_casts": 10, "note": "Subtlety combo builder — wrong spec"}
+  },
+
+  "breakpoint": {
+    "spells": ["Mutilate", "Envenom"],
+    "note": "Mutilate generates 2 combo points per cast, making it a faster combo builder than Sinister Strike when positioned behind the target. Deadly Poison must be applied to both weapons for Envenom to be effective. A parse with no Envenom casts may indicate wrong weapon enchants."
+  },
+
+  "advisory": "Mutilate requires being behind the target — positioning on bosses is critical. Deadly Poison stacks fuel Envenom (the Assassination finisher). Cold Blood (guarantees a critical strike on a 3-minute cooldown) should be paired with Envenom for maximum burst. Unlike Combat, Assassination performs poorly when the hunter cannot maintain behind positioning — flag this as a potential log note.",
+
+  "notes_verified": false
 }

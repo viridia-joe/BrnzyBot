@@ -1,56 +1,33 @@
-﻿{
-    "spec":  "mm_hunter",
-    "display":  "Marksmanship Hunter",
-    "class":  "Hunter",
-    "role":  "ranged_dps",
-    "summary":  "Aimed Shot on cooldown, 1:1 Steady Shot weave (Auto â†’ Steady), Serpent Sting maintained, Multi-Shot on cooldown. Trueshot Aura provides passive +100 ranged AP to the raid.",
-    "core_spells":  [
-                        "Aimed Shot",
-                        "Steady Shot",
-                        "Serpent Sting",
-                        "Multi-Shot",
-                        "Arcane Shot",
-                        "Rapid Fire"
-                    ],
-    "downrank_watch":  [
-                           "Serpent Sting",
-                           "Aimed Shot",
-                           "Arcane Shot",
-                           "Multi-Shot",
-                           "Hunter\u0027s Mark"
-                       ],
-    "ranks_verified":  true,
-    "max_rank_ids":  {
-                         "Serpent Sting":  25295
-                     },
-    "off_rotation":  {
-                         "Aspect of the Monkey":  {
-                                                      "min_casts":  5,
-                                                      "note":  "should be in Aspect of the Hawk for ranged DPS "” Monkey is melee avoidance only"
-                                                  },
-                         "Aspect of the Viper":  {
-                                                     "min_casts":  15,
-                                                     "note":  "sustained Viper use means running OOM "” check consumables and shot frequency"
-                                                 },
-                         "Wing Clip":  {
-                                           "min_casts":  5,
-                                           "note":  "melee slow on a ranged DPS parse "” usually a wrong keybind"
-                                       },
-                         "Volley":  {
-                                        "min_casts":  5,
-                                        "note":  "AoE channel used on a single-target encounter "” likely misfired"
-                                    },
-                         "Raptor Strike":  {
-                                               "min_casts":  3,
-                                               "note":  "melee attack on a ranged parse "” hunter likely got in melee range"
-                                           }
-                     },
-    "breakpoint":  {
-                       "spells":  [
-                                      "Aimed Shot",
-                                      "Steady Shot"
-                                  ],
-                       "note":  "Aimed Shot has a 2.5s cast time "” weaving it cleanly without clipping auto shots is the core MM skill. Steady Shot fills between Aimed Shot casts. Unlike BM, MM damage is almost entirely from the hunter (not the pet), so cast consistency matters more."
-                   },
-    "advisory":  "Trueshot Aura (+100 ranged AP to all party/raid members) is MM\u0027s primary raid contribution alongside personal damage. Aimed Shot should appear on cooldown "” a parse with very few Aimed Shots suggests the keybind is wrong or the cooldown is being missed. Note: Chimera Shot does NOT exist in TBC Classic "” it was added in Wrath. Rapid Fire is a 5-minute cooldown and should appear at least twice in a full boss fight."
+{
+  "spec": "mm_hunter",
+  "display": "Marksmanship Hunter",
+  "class": "Hunter",
+  "role": "ranged_dps",
+  "source": "Icy Veins / Wowhead TBC guides + WCL top MM parses",
+  "summary": "Aimed Shot on cooldown, 1:1 Steady Shot weave (Auto → Steady), Serpent Sting maintained, Multi-Shot on cooldown. Trueshot Aura provides passive +100 ranged AP to the raid.",
+
+  "core_spells": ["Aimed Shot", "Steady Shot", "Serpent Sting", "Multi-Shot", "Arcane Shot", "Rapid Fire"],
+
+  "downrank_watch": ["Serpent Sting", "Aimed Shot", "Arcane Shot", "Multi-Shot", "Hunter's Mark"],
+  "ranks_verified": true,
+  "max_rank_ids": {
+    "Serpent Sting": 25295
+  },
+
+  "off_rotation": {
+    "Aspect of the Monkey":  {"min_casts": 5,  "note": "should be in Aspect of the Hawk for ranged DPS — Monkey is melee avoidance only"},
+    "Aspect of the Viper":   {"min_casts": 15, "note": "sustained Viper use means running OOM — check consumables and shot frequency"},
+    "Wing Clip":             {"min_casts": 5,  "note": "melee slow on a ranged DPS parse — usually a wrong keybind"},
+    "Volley":                {"min_casts": 5,  "note": "AoE channel used on a single-target encounter — likely misfired"},
+    "Raptor Strike":         {"min_casts": 3,  "note": "melee attack on a ranged parse — hunter likely got in melee range"}
+  },
+
+  "breakpoint": {
+    "spells": ["Aimed Shot", "Steady Shot"],
+    "note": "Aimed Shot has a 2.5s cast time — weaving it cleanly without clipping auto shots is the core MM skill. Steady Shot fills between Aimed Shot casts. Unlike BM, MM damage is almost entirely from the hunter (not the pet), so cast consistency matters more."
+  },
+
+  "advisory": "Trueshot Aura (+100 ranged AP to all party/raid members) is MM's primary raid contribution alongside personal damage. Aimed Shot should appear on cooldown — a parse with very few Aimed Shots suggests the keybind is wrong or the cooldown is being missed. Note: Chimera Shot does NOT exist in TBC Classic — it was added in Wrath. Rapid Fire is a 5-minute cooldown and should appear at least twice in a full boss fight.",
+
+  "notes_verified": false
 }

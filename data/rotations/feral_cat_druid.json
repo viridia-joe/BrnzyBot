@@ -1,50 +1,29 @@
-﻿{
-    "spec":  "feral_cat_druid",
-    "display":  "Feral Druid (Cat)",
-    "class":  "Druid",
-    "role":  "melee_dps",
-    "summary":  "Energy-based melee DPS in Cat Form. Mangle (Cat) on cooldown, Shred to build combo points (requires behind target), Rake bleed DoT, Rip as the 5-point finisher DoT. Ferocious Bite as energy dump only when bleeds are up. Tiger\u0027s Fury for energy regen on cooldown.",
-    "core_spells":  [
-                        "Mangle (Cat)",
-                        "Shred",
-                        "Rake",
-                        "Rip",
-                        "Ferocious Bite",
-                        "Tiger\u0027s Fury",
-                        "Faerie Fire (Feral)"
-                    ],
-    "downrank_watch":  [
-                           "Mangle (Cat)",
-                           "Shred",
-                           "Rip",
-                           "Rake",
-                           "Ferocious Bite"
-                       ],
-    "ranks_verified":  false,
-    "off_rotation":  {
-                         "Maul":  {
-                                      "min_casts":  5,
-                                      "note":  "bear form AoE ability "” should not appear in a Cat DPS parse; indicates shapeshifting or wrong form"
-                                  },
-                         "Moonfire":  {
-                                          "min_casts":  5,
-                                          "note":  "Balance damage spell "” using Moonfire in cat form costs a shapeshift; only valid as a DoT in caster form during travel"
-                                      },
-                         "Healing Touch":  {
-                                               "min_casts":  3,
-                                               "note":  "healing in a DPS parse "” indicates significant emergency healing or wrong role"
-                                           },
-                         "Swipe":  {
-                                       "min_casts":  8,
-                                       "note":  "AoE cat ability "” heavy single-target use is a DPS loss vs Shred spam"
-                                   }
-                     },
-    "breakpoint":  {
-                       "spells":  [
-                                      "Shred",
-                                      "Rip"
-                                  ],
-                       "note":  "Rip should almost always be the 5-point finisher "” it provides the highest sustained DPS. Ferocious Bite is only the correct choice when Rip and Rake are already active with enough duration and energy is capping. Mangle (Cat) maintains both the direct damage and a debuff that increases bleed damage "” it must be kept on cooldown."
-                   },
-    "advisory":  "IMPORTANT: Savage Roar and Berserk do NOT exist in TBC Classic "” they were added in Wrath. Cat DPS in TBC lacks an energy regen buff, so Tiger\u0027s Fury (the only energy cooldown at 60s) must be used consistently. Shred requires being behind the target "” cat positioning on bosses is critical and a common DPS loss when missed. Faerie Fire (Feral) reduces the target\u0027s armor and should be applied at pull and maintained (it is cast in caster form or via macro)."
+{
+  "spec": "feral_cat_druid",
+  "display": "Feral Druid (Cat)",
+  "class": "Druid",
+  "role": "melee_dps",
+  "source": "Icy Veins / Wowhead TBC guides + WCL top Feral parses",
+  "summary": "Energy-based melee DPS in Cat Form. Mangle (Cat) on cooldown, Shred to build combo points (requires behind target), Rake bleed DoT, Rip as the 5-point finisher DoT. Ferocious Bite as energy dump only when bleeds are up. Tiger's Fury for energy regen on cooldown.",
+
+  "core_spells": ["Mangle (Cat)", "Shred", "Rake", "Rip", "Ferocious Bite", "Tiger's Fury", "Faerie Fire (Feral)"],
+
+  "downrank_watch": ["Mangle (Cat)", "Shred", "Rip", "Rake", "Ferocious Bite"],
+  "ranks_verified": false,
+
+  "off_rotation": {
+    "Maul":          {"min_casts": 5,  "note": "bear form AoE ability — should not appear in a Cat DPS parse; indicates shapeshifting or wrong form"},
+    "Moonfire":      {"min_casts": 5,  "note": "Balance damage spell — using Moonfire in cat form costs a shapeshift; only valid as a DoT in caster form during travel"},
+    "Healing Touch": {"min_casts": 3,  "note": "healing in a DPS parse — indicates significant emergency healing or wrong role"},
+    "Swipe":         {"min_casts": 8,  "note": "AoE cat ability — heavy single-target use is a DPS loss vs Shred spam"}
+  },
+
+  "breakpoint": {
+    "spells": ["Shred", "Rip"],
+    "note": "Rip should almost always be the 5-point finisher — it provides the highest sustained DPS. Ferocious Bite is only the correct choice when Rip and Rake are already active with enough duration and energy is capping. Mangle (Cat) maintains both the direct damage and a debuff that increases bleed damage — it must be kept on cooldown."
+  },
+
+  "advisory": "IMPORTANT: Savage Roar and Berserk do NOT exist in TBC Classic — they were added in Wrath. Cat DPS in TBC lacks an energy regen buff, so Tiger's Fury (the only energy cooldown at 60s) must be used consistently. Shred requires being behind the target — cat positioning on bosses is critical and a common DPS loss when missed. Faerie Fire (Feral) reduces the target's armor and should be applied at pull and maintained (it is cast in caster form or via macro).",
+
+  "notes_verified": false
 }

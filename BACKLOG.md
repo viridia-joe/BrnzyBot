@@ -13,25 +13,11 @@
 - Rotation baselines pipeline — `scripts/build_baselines.py` pulls top-N Anniversary parses
 - `🥇` emoji fix — Phase 1 BiS items now correctly marked vs current-phase BiS
 - `/gearprio` double-subtraction fix + BiS-equivalence test harness
-- `/srprio` — shipped, needs source-data to function end-to-end (see keystone item)
+- `/srprio` — fully working after source_type filter fix (25-man Raid/10-man Raid)
+- Item DB source data — 4,342/4,389 items enriched; World Boss=16, Arena=718, raids correct
 - Fight diagram framework — per-boss PNG lookup with authoring tool
 - Dead code removed — `core/gearprio.py`, `core/compute-upgrades.py`, `core/triage.py` body
 - Heartbeat mojibake fix — lore/tips/jokes UTF-8 repaired
-
----
-
-## ⭐ Populate item-DB source data — KEYSTONE
-
-**Priority:** Highest · **Effort:** Medium
-
-All 4,513 items in the DB have empty `source_type` / `source_name`. This silently breaks:
-- `/gearprio` + `/gearcheck` obtainability filters (world-boss, arena, PvP are no-ops)
-- `/srprio` — filters on `source_type='Raid'`; returns nothing until this lands
-- Upgrade prose — "source:" annotations are blank
-
-**Stopgaps to retire after fix:** `data/world_boss_items.json` denylist, arena name fallback in `gear_optimizer`.
-
-**Plan:** fix `core/enrich_item_sources.py` to emit a `World Boss` type, run against prod DB, validate known items (Talon of the Tempest → World Boss, Gladiator's → Arena, Nexus Key → Raid/TK), retire stopgaps, extend `tests/test_item_restrictions.py`.
 
 ---
 

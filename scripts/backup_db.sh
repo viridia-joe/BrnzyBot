@@ -15,8 +15,10 @@
 
 set -euo pipefail
 
-DATA_DIR="${BRNZYBOT_DATA_DIR:-$HOME/.openclaw/data}"
-BACKUP_DIR="${BRNZYBOT_BACKUP_DIR:-$HOME/.openclaw/backups}"
+# On the VM the host data dir is ~/openclaw-data (bind-mounted to
+# /root/.openclaw/data inside the container). Override with BRNZYBOT_DATA_DIR.
+DATA_DIR="${BRNZYBOT_DATA_DIR:-$HOME/openclaw-data}"
+BACKUP_DIR="${BRNZYBOT_BACKUP_DIR:-$HOME/openclaw-backups}"
 KEEP=14
 STAMP="$(date +%Y%m%d-%H%M%S)"
 

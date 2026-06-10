@@ -19,35 +19,21 @@ Production-readiness: **7/10**. The three things below move it to 9.
 
 ---
 
-## P0 — Do before inviting beta testers (½–1 day)
+## P0 — DONE (2026-06-10, all shipped + verified in prod)
 
-These are the items a beta tester actually hits, or that risk losing data.
+All five completed before beta. Health endpoint verified returning
+`ready: true, loaded_cogs: 12`; backup cron installed on the VM (daily 04:00).
 
-1. **Cog-load resilience + real health check.** `bot.py:68` loads 12 cogs with no
-   try/except — one bad import crashes the whole bot on boot (the deploy health curl
-   would catch it, but a runtime-only failure wouldn't). And `/health` (`bot.py:138`)
-   returns static `{"status":"ok"}` regardless of whether Discord is connected.
-   - Wrap each `load_extension` in try/except; log failures, keep booting the rest.
-   - Make `/health` report `discord_connected` (is `self.is_ready()`) and the count of
-     loaded cogs; return 503 if not ready. The deploy gate becomes meaningful.
-
-2. **Database backup.** `brnzybot.db` (characters, guild config, subscriptions, rate
-   limits) is a bind-mounted SQLite file with no backup. A disk loss = every guild
-   re-registers from scratch and any Pro status is gone. Add a daily `cron` on the VM
-   that copies `~/.openclaw/data/*.db` to a GCS bucket (or even just a timestamped
-   local copy + weekly `gsutil cp`). ~30 min, saves a catastrophe.
-
-3. **SQLite busy timeout.** `db/server_config.py` opens a fresh connection per call
-   with no busy timeout. Two concurrent writes (two guilds at once) can throw
-   `SQLITE_BUSY`. One line: `conn.execute("PRAGMA busy_timeout=5000")` in `_conn()`.
-
-4. **Timeout fallback messages.** Several cogs (`gear.py`, `rotation.py`, `audit.py`)
-   catch `asyncio.TimeoutError` on `followup.send`, log it, and send nothing — the user
-   is left with a spinner forever. Send an ephemeral "that took too long, try again."
-
-5. **`/audit` and `/rotationcheck` URL validation.** A malformed WCL URL currently
-   defers, then fails 15s later with a circuit-breaker message. Validate the report
-   code format up front and reply instantly with "that's not a valid WCL report link."
+1. ✅ **Cog-load resilience + real health check.** Each cog loads independently;
+   one bad import no longer kills boot. `/health` reports ready state + cog counts
+   and returns 503 when degraded, so the deploy gate is meaningful. (`bot.py`)
+2. ✅ **Database backup.** `scripts/backup_db.sh` does a daily online `sqlite3.backup()`
+   of `brnzybot.db` (14 local snapshots, optional GCS push), installed via cron on the VM.
+3. ✅ **SQLite busy timeout.** `PRAGMA busy_timeout=5000` in `_conn()`.
+4. ✅ **Timeout fallback messages.** gear/rotation/audit send a best-effort ephemeral
+   "that took too long" instead of leaving a stuck spinner.
+5. ✅ **URL validation.** `/audit` and `/rotationcheck` validate the report link up
+   front and reply instantly on a typo.
 
 ## P1 — Do during beta, before any public launch (1–2 days)
 
@@ -60,9 +46,7 @@ These are the items a beta tester actually hits, or that risk losing data.
    down. Add an age check; if the snapshot is >24h old, append "_(gear from cache,
    WCL was unreachable — may be stale)_" to the output. Honesty > silent wrong data.
 
-8. **Log rotation.** `bot.py` logs to a flat file; `/gearprio` logs candidate-pool size
-   on every call. On a 20GB disk this grows unbounded. `RotatingFileHandler`,
-   10MB × 5. 15 min.
+8. ✅ **Log rotation.** Done alongside P0 — `RotatingFileHandler` 10MB × 5 in `bot.py`.
 
 9. **A `/help` command.** There is none today — discovery relies on Discord's slash
    autocomplete and the onboarding DM. A single `/help` that lists the command groups

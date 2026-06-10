@@ -30,8 +30,18 @@ for db in brnzybot.db; do
     src="$DATA_DIR/$db"
     [ -f "$src" ] || { echo "skip: $src not found"; continue; }
     dest="$BACKUP_DIR/${db%.db}-$STAMP.db"
-    # .backup uses SQLite's online backup API — safe while the bot is running.
-    sqlite3 "$src" ".backup '$dest'"
+    # Online backup via Python's sqlite3 (the sqlite3 CLI isn't installed on the
+    # VM, but python3 always is). conn.backup() is the same safe online API —
+    # consistent snapshot while the bot is still writing.
+    python3 - "$src" "$dest" <<'PY'
+import sqlite3, sys
+src, dest = sys.argv[1], sys.argv[2]
+s = sqlite3.connect(src)
+d = sqlite3.connect(dest)
+with d:
+    s.backup(d)
+d.close(); s.close()
+PY
     gzip -f "$dest"
     echo "backed up $db -> ${dest}.gz"
 

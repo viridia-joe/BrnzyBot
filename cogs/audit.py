@@ -24,7 +24,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from core.audit.report import build_audit, build_roster_audit
+from core.audit.report import build_audit, build_roster_audit, parse_report_url
 from db.server_config import (
     check_rate_limit, get_character, list_characters, log_usage,
 )
@@ -61,6 +61,17 @@ class AuditCog(commands.Cog, name="Audit"):
         character: str | None = None,
     ) -> None:
         guild_id = str(interaction.guild_id)
+
+        # Validate the report link up front so a typo gets an instant, clear reply
+        # instead of a 15-second defer that ends in a circuit-breaker error.
+        code, _fight = parse_report_url(url)
+        if not code:
+            await interaction.response.send_message(
+                "That doesn't look like a Warcraft Logs report link. Paste the full "
+                "URL, e.g. `https://classic.warcraftlogs.com/reports/aBcD1234EfGh5678`.",
+                ephemeral=True,
+            )
+            return
 
         allowed, _ = check_rate_limit(guild_id)
         if not allowed:
@@ -107,6 +118,14 @@ class AuditCog(commands.Cog, name="Audit"):
                 await asyncio.wait_for(interaction.followup.send(chunk), timeout=15)
         except asyncio.TimeoutError:
             log.error("followup.send timed out for /audit")
+            try:
+                await interaction.followup.send(
+                    "That audit took too long to send — Warcraft Logs may be slow "
+                    "right now. Give it a moment and try again.",
+                    ephemeral=True,
+                )
+            except Exception:
+                pass
 
 
 async def setup(bot: commands.Bot) -> None:

@@ -19,8 +19,10 @@ Requires DISCORD_BOT_TOKEN in ~/.openclaw/data/.env or environment.
 import asyncio
 import json
 import logging
+import os
 import sys
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from logging.handlers import RotatingFileHandler
 from threading import Thread
 
 import discord
@@ -32,19 +34,29 @@ from db.server_config import init_db, purge_expired_intents
 # ---------------------------------------------------------------------------
 # Logging
 # ---------------------------------------------------------------------------
+_LOG_PATH = os.path.expanduser("~/.openclaw/logs/brnzybot.log")
+os.makedirs(os.path.dirname(_LOG_PATH), exist_ok=True)
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)-8s [%(name)s] %(message)s",
     datefmt="%H:%M:%S",
     handlers=[
         logging.StreamHandler(sys.stdout),
-        logging.FileHandler(
-            __import__("os").path.expanduser("~/.openclaw/logs/brnzybot.log"),
-            encoding="utf-8",
+        # Rotate at 10MB, keep 5 — /gearprio logs candidate-pool size per call,
+        # so a flat file would grow unbounded on the 20GB disk.
+        RotatingFileHandler(
+            _LOG_PATH, maxBytes=10_000_000, backupCount=5, encoding="utf-8",
         ),
     ],
 )
 log = logging.getLogger("brnzybot")
+
+# Shared health state, read by the /health HTTP handler. Updated as the bot boots.
+_HEALTH: dict = {
+    "ready": False,          # set True on on_ready (Discord gateway connected)
+    "loaded_cogs": 0,
+    "failed_cogs": [],
+}
 
 # ---------------------------------------------------------------------------
 # Intents
@@ -67,19 +79,26 @@ class BrnzyBot(commands.Bot):
 
     async def setup_hook(self) -> None:
         """Called once before the bot connects. Load cogs and sync slash commands."""
-        await self.load_extension("cogs.gear")
-        await self.load_extension("cogs.rotation")
-        await self.load_extension("cogs.strategy")
-        await self.load_extension("cogs.bossguide")
-        await self.load_extension("cogs.listener")
-        await self.load_extension("cogs.admin")
-        await self.load_extension("cogs.onboarding")
-        await self.load_extension("cogs.billing")
-        await self.load_extension("cogs.simexport")
-        await self.load_extension("cogs.botduel")
-        await self.load_extension("cogs.heartbeat")
-        await self.load_extension("cogs.audit")
-        log.info("Cogs loaded")
+        cog_names = [
+            "cogs.gear", "cogs.rotation", "cogs.strategy", "cogs.bossguide",
+            "cogs.listener", "cogs.admin", "cogs.onboarding", "cogs.billing",
+            "cogs.simexport", "cogs.botduel", "cogs.heartbeat", "cogs.audit",
+        ]
+        # Load each cog independently — one bad import shouldn't take down the
+        # whole bot. Failures are recorded so /health can report degraded state.
+        for name in cog_names:
+            try:
+                await self.load_extension(name)
+            except Exception:
+                _HEALTH["failed_cogs"].append(name)
+                log.exception("Failed to load %s — continuing without it", name)
+        _HEALTH["loaded_cogs"] = len(cog_names) - len(_HEALTH["failed_cogs"])
+        if _HEALTH["failed_cogs"]:
+            log.error("Degraded: %d/%d cogs loaded (failed: %s)",
+                      _HEALTH["loaded_cogs"], len(cog_names),
+                      ", ".join(_HEALTH["failed_cogs"]))
+        else:
+            log.info("All %d cogs loaded", len(cog_names))
 
         # Slash-command sync — pick exactly ONE scope per server. If the same
         # command is registered both guild-scoped and globally, both resolve in
@@ -106,6 +125,7 @@ class BrnzyBot(commands.Bot):
 
     async def on_ready(self) -> None:
         log.info("BrnzyBot online as %s (id=%s)", self.user, self.user.id)
+        _HEALTH["ready"] = True
         # Purge any stale pending intents from a previous session
         purge_expired_intents()
 
@@ -137,8 +157,18 @@ class _HealthHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         if self.path == "/health":
-            body = json.dumps({"status": "ok", "service": "brnzybot"}).encode()
-            self.send_response(200)
+            # Healthy only when the gateway is connected AND no cog failed to load.
+            # The deploy gate (curl -sf) then actually means "the bot is usable",
+            # not just "an HTTP server is listening".
+            ok = _HEALTH["ready"] and not _HEALTH["failed_cogs"]
+            body = json.dumps({
+                "status": "ok" if ok else "degraded",
+                "service": "brnzybot",
+                "ready": _HEALTH["ready"],
+                "loaded_cogs": _HEALTH["loaded_cogs"],
+                "failed_cogs": _HEALTH["failed_cogs"],
+            }).encode()
+            self.send_response(200 if ok else 503)
             self.send_header("Content-Type", "application/json")
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()

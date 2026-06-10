@@ -47,6 +47,19 @@ def _chunks(text: str, limit: int = DISCORD_MAX) -> list[str]:
     return chunk(text, limit)
 
 
+async def _notify_timeout(interaction, display: str) -> None:
+    """Best-effort ephemeral message after a followup.send timed out, so the
+    user sees *something* instead of a stuck 'thinking' spinner."""
+    try:
+        await interaction.followup.send(
+            f"That took too long to send for **{display}** — Warcraft Logs may be "
+            f"slow right now. Give it a moment and try again.",
+            ephemeral=True,
+        )
+    except Exception:
+        pass  # nothing more we can do; already logged the original timeout
+
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -218,6 +231,7 @@ class GearCog(commands.Cog, name="Gear"):
                 await asyncio.wait_for(interaction.followup.send(chunk), timeout=15)
         except asyncio.TimeoutError:
             log.error("followup.send timed out for gearprio %s", display)
+            await _notify_timeout(interaction, display)
 
     # -----------------------------------------------------------------------
     # !gearprio — prefix command (aliases: !gp, !prio)
@@ -327,6 +341,7 @@ class GearCog(commands.Cog, name="Gear"):
                 await asyncio.wait_for(interaction.followup.send(chunk), timeout=15)
         except asyncio.TimeoutError:
             log.error("followup.send timed out for gearcheck %s", display)
+            await _notify_timeout(interaction, display)
 
     # -----------------------------------------------------------------------
     # /gearcheck — slash command (always verbose: BiS item, EP, % gap per slot)
@@ -484,6 +499,7 @@ class GearCog(commands.Cog, name="Gear"):
                 await asyncio.wait_for(interaction.followup.send(chunk), timeout=15)
         except asyncio.TimeoutError:
             log.error("followup.send timed out for srprio %s", display)
+            await _notify_timeout(interaction, display)
 
     # -----------------------------------------------------------------------
     # !srprio <character> <raid…> — prefix command (alias: !sr)

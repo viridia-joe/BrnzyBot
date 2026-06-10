@@ -66,6 +66,10 @@ def _migrate(conn: sqlite3.Connection) -> None:
 def _conn(path: str = DB_PATH):
     conn = sqlite3.connect(path)
     conn.row_factory = sqlite3.Row
+    # SQLite is single-writer; without a busy timeout, two concurrent writes
+    # (e.g. two guilds issuing commands at once) throw SQLITE_BUSY immediately.
+    # 5s lets the second writer wait for the lock instead of erroring.
+    conn.execute("PRAGMA busy_timeout=5000")
     try:
         yield conn
         conn.commit()

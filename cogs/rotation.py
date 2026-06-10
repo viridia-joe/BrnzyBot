@@ -41,6 +41,20 @@ class RotationCog(commands.Cog, name="Rotation"):
     ) -> None:
         guild_id = str(interaction.guild_id)
 
+        # If the user passed a specific report, validate it up front so a typo
+        # gets an instant reply instead of a 15s defer ending in a WCL error.
+        if report:
+            from core.rotation_handler import parse_report_ref
+            code, _f = parse_report_ref(report)
+            if not code:
+                await interaction.response.send_message(
+                    "That doesn't look like a Warcraft Logs report link or code. "
+                    "Paste the full URL or the 16+ character report code, or omit it "
+                    "to use their most recent log.",
+                    ephemeral=True,
+                )
+                return
+
         allowed, _ = check_rate_limit(guild_id)
         if not allowed:
             await interaction.response.send_message(
@@ -99,6 +113,14 @@ class RotationCog(commands.Cog, name="Rotation"):
                 await asyncio.wait_for(interaction.followup.send(chunk), timeout=15)
         except asyncio.TimeoutError:
             log.error("followup.send timed out for rotationcheck %s", display)
+            try:
+                await interaction.followup.send(
+                    f"That took too long to send for **{display}** — Warcraft Logs "
+                    f"may be slow right now. Give it a moment and try again.",
+                    ephemeral=True,
+                )
+            except Exception:
+                pass
 
     # -----------------------------------------------------------------------
     # /rotationcheck — slash command

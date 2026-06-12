@@ -157,6 +157,7 @@ def normalize_combatant(record: dict) -> dict:
 
     return {
         "source_id": record.get("sourceID", record.get("source_id")),
+        "spec_id": record.get("specID", record.get("spec_id")),  # Blizzard specID
         "gear": gear,
         "gems": gems,
         "meta_present": meta_present,

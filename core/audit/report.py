@@ -27,6 +27,33 @@ from core.audit.checks import AuditReport, CheckResult, RosterAudit, Section, Ve
 from core.audit.normalize import normalize_combatant
 from core.audit.profiles import SpecProfile, get_profile
 
+# Class name (WCL actor subType) → a representative raiding spec, used when the
+# log gives us the class but no usable specID. The Preparation checks
+# (enchants/gems/consumes) are role-driven, so the exact DPS spec within a class
+# rarely changes the prep verdict — this just needs to land on the right profile.
+_CLASS_DEFAULT_SPEC: dict[str, str] = {
+    "Warrior": "fury_warrior",
+    "Paladin": "ret_paladin",
+    "Hunter":  "bm_hunter",
+    "Rogue":   "combat_rogue",
+    "Priest":  "shadow_priest",
+    "Shaman":  "ele_shaman",
+    "Mage":    "fire_mage",
+    "Warlock": "destro_warlock",
+    "Druid":   "balance_druid",
+}
+
+
+def _spec_from_log(spec_id, wow_class: str) -> str | None:
+    """Derive a canonical spec key from the log's specID, then class default.
+    Returns None if neither is usable (caller then tries the registry)."""
+    from core.gear_cache import WCL_SPEC_MAP
+    if spec_id is not None:
+        key = WCL_SPEC_MAP.get(int(spec_id)) if str(spec_id).lstrip("-").isdigit() else None
+        if key:
+            return key
+    return _CLASS_DEFAULT_SPEC.get((wow_class or "").strip())
+
 log = logging.getLogger(__name__)
 
 
@@ -245,7 +272,10 @@ def check_consumes(auras: list[dict], profile: SpecProfile, potion_count: int | 
         if not ok:
             _bump(Verdict.WARN if not rule.required else Verdict.FAIL)
 
-    return CheckResult("consumes", "Consumes", worst, "; ".join(lines),
+    # One consumable per line (sub-bulleted under the Consumes header) instead of
+    # a run-on "Food: ✅; Oil: ❌; Potions: ❌" string that's hard to scan.
+    summary = "\n" + "\n".join(f"   • {ln}" for ln in lines) if lines else "none expected"
+    return CheckResult("consumes", "Consumes", worst, summary,
                        evidence={"auras": sorted(names), "has_flask": has_flask,
                                  "potion_count": potion_count})
 
@@ -676,10 +706,17 @@ def build_roster_audit(url: str, resolve_spec) -> RosterAudit:
             continue
         seen.add(name.lower())
 
-        spec = resolve_spec(name, actor.get("subType", ""))
+        # Prefer the spec the LOG reports (specID from CombatantInfo), then the
+        # class default, and only fall back to the guild registry. The log is
+        # ground truth — this audits the whole raid without prior registration
+        # AND fixes stale/wrong registry entries (e.g. a warrior mis-saved as a
+        # druid). resolve_spec (registry) is the last resort, not the first.
+        spec = _spec_from_log(norm.get("spec_id"), actor.get("subType", "")) \
+            or resolve_spec(name, actor.get("subType", ""))
         profile = get_profile(spec) if spec else None
         if profile is None:
-            roster.skipped.append((name, f"no profile for {spec}" if spec else "unregistered"))
+            why = f"no audit profile for {spec}" if spec else "couldn't determine spec from log"
+            roster.skipped.append((name, why))
             continue
         norm.update(_socket_info(norm.get("gear", [])))
         if cast_tally is not None:

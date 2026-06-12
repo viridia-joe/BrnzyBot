@@ -95,7 +95,31 @@ def _combatant(member):
     real(POS["Head"], "Head", HELM, head_gems)
     bslot = "Chest" if body_item == VEST else "Waist"
     real(POS[bslot], bslot, body_item, body_gems)
-    return {"sourceID": sid, "gear": gear, "auras": [{"name": a} for a in auras]}
+    # Emit a stat block consistent with the intended spec's role so that the
+    # log-based spec detector (gear_cache.spec_from_stats) recovers this spec —
+    # TBC Anniversary logs carry no specID, so role is read from these stats.
+    role_stats = _stats_for_spec(spec)
+    return {"sourceID": sid, "gear": gear,
+            "auras": [{"name": a} for a in auras], **role_stats}
+
+
+def _stats_for_spec(spec: str) -> dict:
+    """A minimal stat block that makes spec_from_stats land on `spec`."""
+    healer = {"intellect": 500, "spirit": 400, "critSpell": 80, "strength": 50,
+              "agility": 50, "armor": 6000, "stamina": 600, "block": 0}
+    caster_dps = {"intellect": 520, "spirit": 150, "critSpell": 300, "strength": 50,
+                  "agility": 60, "armor": 6000, "stamina": 650, "block": 0}
+    melee = {"strength": 700, "agility": 200, "intellect": 60, "spirit": 90,
+             "critSpell": 0, "armor": 10000, "stamina": 750, "block": 0}
+    tank = {"strength": 400, "agility": 150, "intellect": 60, "spirit": 90,
+            "critSpell": 0, "armor": 16000, "stamina": 1100, "block": 30}
+    if spec.startswith(("holy_", "resto_")):
+        return healer
+    if spec.startswith("prot_") or spec == "feral_bear_druid":
+        return tank
+    if spec in ("ele_shaman", "balance_druid", "shadow_priest") or "mage" in spec or "warlock" in spec:
+        return caster_dps
+    return melee
 
 
 def _casts(member):

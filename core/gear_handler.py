@@ -413,7 +413,7 @@ def handle_gear_list(
         lines.append("_⚠ Gear from cache — WCL was unavailable_")
 
     if verbose:
-        lines.append("_🥇 BiS from an earlier phase (still best) · 🔥 current-tier BiS · ➡️ minor upgrade · ❄️ sizable upgrade_")
+        lines.append("_🥇 BiS from an earlier phase (still best) · 🔥 current-tier BiS · 🥈 prior-tier, upgrade available · ↔️ minor upgrade · ❄️ sizable upgrade_")
 
     lines.append("")
 
@@ -461,7 +461,11 @@ def handle_gear_list(
                         oh_ep = cur_ep_by_slot.get("Off Hand", 0.0)
                         combined_gain = two_h_sr.ep - oh_ep
                         pct_off = combined_gain / two_h_sr.ep if two_h_sr.ep > 0 else 0
-                        marker = "❄️" if pct_off > 0.20 else ("➡️" if pct_off > 0.10 else "🔥")
+                        mh_phase = equipped_phase_by_name.get(cur_name, phase)
+                        if mh_phase and phase and mh_phase < phase:
+                            marker = "🥈"
+                        else:
+                            marker = "❄️" if pct_off > 0.20 else ("↔️" if pct_off > 0.10 else "🔥")
                         if combined_gain > 0.5:
                             line = (
                                 f"{marker} **{slot}** {cur_name} `{cur_ep:.1f}` "
@@ -503,15 +507,20 @@ def handle_gear_list(
                 gain = sr.ep
                 bis_ep = cur_ep + gain
                 pct_off = gain / bis_ep if bis_ep > 0 else 0
+                cur_phase = equipped_phase_by_name.get(cur_name, phase)
                 if gain <= 0:
                     # Equipped item is better than anything in the DB — it IS BiS.
                     # Use the equipped item's actual phase for the 🥇/🔥 marker.
-                    cur_phase = equipped_phase_by_name.get(cur_name, phase)
                     marker = _bis_marker(cur_phase, phase)
+                elif cur_phase and phase and cur_phase < phase:
+                    # They're wearing PRIOR-TIER gear that has a current-tier upgrade.
+                    # That's not "in greens" (❄️) — it's a respectable piece with a
+                    # clear step up. 🥈 distinguishes it from true undergeared slots.
+                    marker = "🥈"
                 elif pct_off <= 0.10:
                     marker = "🔥"
                 elif pct_off <= 0.20:
-                    marker = "➡️"
+                    marker = "↔️"
                 else:
                     marker = "❄️"
                 src_str = f" — {sr.source}" if sr.source else ""

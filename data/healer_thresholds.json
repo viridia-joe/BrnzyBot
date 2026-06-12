@@ -39,7 +39,8 @@
     "base_mana": 3496,
     "healing":   {"minimum": 1200, "comfortable": 1500, "well_geared": 1800},
     "mp5":       {"minimum": 25,   "comfortable": 45,   "well_geared": 65},
-    "mana_pool": {"minimum": 8000, "comfortable": 9500, "well_geared": 11000},
-    "regen_note": "HoT specialist — Spirit is very valuable (Intensity gives while-casting regen; Tree of Life aura). Spell haste speeds HoT application. MP5 matters less than for shamans."
+    "mana_pool": {"minimum": 6500, "comfortable": 7500, "well_geared": 9000},
+    "mana_pool_note": "Druids are the least mana-stressed TBC healer (HoTs are cheap, Intensity gives while-casting Spirit regen, Tree of Life cuts costs ~20%). They deliberately don't stack Intellect, so a modest pool is normal — judge them on +Healing and Spirit, not pool size. Floor is a leveling/undergeared sanity check only; a P2 raider sits ~7,800 unbuffed (~9,500 raid-buffed).",
+    "regen_note": "HoT specialist — Spirit is very valuable (Intensity gives while-casting regen; Tree of Life aura). Spell haste speeds HoT application. MP5 and a big mana pool matter less than for shamans/paladins."
   }
 }

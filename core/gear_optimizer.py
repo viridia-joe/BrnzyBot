@@ -859,13 +859,24 @@ def _solve(problem: dict, candidates: list[dict], spec_data: dict,
     set_counts: dict[str, int] = {}
     total_hit = 0.0
 
-    # Build slot → equipped EP lookup so we can show marginal gain per swap
-    equipped_ep_by_slot: dict[str, float] = {}
+    # Build slot → equipped EP lookup so we can show marginal gain per swap.
+    # For a NEW item, the marginal gain is measured against the item it would
+    # displace. In a single slot that's the equipped piece. In a DUAL slot
+    # (Ring/Trinket) a new piece displaces the *weaker* of the two equipped —
+    # NOT the sum of both (subtracting the sum makes a strong new ring look like
+    # a huge negative, e.g. Coral Band showing -81 EP / a phantom "30 EP BiS").
+    _DUAL_SLOTS_OPT = {"Ring", "Trinket", "Finger"}
+    _equipped_eps_by_slot: dict[str, list[float]] = {}
     for item in candidates:
         if item["equipped"]:
-            slot = item["slot"]
-            # For dual slots (Ring/Trinket) sum both; for others take the single value
-            equipped_ep_by_slot[slot] = equipped_ep_by_slot.get(slot, 0.0) + item["base_ep"]
+            _equipped_eps_by_slot.setdefault(item["slot"], []).append(item["base_ep"])
+    equipped_ep_by_slot: dict[str, float] = {}        # for equipped-item display
+    displaced_ep_by_slot: dict[str, float] = {}       # what a NEW item replaces
+    for slot, eps in _equipped_eps_by_slot.items():
+        equipped_ep_by_slot[slot] = sum(eps)
+        # A new item in a dual slot replaces the weaker equipped piece; in a
+        # single slot it replaces the one equipped piece.
+        displaced_ep_by_slot[slot] = min(eps) if slot in _DUAL_SLOTS_OPT else sum(eps)
 
     result_ids = []
     current_ep = sum(item["base_ep"] for item in candidates if item["equipped"])
@@ -876,12 +887,13 @@ def _solve(problem: dict, candidates: list[dict], spec_data: dict,
             if item["set_name"]:
                 set_counts[item["set_name"]] = set_counts.get(item["set_name"], 0) + 1
 
-            # Per-slot EP: marginal gain over what was equipped, or raw EP if nothing equipped
-            slot_equipped_ep = equipped_ep_by_slot.get(item["slot"], 0.0)
+            # Per-slot EP: an equipped item shows its absolute EP; a new item
+            # shows marginal gain over the piece it would displace (the weaker
+            # equipped item for dual slots), or raw EP if the slot was empty.
             if item["equipped"]:
                 slot_display_ep = item["base_ep"]
             else:
-                slot_display_ep = item["base_ep"] - slot_equipped_ep
+                slot_display_ep = item["base_ep"] - displaced_ep_by_slot.get(item["slot"], 0.0)
 
             slots_result.append(SlotResult(
                 slot=item["slot"],

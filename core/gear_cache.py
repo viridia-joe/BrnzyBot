@@ -520,6 +520,60 @@ WCL_CLASS_NAME = {
 }
 
 
+def spec_from_stats(wow_class: str, stats: dict) -> str | None:
+    """
+    Infer a raider's role/spec from their CombatantInfo stat block.
+
+    TBC Anniversary logs report specID=0 and an empty talentTree, so neither the
+    specID nor talents can tell us a hybrid class's role. The stat block IS
+    populated, so we separate healer / tank / dps within a class from it. Tuned
+    on real Dreamscythe logs. Shared by /addchar auto-detect and /audit roster.
+
+      - Healers stack Intellect + Spirit with little/no spell-crit gear.
+      - Tanks carry far more armor + Stamina than dps/healer peers.
+      - Casters with real Spell Crit are dps; pure int/spirit are healers.
+    Pure-dps classes (Mage/Warlock/Rogue/Hunter) fall through to the class default.
+    """
+    cls = (wow_class or "").strip()
+    g = lambda k: float(stats.get(k) or 0)
+    intel, spirit = g("intellect"), g("spirit")
+    strn, agi = g("strength"), g("agility")
+    crit_spell = g("critSpell")
+    armor, stam = g("armor"), g("stamina")
+    caster = intel > max(strn, agi)
+
+    if cls == "Druid":
+        if armor > 18000 and agi > intel:
+            return "feral_bear_druid"
+        if agi > intel and agi > 350:
+            return "feral_cat_druid"
+        if caster and crit_spell < 50 and spirit > 250:
+            return "resto_druid"
+        return "balance_druid"
+    if cls == "Paladin":
+        if caster and spirit > 150 and crit_spell < 200:
+            return "holy_paladin"
+        if armor > 12000 and stam > 700:
+            return "prot_paladin"
+        return "ret_paladin"
+    if cls == "Shaman":
+        if caster and spirit > 200 and crit_spell < 120:
+            return "resto_shaman"
+        if agi > intel:
+            return "enh_shaman"
+        return "ele_shaman"
+    if cls == "Priest":
+        if spirit > 250 and crit_spell < 150:
+            return "holy_priest"
+        return "shadow_priest"
+    if cls == "Warrior":
+        if armor > 14000 and stam > 900:
+            return "prot_warrior"
+        return "arms_warrior" if strn > 800 and agi < 250 else "fury_warrior"
+
+    return None  # pure-dps class: caller uses WCL_CLASS_DEFAULT_SPEC
+
+
 _CLASS_NAME_TO_ID: dict[str, int] = {
     "Warrior": 1, "Paladin": 2, "Hunter": 3, "Rogue": 4, "Priest": 5,
     "Shaman": 7, "Mage": 8, "Warlock": 9, "Druid": 11,
@@ -676,6 +730,17 @@ def fetch_character_spec(
                 )
                 class_id = inferred
                 spec_key = None   # re-derive below using corrected class
+
+        # specID is 0/unknown on TBC Anniversary → infer role from the stat block
+        # (so a Prot tank isn't mis-saved as Fury, a Resto druid as Balance, etc.)
+        # before falling back to the class default.
+        if not spec_key and events:
+            stats = events[-1]
+            inferred_spec = spec_from_stats(WCL_CLASS_NAME.get(class_id, ""), stats)
+            if inferred_spec:
+                spec_key = inferred_spec
+                log.info("WCL spec lookup: %s specID unknown → stat-inferred %s",
+                         display_name, spec_key)
 
         if not spec_key:
             spec_key = WCL_CLASS_DEFAULT_SPEC.get(class_id)

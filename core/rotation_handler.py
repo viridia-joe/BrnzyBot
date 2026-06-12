@@ -109,7 +109,10 @@ def load_baseline(spec: str, fight_name: str) -> dict | None:
 
 
 def _derive_spec_from_log(code: str, fight_id: int, actor_id: int) -> str | None:
-    """Read the player's spec from the analyzed pull's CombatantInfo (specID)."""
+    """Spec for THIS specific pull, from its CombatantInfo. Prefers specID, then
+    the stat-block heuristic (TBC Anniversary logs report specID=0). Detecting
+    per-fight is what lets /rotationcheck handle a raider who switches spec mid
+    report (e.g. ele early, resto late)."""
     try:
         events = wcl.get_combatant_info(code, fight_id)
     except RuntimeError:
@@ -119,8 +122,15 @@ def _derive_spec_from_log(code: str, fight_id: int, actor_id: int) -> str | None
         rec = events[-1]
     if not rec:
         return None
-    from core.gear_cache import WCL_SPEC_MAP  # lazy: keep import-light for CI checks
-    return WCL_SPEC_MAP.get(rec.get("specID"))
+    # lazy imports: keep this module import-light for CI's offline checks
+    from core.gear_cache import (WCL_SPEC_MAP, WCL_CLASS_NAME,
+                                 spec_from_stats, get_master_actors_class)
+    spec = WCL_SPEC_MAP.get(rec.get("specID"))
+    if spec:
+        return spec
+    # No usable specID → infer from the pull's stat block using the actor's class.
+    cls_name = get_master_actors_class(code, actor_id) or ""
+    return spec_from_stats(cls_name, rec)
 
 
 def verified_max_ranks(profile: dict) -> dict[str, int]:
@@ -538,14 +548,16 @@ def handle_rotation_check(
             pass  # fuzzy match is best-effort; don't block the real error
         return resolved
 
-    # 2. Resolve the spec: prefer a usable provided/registered spec, otherwise
-    #    derive it from the pull we're about to analyze (more accurate anyway).
+    # 2. Resolve the spec: prefer an explicitly provided spec, otherwise derive
+    #    it from THIS pull (per-fight detection handles spec-switchers correctly).
     spec_key = _resolve_spec_key(spec) if spec else None
     profile = load_profile(spec_key) if spec_key else None
+    spec_was_detected = False
     if profile is None:
         derived = _derive_spec_from_log(resolved.code, resolved.fight_id, resolved.actor_id)
         if derived:
             profile = load_profile(derived)
+            spec_was_detected = profile is not None
     if profile is None:
         covered = ", ".join(covered_specs()) or "(none)"
         who = f"**{spec}**" if spec else f"**{character}**'s spec"
@@ -573,6 +585,13 @@ def handle_rotation_check(
                        max_rank_ids=verified_max_ranks(profile),
                        baseline=baseline)
     out = _format(profile, resolved, analysis, character)
+
+    # Disclose auto-detected spec + how, so a spec-switcher knows which spec was
+    # analyzed and can override it. (When the user passed a spec, no note needed.)
+    if spec_was_detected:
+        disp = profile.get("display", profile.get("spec", "?"))
+        out += (f"\n\n_Spec auto-detected as **{disp}** from the {resolved.fight_name} "
+                f"pull. Different spec that fight? `/rotationcheck {character} <spec>`._")
 
     if entitlements.llm_enabled(guild_id):
         coached = _coach(profile, analysis, character)

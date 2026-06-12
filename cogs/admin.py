@@ -326,9 +326,11 @@ class AdminCog(commands.Cog, name="Admin"):
             display_name, detected_spec, class_id = result
             class_name = WCL_CLASS_NAME.get(class_id, "Unknown")
             reg_note = (
-                f"*Auto-registered **{display_name}** as `{detected_spec}` "
-                f"({class_name} on {realm}) from WCL. "
-                f"Wrong spec? `/addchar {display_name} <spec>` — see `/listspecs`.*"
+                f"*Auto-registered **{display_name}** ({class_name} on {realm}). "
+                f"Usual spec detected as `{detected_spec}` from recent logs — this is "
+                f"just a default; `/rotationcheck` and `/audit` re-detect spec per fight, "
+                f"so dual-spec is handled automatically. "
+                f"Wrong default? `/addchar {display_name} <spec>` — see `/listspecs`.*"
             )
 
         add_character(

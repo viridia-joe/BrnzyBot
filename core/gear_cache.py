@@ -520,6 +520,17 @@ WCL_CLASS_NAME = {
 }
 
 
+def get_master_actors_class(report_code: str, actor_id: int) -> str | None:
+    """Return an actor's class name (WCL subType) for one report, or None."""
+    try:
+        for a in wcl_client.get_master_actors(report_code):
+            if a.get("id") == actor_id:
+                return a.get("subType")
+    except Exception:
+        return None
+    return None
+
+
 def spec_from_stats(wow_class: str, stats: dict) -> str | None:
     """
     Infer a raider's role/spec from their CombatantInfo stat block.
@@ -540,20 +551,28 @@ def spec_from_stats(wow_class: str, stats: dict) -> str | None:
     strn, agi = g("strength"), g("agility")
     crit_spell = g("critSpell")
     armor, stam = g("armor"), g("stamina")
+    block = g("block")
     caster = intel > max(strn, agi)
 
+    # Tank tell, calibrated on real Dreamscythe logs: a tanking statline carries
+    # far more Stamina + Armor than the same character DPSing (e.g. a Warrior
+    # tank ~1000 stam / 17k armor vs ~700 stam / 9.5k armor as fury), and any
+    # block rating is plate-tank-only. This reads the *fight*, not the character.
+    plate_tank = (stam > 900 and armor > 14000) or block > 0
+    bear_tank  = (stam > 1000 and armor > 14000)
+
     if cls == "Druid":
-        if armor > 18000 and agi > intel:
+        if bear_tank and agi < intel + 400:        # bear: huge stam+armor
             return "feral_bear_druid"
-        if agi > intel and agi > 350:
+        if agi > intel and agi > 350:               # cat: agility melee
             return "feral_cat_druid"
         if caster and crit_spell < 50 and spirit > 250:
-            return "resto_druid"
-        return "balance_druid"
+            return "resto_druid"                    # int/spirit, no crit = healer
+        return "balance_druid"                      # caster with crit = moonkin
     if cls == "Paladin":
         if caster and spirit > 150 and crit_spell < 200:
             return "holy_paladin"
-        if armor > 12000 and stam > 700:
+        if plate_tank:
             return "prot_paladin"
         return "ret_paladin"
     if cls == "Shaman":
@@ -567,7 +586,7 @@ def spec_from_stats(wow_class: str, stats: dict) -> str | None:
             return "holy_priest"
         return "shadow_priest"
     if cls == "Warrior":
-        if armor > 14000 and stam > 900:
+        if plate_tank:
             return "prot_warrior"
         return "arms_warrior" if strn > 800 and agi < 250 else "fury_warrior"
 
@@ -731,16 +750,25 @@ def fetch_character_spec(
                 class_id = inferred
                 spec_key = None   # re-derive below using corrected class
 
-        # specID is 0/unknown on TBC Anniversary → infer role from the stat block
-        # (so a Prot tank isn't mis-saved as Fury, a Resto druid as Balance, etc.)
-        # before falling back to the class default.
+        # specID is 0/unknown on TBC Anniversary → infer role from the stat block.
+        # `events` holds one CombatantInfo per fight the actor was in, so scan all
+        # of them and take the most common spec. This is robust for dual-spec
+        # raiders whose latest single fight is ambiguous (a warrior who tanks some
+        # fights and DPSes others lands on whichever they did more of). The
+        # per-fight commands (/rotationcheck, /audit) still detect per pull; this
+        # is just the registry's "usual spec" default.
         if not spec_key and events:
-            stats = events[-1]
-            inferred_spec = spec_from_stats(WCL_CLASS_NAME.get(class_id, ""), stats)
-            if inferred_spec:
-                spec_key = inferred_spec
-                log.info("WCL spec lookup: %s specID unknown → stat-inferred %s",
-                         display_name, spec_key)
+            cls_name = WCL_CLASS_NAME.get(class_id, "")
+            votes: dict[str, int] = {}
+            for ev in events:
+                s = spec_from_stats(cls_name, ev)
+                if s:
+                    votes[s] = votes.get(s, 0) + 1
+            if votes:
+                spec_key = max(votes, key=votes.get)
+                log.info("WCL spec lookup: %s specID unknown → stat-inferred %s "
+                         "(votes across %d fights: %s)",
+                         display_name, spec_key, len(events), votes)
 
         if not spec_key:
             spec_key = WCL_CLASS_DEFAULT_SPEC.get(class_id)

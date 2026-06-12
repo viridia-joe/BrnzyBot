@@ -113,13 +113,17 @@ def _derive_spec_from_log(code: str, fight_id: int, actor_id: int) -> str | None
     the stat-block heuristic (TBC Anniversary logs report specID=0). Detecting
     per-fight is what lets /rotationcheck handle a raider who switches spec mid
     report (e.g. ele early, resto late)."""
+    # Fetch this actor's CombatantInfo across the report, then pick the event for
+    # THIS fight (the by-fight-only query returns nothing for some reports, but
+    # the by-source query reliably returns one event per fight, tagged with
+    # `fight`). This is what makes per-fight spec switches detectable.
     try:
-        events = wcl.get_combatant_info(code, fight_id)
+        events = wcl.get_combatant_info(code, source_id=actor_id)
     except RuntimeError:
         return None
-    rec = next((e for e in events if e.get("sourceID") == actor_id), None)
+    rec = next((e for e in events if e.get("fight") == fight_id), None)
     if rec is None and events:
-        rec = events[-1]
+        rec = events[-1]   # fall back to most recent if no exact fight match
     if not rec:
         return None
     # lazy imports: keep this module import-light for CI's offline checks

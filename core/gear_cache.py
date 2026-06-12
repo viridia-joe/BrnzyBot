@@ -522,6 +522,7 @@ WCL_CLASS_NAME = {
 
 def get_master_actors_class(report_code: str, actor_id: int) -> str | None:
     """Return an actor's class name (WCL subType) for one report, or None."""
+    from core import wcl_client  # module imports wcl_client lazily per-function
     try:
         for a in wcl_client.get_master_actors(report_code):
             if a.get("id") == actor_id:

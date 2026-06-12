@@ -44,12 +44,70 @@ _CLASS_DEFAULT_SPEC: dict[str, str] = {
 }
 
 
-def _spec_from_log(spec_id, wow_class: str) -> str | None:
-    """Derive a canonical spec key from the log's specID, then class default.
-    Returns None if neither is usable (caller then tries the registry)."""
+def _spec_from_stats(wow_class: str, stats: dict) -> str | None:
+    """
+    Infer a raider's role/spec from their CombatantInfo stat block when the log
+    gives us no specID or talent tree (TBC Anniversary logs report specID=0 and
+    empty talentTree, so this is the primary path, not a fallback).
+
+    Heuristics per hybrid class, tuned on real Dreamscythe logs:
+      - Healers stack Intellect + Spirit with little/no melee or spell-crit gear.
+      - Tanks carry far more armor + Stamina than their dps/healer peers.
+      - Casters with real Spell Crit are dps; pure int/spirit are healers.
+    Pure-dps classes (Mage/Warlock/Rogue/Hunter) just take the class default.
+    """
+    cls = (wow_class or "").strip()
+    g = lambda k: float(stats.get(k) or 0)
+    intel, spirit = g("intellect"), g("spirit")
+    strn, agi = g("strength"), g("agility")
+    crit_spell = g("critSpell")
+    armor, stam = g("armor"), g("stamina")
+    caster = intel > max(strn, agi)        # int-primary => caster body
+
+    if cls == "Druid":
+        if armor > 18000 and agi > intel:           # bear: huge armor, agi-built
+            return "feral_bear_druid"
+        if agi > intel and agi > 350:               # cat: agility melee
+            return "feral_cat_druid"
+        if caster and crit_spell < 50 and spirit > 250:
+            return "resto_druid"                    # int/spirit, no crit = healer
+        return "balance_druid"                      # caster with crit = moonkin
+    if cls == "Paladin":
+        if caster and spirit > 150 and crit_spell < 200:
+            return "holy_paladin"
+        if armor > 12000 and stam > 700:
+            return "prot_paladin"
+        return "ret_paladin"
+    if cls == "Shaman":
+        if caster and spirit > 200 and crit_spell < 120:
+            return "resto_shaman"
+        if agi > intel:
+            return "enh_shaman"
+        return "ele_shaman"
+    if cls == "Priest":
+        # Holy/Disc stack spirit+int; Shadow stacks spell crit/hit + shadow power.
+        if spirit > 250 and crit_spell < 150:
+            return "holy_priest"
+        return "shadow_priest"
+    if cls == "Warrior":
+        if armor > 14000 and stam > 900:
+            return "prot_warrior"
+        return "arms_warrior" if strn > 800 and agi < 250 else "fury_warrior"
+
+    return _CLASS_DEFAULT_SPEC.get(cls)
+
+
+def _spec_from_log(spec_id, wow_class: str, stats: dict | None = None) -> str | None:
+    """Derive a canonical spec key from the log. Prefers a real specID (rare on
+    TBC Anniversary), else infers role/spec from the stat block, else the class
+    default. Returns None only when even the class is unknown."""
     from core.gear_cache import WCL_SPEC_MAP
-    if spec_id is not None:
+    if spec_id:  # 0 / None both mean "not provided"
         key = WCL_SPEC_MAP.get(int(spec_id)) if str(spec_id).lstrip("-").isdigit() else None
+        if key:
+            return key
+    if stats:
+        key = _spec_from_stats(wow_class, stats)
         if key:
             return key
     return _CLASS_DEFAULT_SPEC.get((wow_class or "").strip())
@@ -706,12 +764,12 @@ def build_roster_audit(url: str, resolve_spec) -> RosterAudit:
             continue
         seen.add(name.lower())
 
-        # Prefer the spec the LOG reports (specID from CombatantInfo), then the
-        # class default, and only fall back to the guild registry. The log is
-        # ground truth — this audits the whole raid without prior registration
-        # AND fixes stale/wrong registry entries (e.g. a warrior mis-saved as a
-        # druid). resolve_spec (registry) is the last resort, not the first.
-        spec = _spec_from_log(norm.get("spec_id"), actor.get("subType", "")) \
+        # Prefer the spec the LOG reports (specID, else the stat block), and only
+        # fall back to the guild registry. The log is ground truth — this audits
+        # the whole raid without prior registration AND fixes stale/wrong registry
+        # entries (e.g. a warrior mis-saved as a druid). TBC Anniversary logs give
+        # no specID/talents, so the stat-block heuristic does the real work.
+        spec = _spec_from_log(norm.get("spec_id"), actor.get("subType", ""), rec) \
             or resolve_spec(name, actor.get("subType", ""))
         profile = get_profile(spec) if spec else None
         if profile is None:

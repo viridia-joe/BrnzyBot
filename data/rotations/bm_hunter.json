@@ -45,8 +45,8 @@
       "note": "AoE used on a single-target encounter  -  likely a misfire"
     },
     "Explosive Trap": {
-      "min_casts": 3,
-      "note": "trap used on single-target boss  -  rarely correct outside niche mechanics"
+      "min_casts": 8,
+      "note": "heavy Explosive Trap use - correct AoE on add phases (e.g. Nightbane skeletons, Gurtogg), but on a pure single-target pull it is a DPS loss vs Steady Shot weaving"
     }
   },
   "breakpoint": {

@@ -17,9 +17,7 @@
   ],
   "ranks_verified": true,
   "max_rank_ids": {
-    "Arcane Missiles": 38699,
-    "Frostbolt": 38697,
-    "Fireball": 38692
+    "Fireball": 27070
   },
   "off_rotation": {
     "Fireball": {

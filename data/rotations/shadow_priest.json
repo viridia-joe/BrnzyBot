@@ -22,13 +22,9 @@
     "Shadow Word: Death"
   ],
   "ranks_verified": true,
+  "_max_rank_note": "Only SW:Pain (25368) confirmed against live TBC Anniversary log abilities. Mind Blast/Mind Flay/VT/Devouring Plague/SW:Death IDs were unverified guesses (live logs show e.g. Mind Flay 29570, not 25387) and were removed to avoid flagging correct max-rank casts. Re-add when confirmed from a player shadow priest's casts.",
   "max_rank_ids": {
-    "Mind Blast": 25375,
-    "Mind Flay": 25387,
-    "Shadow Word: Pain": 25368,
-    "Vampiric Touch": 34914,
-    "Devouring Plague": 25467,
-    "Shadow Word: Death": 32996
+    "Shadow Word: Pain": 25368
   },
   "off_rotation": {
     "Smite": {

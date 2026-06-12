@@ -14,11 +14,9 @@
     "Frostbolt",
     "Ice Lance"
   ],
-  "ranks_verified": true,
-  "max_rank_ids": {
-    "Frostbolt": 38697,
-    "Ice Lance": 30455
-  },
+  "ranks_verified": false,
+  "_max_rank_note": "Frostbolt/Ice Lance max-rank IDs not yet confirmed against live TBC Anniversary player casts; downrank check disabled until verified to avoid false positives.",
+  "max_rank_ids": {},
   "off_rotation": {
     "Fireball": {
       "min_casts": 5,

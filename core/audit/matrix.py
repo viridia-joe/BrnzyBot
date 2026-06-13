@@ -202,10 +202,16 @@ def gather_raid_matrix(report_code: str, include_wipes: bool = False) -> RaidMat
         m.gear[name] = normalize_combatant(latest_ev)
 
         # Usual spec = most common across this player's kept fights.
+        from core.gear_cache import WCL_CLASS_DEFAULT_SPEC, _CLASS_NAME_TO_ID
+        cls_default = WCL_CLASS_DEFAULT_SPEC.get(_CLASS_NAME_TO_ID.get(cls))
         votes: dict[str, int] = {}
         cells: dict[int, Cell] = {}
         for fid, ev in fight_events.items():
-            spec = WCL_SPEC_MAP.get(ev.get("specID")) or spec_from_stats(cls, ev)
+            # specID (rare on Anniversary) → stat heuristic (hybrid classes) →
+            # class default (pure-DPS classes like Warlock/Mage/Rogue/Hunter).
+            spec = (WCL_SPEC_MAP.get(ev.get("specID"))
+                    or spec_from_stats(cls, ev)
+                    or cls_default)
             if spec:
                 votes[spec] = votes.get(spec, 0) + 1
             cells[fid] = Cell(

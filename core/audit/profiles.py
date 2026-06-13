@@ -133,6 +133,7 @@ ELE_SHAMAN = SpecProfile(
             # Elemental scales well with crit, so Brilliant (+14 crit) is the best
             # caster oil here, not Superior (see weights note below).
             accepted=("Brilliant Wizard Oil", "Superior Wizard Oil"),
+            required=False,   # real DPS gain but not flask-critical → ⚠️ when absent
             note="Frequently the most-missed buff (see Brnzy: 'Weapon Buffs: No?').",
         ),
         ConsumeRule(

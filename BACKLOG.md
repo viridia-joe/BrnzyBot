@@ -58,6 +58,20 @@ Preparation audit is shipped. Execution phase wired (cast analysis from rotation
 
 ---
 
+## Deep-Research the Heartbeat Lore + Jokes for Accuracy/Quality
+
+**Priority:** Medium · **Effort:** Medium
+
+The raid TIPS were full of hallucinated mechanics (Hydross NR/FR reversed, Leotheras "3 tanks + tremor totem", Morogrim "Tidal Surge", Vashj "5 generators", etc.) and got a full deep-research verification pass. The other heartbeat content needs the same treatment:
+
+- **Lore (95 entries):** deep-research each against Wowhead/Warcraft Wiki/WoWpedia TBC lore. Lower stakes than tips (flavor, not actionable) but the same hallucination risk - wrong character relationships, invented backstory, conflated lore. Verify and correct.
+- **Jokes (102 entries):** many are genuinely unfunny/terrible - this is a quality cull + rewrite, not just accuracy. Drop the dead ones, sharpen or replace with actually-funny WoW/raiding humor.
+- **"Chinese memes" / spammacros (25 entries):** these are MEANT to be broken-English, slightly-condescending-to-American-players callouts that actually reflect the fights (the classic CN-server meme voice). Right now they're weak. Research the real fight mechanics and rewrite them in that authentic voice - broken English, a little smug, but mechanically grounded (e.g. a real Vashj/Kael mechanic delivered in the meme register). Keep them in good taste.
+
+Reuse the `verify-raid-tips` workflow pattern (chunk by encounter/topic, structured JSON of index -> corrected text, then apply + validate JSON + no fancy Unicode).
+
+---
+
 ## Food Buff Aura Names — verify the long tail
 
 **Priority:** Low · **Effort:** Low

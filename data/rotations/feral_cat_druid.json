@@ -22,22 +22,23 @@
     "Ferocious Bite"
   ],
   "ranks_verified": false,
+  "_dev_note": "Wrong-expansion guard (not user-facing): Savage Roar and Berserk are WotLK abilities and have no off_rotation entry here; advisory previously called this out, removed to keep user-facing text clean.",
   "off_rotation": {
     "Maul": {
       "min_casts": 5,
-      "note": "bear form AoE ability  -  should not appear in a Cat DPS parse; indicates shapeshifting or wrong form"
+      "note": "Bear form ability - wrong form for a Cat DPS parse; indicates shapeshifting or wrong stance"
     },
     "Moonfire": {
       "min_casts": 5,
-      "note": "Balance damage spell  -  using Moonfire in cat form costs a shapeshift; only valid as a DoT in caster form during travel"
+      "note": "Balance spell - casting Moonfire costs a shapeshift out of cat; only situational as a caster-form DoT during forced movement"
     },
     "Healing Touch": {
       "min_casts": 3,
-      "note": "healing in a DPS parse  -  indicates significant emergency healing or wrong role"
+      "note": "Healing in a DPS parse - indicates emergency off-healing or wrong role assignment"
     },
     "Swipe": {
       "min_casts": 8,
-      "note": "AoE cat ability  -  heavy single-target use is a DPS loss vs Shred spam"
+      "note": "AoE cat ability - heavy single-target use is a DPS loss vs Shred spam"
     }
   },
   "breakpoint": {
@@ -45,8 +46,8 @@
       "Shred",
       "Rip"
     ],
-    "note": "Rip should almost always be the 5-point finisher  -  it provides the highest sustained DPS. Ferocious Bite is only the correct choice when Rip and Rake are already active with enough duration and energy is capping. Mangle (Cat) maintains both the direct damage and a debuff that increases bleed damage  -  it must be kept on cooldown."
+    "note": "Rip should almost always be the 5-point finisher - it provides the highest sustained DPS. Ferocious Bite is only the correct choice when Rip and Rake are already active with enough duration and energy is capping. Mangle (Cat) maintains both the direct damage and a debuff that increases bleed damage - it must be kept on cooldown."
   },
-  "advisory": "IMPORTANT: Savage Roar and Berserk do NOT exist in TBC Classic  -  they were added in Wrath. Cat DPS in TBC lacks an energy regen buff, so Tiger's Fury (the only energy cooldown at 60s) must be used consistently. Shred requires being behind the target  -  cat positioning on bosses is critical and a common DPS loss when missed. Faerie Fire (Feral) reduces the target's armor and should be applied at pull and maintained (it is cast in caster form or via macro).",
+  "advisory": "Cat DPS in TBC lacks an energy regen buff, so Tiger's Fury (the only energy cooldown at 60s) must be used consistently. Shred requires being behind the target - cat positioning on bosses is critical and a common DPS loss when missed. Faerie Fire (Feral) reduces the target's armor and should be applied at pull and maintained (it is cast in caster form or via macro). Fight notes: Feral is a pure single-target spec - on positioning-heavy fights (Lady Vashj, Kael'thas, Leotheras) protect Shred uptime by staying behind the boss, since being pushed to the front forces lower-DPS Mangle/Claw spam. On forced-movement phases watch Rake/Rip bleed clipping and refresh them the instant you re-engage; on add waves prefer holding cooldowns for the boss rather than dumping energy on Swipe.",
   "notes_verified": false
 }

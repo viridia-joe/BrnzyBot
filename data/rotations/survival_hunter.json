@@ -5,6 +5,7 @@
   "role": "ranged_dps",
   "source": "Icy Veins / Wowhead TBC guides + WCL top Survival parses",
   "summary": "Steady Shot weave, Serpent Sting maintained, Multi-Shot on cooldown. Expose Weakness (armor debuff on crits) is the primary raid contribution. Readiness resets all cooldowns on a 5-min timer.",
+  "_dev_note": "Wrong-expansion guard (not user-facing): Explosive Shot and Kill Shot are WotLK abilities; if they ever appear in a log the parse is mislabeled.",
   "core_spells": [
     "Steady Shot",
     "Serpent Sting",
@@ -26,11 +27,11 @@
   "off_rotation": {
     "Aspect of the Monkey": {
       "min_casts": 5,
-      "note": "should be in Aspect of the Hawk for DPS  -  Monkey is melee avoidance only"
+      "note": "should be in Aspect of the Hawk for DPS - Monkey is melee avoidance only"
     },
     "Aspect of the Viper": {
       "min_casts": 15,
-      "note": "sustained Viper use means running OOM  -  check consumables"
+      "note": "sustained Viper use means running OOM - check consumables"
     },
     "Wing Clip": {
       "min_casts": 5,
@@ -38,7 +39,7 @@
     },
     "Wyvern Sting": {
       "min_casts": 3,
-      "note": "CC utility ability used as a filler  -  should not appear on a non-CC encounter"
+      "note": "CC utility ability used as a filler - should not appear on a non-CC encounter"
     },
     "Volley": {
       "min_casts": 5,
@@ -50,8 +51,8 @@
       "Steady Shot",
       "Multi-Shot"
     ],
-    "note": "Survival's shot rotation is mechanically identical to BM  -  the difference is in the talent tree (Expose Weakness, Lightning Reflexes, Resourcefulness). A survival hunter parse that looks exactly like a BM parse is working correctly."
+    "note": "Survival's shot rotation is mechanically identical to BM - the difference is in the talent tree (Expose Weakness, Lightning Reflexes, Resourcefulness). A survival hunter parse that looks exactly like a BM parse is working correctly."
   },
-  "advisory": "Expose Weakness procs on ranged crits and reduces the target's armor  -  this is a significant raid DPS contribution that doesn't show directly in the hunter's personal damage. Readiness (resets all cooldowns on a 5-min timer) enables a double-Rapid Fire burst window. Note: Explosive Shot and Kill Shot do NOT exist in TBC  -  they were added in Wrath.",
+  "advisory": "Expose Weakness procs on ranged crits and reduces the target's armor - this is a significant raid DPS contribution that doesn't show directly in the hunter's personal damage. Readiness (resets all cooldowns on a 5-min timer) enables a double-Rapid Fire burst window. Fight notes: on add-heavy phases (Karathress murlocs, Nightbane skeletons, Hydross adds) swap Multi-Shot weave for Volley and an Explosive Trap on the spawn point; use Misdirection on pulls to feed threat to the tank, and switch to Aspect of the Viper only when a fight's long downtime or movement (Vashj striders, Kael phases) is draining your mana.",
   "notes_verified": false
 }

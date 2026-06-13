@@ -25,9 +25,9 @@
   "off_rotation": {
     "Frostbolt": {
       "min_casts": 5,
-      "note": "a fire mage casting Frostbolt  -  check spec/macros"
+      "note": "Frost ability - wrong spec for a Fire mage; check spec/macros"
     }
   },
-  "advisory": "Scorch is only for maintaining the 5-stack Improved Scorch debuff  -  beyond keeping it up, every Scorch should be a Fireball. Heavy Scorch counts can mean over-scorching.",
+  "advisory": "Scorch is only for maintaining the 5-stack Improved Scorch debuff - beyond keeping it up, every Scorch should be a Fireball. Heavy Scorch counts can mean over-scorching. Fight notes: on movement-heavy fights (Vashj phase 2 kiting, Kael weapons, Shade of Aran), expect more Fire Blast and Scorch as your only on-the-move filler - don't read those as rotation errors. On add-heavy pulls (Karathress, Hyjal trash, Council), drop the single-target Fireball loop for Arcane Explosion or Flamestrike to maximize AoE throughput, while keeping the Scorch debuff parked on the boss/priority target.",
   "notes_verified": false
 }

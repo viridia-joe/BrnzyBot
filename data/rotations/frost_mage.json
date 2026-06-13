@@ -20,9 +20,9 @@
   "off_rotation": {
     "Fireball": {
       "min_casts": 5,
-      "note": "a frost mage casting Fireball heavily  -  check spec/macros"
+      "note": "Fire ability - wrong spec for a Frost mage, check spec/macros"
     }
   },
-  "advisory": "Frostbolt should be the overwhelming majority of casts. Ice Lance is a low-damage instant  -  only valuable while moving or with Fingers of Frost procs.",
+  "advisory": "Frostbolt should be the overwhelming majority of casts. Ice Lance is a low-damage instant - only valuable while moving or with Fingers of Frost procs. Fight notes: on movement-heavy fights (Vashj phase 2 striders, Kael weapon phase) lean on Ice Lance and Fire Blast to keep some uptime, but don't spam them while standing still. On AoE/add pulls (Hydross adds, SSC trash, Kael's advisors) swap in Cone of Cold and Arcane Explosion / Blizzard, and keep Frostbolt for single-target priority targets.",
   "notes_verified": false
 }

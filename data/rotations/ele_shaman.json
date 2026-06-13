@@ -24,7 +24,7 @@
   "off_rotation": {
     "Healing Wave": {
       "min_casts": 3,
-      "note": "healing during a DPS parse  -  a sign of a heal bound where a nuke should be"
+      "note": "healing during a DPS parse - a nuke was likely skipped to heal"
     },
     "Lesser Healing Wave": {
       "min_casts": 3,
@@ -40,7 +40,8 @@
       "Chain Lightning",
       "Lightning Bolt"
     ],
-    "note": "Lightning Bolt is the filler with Chain Lightning woven on cooldown. As spell power scales, Chain Lightning's higher per-cast damage makes it increasingly worth casting on every cooldown  -  a near-zero Chain Lightning count usually means DPS left on the table."
+    "note": "Lightning Bolt is the filler with Chain Lightning woven on cooldown. As spell power scales, Chain Lightning's higher per-cast damage makes it increasingly worth casting on every cooldown - a near-zero Chain Lightning count usually means DPS left on the table."
   },
+  "advisory": "Keep Flame Shock ticking and weave Chain Lightning on cooldown between Lightning Bolt fillers; watch mana and drop Mana Spring / use Bloodlust windows for burst. Fight notes: Chain Lightning shines on add-heavy pulls (Karathress, Hyjal trash, Kael adds) where it can hit multiple targets - prioritize it there over single-target rotation. On movement-heavy fights (Vashj striders, Solarian) Flame Shock uptime suffers, so refresh it the moment you have a free GCD, and on pure single-target tank-and-spank keep Chain Lightning every cooldown rather than overcapping on Lightning Bolt.",
   "notes_verified": false
 }

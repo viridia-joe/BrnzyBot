@@ -3,7 +3,7 @@
   "display": "Subtlety Rogue",
   "class": "Rogue",
   "role": "melee_dps",
-  "source": "Wowhead TBC guides  -  note: Subtlety is primarily a PvP spec in TBC; rarely optimal in raids",
+  "source": "Wowhead TBC guides - note: Subtlety is primarily a PvP spec in TBC; rarely optimal in raids",
   "summary": "Hemorrhage as the primary combo builder (applies a stacking physical damage debuff). Keep Slice and Dice up, Rupture for bleed, Eviscerate as dump. Shadowstep for gap closing. Primarily valued in raids for the Hemorrhage armor debuff.",
   "core_spells": [
     "Hemorrhage",
@@ -22,11 +22,11 @@
   "off_rotation": {
     "Sinister Strike": {
       "min_casts": 20,
-      "note": "Combat combo builder  -  a Subtlety build should use Hemorrhage as its primary combo point generator"
+      "note": "Combat combo builder - a Subtlety build should use Hemorrhage as its primary combo point generator"
     },
     "Mutilate": {
       "min_casts": 5,
-      "note": "Assassination combo builder  -  wrong spec"
+      "note": "Assassination ability - wrong spec for a Subtlety rogue"
     }
   },
   "breakpoint": {
@@ -34,8 +34,8 @@
       "Hemorrhage",
       "Eviscerate"
     ],
-    "note": "Hemorrhage applies a stacking physical damage taken debuff  -  the main reason to bring Subtlety to a raid. If no other rogues or warriors are maintaining this debuff, it provides real value. In a full melee group it may be redundant."
+    "note": "Hemorrhage applies a stacking physical damage taken debuff - the main reason to bring Subtlety to a raid. If no other rogues or warriors are maintaining this debuff, it provides real value. In a full melee group it may be redundant."
   },
-  "advisory": "Subtlety is rarely brought to SSC/TK raids for DPS  -  it underperforms Combat and Assassination on sustained single-target. Its primary raid value is the Hemorrhage debuff (+3 stacks of increased physical damage taken) and utility. If you see a Subtlety rogue in the log, confirm the Hemorrhage debuff is being maintained and the spec choice is intentional.",
+  "advisory": "Subtlety is rarely brought to SSC/TK raids for DPS - it underperforms Combat and Assassination on sustained single-target. Its primary raid value is the Hemorrhage debuff (+3 stacks of increased physical damage taken) and utility. If you see a Subtlety rogue in the log, confirm the Hemorrhage debuff is being maintained and the spec choice is intentional. Fight notes: Hemorrhage uptime is what justifies the spec - on heavy-melee fights (Gruul, Hydross, single-target bosses) make sure the debuff stays at full stacks so the rest of the melee group benefits. With Premeditation + Shadowstep you can re-open instantly after forced movement (Vashj striders, Kael phase transitions), so prioritize staying on the boss to keep Slice and Dice and Rupture rolling.",
   "notes_verified": false
 }

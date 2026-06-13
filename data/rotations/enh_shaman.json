@@ -5,6 +5,7 @@
   "role": "melee_dps",
   "source": "Icy Veins / Wowhead TBC guides + WCL top Enhancement parses",
   "summary": "Stormstrike on 8s cooldown, weave Earth Shock between melee swings, Lightning Shield maintained. Windfury Weapon on main hand, Flametongue on off-hand. Shamanistic Rage for mana/cooldown management.",
+  "_dev_note": "Wrong-expansion guard (do NOT surface to users): Lava Lash and Maelstrom Weapon are WotLK abilities and are not in this profile's rotation; mention kept here only as an internal reminder.",
   "core_spells": [
     "Stormstrike",
     "Earth Shock",
@@ -24,11 +25,11 @@
   "off_rotation": {
     "Chain Lightning": {
       "min_casts": 5,
-      "note": "AoE spell  -  heavy single-target use is a significant DPS loss vs melee + shocks"
+      "note": "AoE spell - heavy single-target use is a significant DPS loss vs melee + shocks"
     },
     "Chain Heal": {
       "min_casts": 3,
-      "note": "healing during a DPS parse  -  indicates emergency or wrong role"
+      "note": "healing during a DPS parse - indicates emergency or wrong role"
     },
     "Healing Wave": {
       "min_casts": 3,
@@ -36,7 +37,7 @@
     },
     "Lightning Bolt": {
       "min_casts": 5,
-      "note": "caster spell  -  Enhancement DPS comes from melee, not spellcasting; heavy LB use means out of melee range or wrong spec"
+      "note": "caster spell - Enhancement DPS comes from melee, not spellcasting; heavy LB use means out of melee range or wrong spec"
     }
   },
   "breakpoint": {
@@ -44,8 +45,8 @@
       "Stormstrike",
       "Earth Shock"
     ],
-    "note": "Stormstrike is the signature Enhancement ability  -  it should appear every 8 seconds. Earth Shock should weave between melee swings on a consistent timer. The bulk of Enhancement DPS is from white hits (melee auto attacks) empowered by Windfury Weapon procs, which don't show as casts in the log  -  a low spell cast count is normal and correct."
+    "note": "Stormstrike is the signature Enhancement ability - it should appear every 8 seconds. Earth Shock should weave between melee swings on a consistent timer. The bulk of Enhancement DPS is from white hits (melee auto attacks) empowered by Windfury Weapon procs, which don't show as casts in the log - a low spell cast count is normal and correct."
   },
-  "advisory": "IMPORTANT: Lava Lash does NOT exist in TBC Classic  -  it was added in Wrath. Windfury Weapon (main hand) is the core DPS mechanic  -  it must be on the MH weapon. Expose Weakness procs on hits and reduces the target's armor, providing significant raid DPS contribution that doesn't appear in the hunter's personal damage. Bloodlust/Heroism is the Enhancement shaman's biggest raid cooldown. Shamanistic Rage provides both a DPS burst and mana restoration  -  use it on cooldown.",
+  "advisory": "Windfury Weapon (main hand) is the core DPS mechanic - it must be on the MH weapon. Expose Weakness procs on hits and reduces the target's armor, providing significant raid DPS contribution that doesn't appear in your personal damage. Bloodlust/Heroism is the Enhancement shaman's biggest raid cooldown. Shamanistic Rage provides both a DPS burst and mana restoration - use it on cooldown. Fight notes: keep Flame Shock rolling on single-target tank-and-spank, but on movement-heavy fights (Vashj phase 2, Kael adds, Hydross transitions) expect uptime to suffer - reposition to stay in melee for Windfury rather than chasing shock timers. On add-heavy pulls (Karathress catfish, Council, trash packs) Chain Lightning becomes worthwhile cleave; otherwise stay on melee + Earth Shock for single-target.",
   "notes_verified": false
 }

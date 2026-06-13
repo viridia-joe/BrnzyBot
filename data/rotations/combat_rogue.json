@@ -22,15 +22,15 @@
   "off_rotation": {
     "Backstab": {
       "min_casts": 10,
-      "note": "dagger+behind combo builder  -  Combat builds use Sinister Strike, not Backstab; heavy Backstab means wrong spec or action bar"
+      "note": "dagger/behind combo builder - Combat uses Sinister Strike, wrong spec or action bar"
     },
     "Mutilate": {
       "min_casts": 5,
-      "note": "Assassination combo builder  -  wrong spec entirely for a Combat build"
+      "note": "Assassination combo builder - wrong spec for a Combat build"
     },
     "Hemorrhage": {
       "min_casts": 10,
-      "note": "Subtlety combo builder  -  wrong spec for Combat"
+      "note": "Subtlety combo builder - wrong spec for Combat"
     }
   },
   "breakpoint": {
@@ -38,8 +38,8 @@
       "Sinister Strike",
       "Eviscerate"
     ],
-    "note": "Slice and Dice uptime is the single most important metric for Combat  -  it should be up nearly 100% of the fight after the opener. Sinister Strike should be the dominant spell after auto attacks. Rupture adds sustained bleed damage and should maintain high uptime."
+    "note": "Slice and Dice uptime is the single most important metric for Combat - it should be up nearly 100% of the fight after the opener. Sinister Strike should be the dominant spell after auto attacks. Rupture adds sustained bleed damage and should maintain high uptime."
   },
-  "advisory": "Combat (Swords/Maces) is the dominant TBC raid rogue spec. Slice and Dice must never drop  -  refreshing it at 1 stack is fine. Adrenaline Rush doubles energy regeneration for 15s and should be used on cooldown. Blade Flurry adds a second swing for 15s  -  excellent on multi-target. Expose Armor (if assigned by raid leader) replaces one Eviscerate every 30s.",
+  "advisory": "Combat (Swords/Maces) is the dominant TBC raid rogue spec. Slice and Dice must never drop - refreshing it at 1 stack is fine. Adrenaline Rush doubles energy regeneration for 15s and should be used on cooldown. Blade Flurry adds a second swing for 15s - excellent on multi-target. Expose Armor (if assigned by raid leader) replaces one Eviscerate every 30s. Fight notes: time Blade Flurry with Adrenaline Rush onto cleave windows - Illidari Council, Hydross add waves, and Gurtogg/Najentus packs - rather than burning it on single-target. On positioning fights like Lady Vashj and Kael where uptime drops, protect Slice and Dice and Rupture first, and swap to Aspect-style sustain by pooling energy before forced movement so you re-enter melee mid-cycle.",
   "notes_verified": false
 }

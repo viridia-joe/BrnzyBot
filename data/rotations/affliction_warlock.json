@@ -31,17 +31,17 @@
   "off_rotation": {
     "Searing Pain": {
       "min_casts": 3,
-      "note": "a fire filler  -  Affliction should fill with Shadow Bolt, not Searing Pain"
+      "note": "a fire filler - Affliction should fill with Shadow Bolt, not Searing Pain"
     },
     "Rain of Fire": {
       "min_casts": 3,
-      "note": "AoE filler used on single-target  -  usually a misclick or wrong build"
+      "note": "AoE filler used on single-target - usually a misclick or wrong build"
     },
     "Hellfire": {
       "min_casts": 2,
       "note": "self-damaging AoE on a single-target parse"
     }
   },
-  "advisory": "Affliction's damage is in keeping every DoT at full uptime  -  Shadow Bolt is only the gap-filler between refreshes.",
+  "advisory": "Affliction's damage is in keeping every DoT at full uptime - Shadow Bolt is only the gap-filler between refreshes. Fight notes: on movement-heavy fights (Vashj phase transitions, Kael weapons/adds, Leotheras) pre-cast your DoTs before you have to move so uptime does not slip, and refresh on the run since DoTs need no cast time; on add-heavy pulls (Hydross adds, Karathress, Mount Hyjal waves) Seed of Corruption is your AoE filler instead of single-target Shadow Bolt, and make sure Curse of the Elements stays on the primary target if you are the assigned curse.",
   "notes_verified": false
 }

@@ -14,6 +14,7 @@
   ],
   "downrank_watch": [],
   "ranks_verified": false,
+  "_dev_note": "Wrong-expansion guard (do NOT surface to users): Survival Instincts and Berserk are WotLK abilities; kept in off_rotation for detection but user-facing notes stay terse.",
   "off_rotation": {
     "Shred": {
       "min_casts": 3,
@@ -37,11 +38,11 @@
     },
     "Survival Instincts": {
       "min_casts": 1,
-      "note": "does NOT exist in TBC Classic (WotLK ability) - log is mislabeled or wrong-expansion"
+      "note": "not a TBC ability - log may be mislabeled"
     },
     "Berserk": {
       "min_casts": 1,
-      "note": "does NOT exist in TBC Classic (WotLK ability)"
+      "note": "not a TBC ability - log may be mislabeled"
     },
     "Healing Touch": {
       "min_casts": 3,
@@ -56,5 +57,5 @@
     ],
     "note": "Mangle (Bear) cast count should be near its theoretical max (used on its ~6s cooldown) - it's the top single-target threat and the #1 bear competence signal. Lacerate should ramp to and hold a 5-stack bleed. Maul (off the GCD) should appear frequently as the rage dump, riding alongside Mangle/Lacerate; no Maul means rage capping and wasted threat."
   },
-  "advisory": "TBC bear tank. Should be in Dire Bear Form the entire fight - any Cat-form abilities (Shred, Rip, Rake, Mangle Cat) mean the druid is in Cat (DPS), not tanking. Bears have no Shield Block/Holy Shield equivalent; mitigation is passive (high armor + dodge), so don't expect a per-GCD defensive cast. Frenzied Regeneration is a cooldown-style self-heal on damage spikes (a handful per fight), not a rotational ability. Barkskin and Challenging Roar (AoE taunt) are situational cooldowns. Survival Instincts and Berserk do NOT exist in TBC."
+  "advisory": "TBC bear tank. Should be in Dire Bear Form the entire fight - any Cat-form abilities (Shred, Rip, Rake, Mangle Cat) mean the druid is in Cat (DPS), not tanking. Bears have no Shield Block/Holy Shield equivalent; mitigation is passive (high armor + dodge), so don't expect a per-GCD defensive cast. Frenzied Regeneration is a cooldown-style self-heal on damage spikes (a handful per fight), not a rotational ability. Barkskin and Challenging Roar (AoE taunt) are situational cooldowns. Fight notes: bears are the premier AoE-threat tank in TBC - on add-heavy pulls (Hyjal trash waves, Mount Hyjal/SSC packs, Karathress totems) tab-Swipe with Demoralizing Roar and ride Maul for extra cleave threat; on single-target bosses, Mangle (Bear) on cooldown plus a held 5-stack Lacerate carries threat, and save Barkskin/Frenzied Regeneration for predictable spike windows."
 }

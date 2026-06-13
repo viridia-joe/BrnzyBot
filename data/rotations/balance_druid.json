@@ -43,8 +43,8 @@
       "Starfire",
       "Wrath"
     ],
-    "note": "Wrath is the more mana-efficient and gear-light nuke; Starfire's larger hits scale up as spell power and crit grow. The mix shifts toward Starfire with better gear  -  a parse that is nearly all of one or the other is worth a second look."
+    "note": "Wrath is the more mana-efficient and gear-light nuke; Starfire's larger hits scale up as spell power and crit grow. The mix shifts toward Starfire with better gear - a parse that is nearly all of one or the other is worth a second look."
   },
-  "advisory": "Moonfire and Insect Swarm are damage-per-cast-time gains  -  letting them drop to spam a nuke is a common DPS loss.",
+  "advisory": "Moonfire and Insect Swarm are damage-per-cast-time gains - letting them drop to spam a nuke is a common DPS loss. Fight notes: on movement-heavy encounters (Vashj striders, Kael phase transitions) cast-on-the-move Moonfire keeps damage flowing while you reposition, and refresh DoTs before you have to move. On add-heavy pulls (Karathress, Hyjal trash) Hurricane is your AoE filler, but watch its threat and mana cost.",
   "notes_verified": false
 }

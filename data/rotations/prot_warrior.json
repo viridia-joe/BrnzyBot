@@ -15,6 +15,7 @@
   ],
   "downrank_watch": [],
   "ranks_verified": false,
+  "_dev_note": "Wrong-expansion guard (not user-facing): Shockwave is a WotLK ability; kept in off_rotation only for detection, user-facing note stays terse.",
   "off_rotation": {
     "Bloodthirst": {
       "min_casts": 3,
@@ -38,7 +39,7 @@
     },
     "Shockwave": {
       "min_casts": 1,
-      "note": "does NOT exist in TBC Classic (WotLK ability) - the log is mislabeled or wrong-expansion"
+      "note": "not a TBC ability - log may be mislabeled"
     }
   },
   "breakpoint": {
@@ -49,5 +50,5 @@
     ],
     "note": "Shield Slam (highest threat) and Revenge (when proc'd) should appear near their cooldown caps. Devastate is the filler that also maintains Sunder Armor stacks. Shield Block should be one of the HIGHEST cast counts in the log (~5s cooldown, kept up near-100% for block mitigation) - a low Shield Block count means the warrior is taking unmitigated melee damage. Heroic Strike eats excess rage off the GCD."
   },
-  "advisory": "TBC main-tank spec. Stays in Defensive Stance with a shield the entire fight - any Berserker/Battle Stance abilities (Whirlwind, Bloodthirst, Recklessness) mean defenses were dropped. A properly-specced Prot warrior shows Devastate, not standalone Sunder Armor (Devastate replaces it and applies the stacks). Shield Wall (big damage reduction CD) and Last Stand (emergency health) should appear on spike-damage phases. Spell Reflection is situational. The #1 competence signal is high Shield Block uptime alongside Shield Slam/Revenge used on cooldown."
+  "advisory": "TBC main-tank spec. Stays in Defensive Stance with a shield the entire fight - any Berserker/Battle Stance abilities (Whirlwind, Bloodthirst, Recklessness) mean defenses were dropped. A properly-specced Prot warrior shows Devastate, not standalone Sunder Armor (Devastate replaces it and applies the stacks). Shield Wall (big damage reduction CD) and Last Stand (emergency health) should appear on spike-damage phases. Spell Reflection is situational. The #1 competence signal is high Shield Block uptime alongside Shield Slam/Revenge used on cooldown. Fight notes: on add-heavy and multi-target pulls (Hyjal trash waves, Karathress, Council-style packs) lead with Thunder Clap for the attack-speed debuff and AoE threat, and tab Revenge/Shield Slam across targets. On caster bosses, Spell Reflection earns its keep - reflect predictable nukes (e.g. Aran's Frostbolt/Fireball on the Shade pull). On single-target tank-and-spank, pure Shield Slam > Revenge > Devastate with near-100% Shield Block carries threat."
 }

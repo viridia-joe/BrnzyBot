@@ -22,11 +22,11 @@
   "off_rotation": {
     "Bloodthirst": {
       "min_casts": 5,
-      "note": "Fury deep talent  -  an Arms warrior should not be casting Bloodthirst; check spec"
+      "note": "Fury deep talent - wrong spec for an Arms warrior; check spec"
     },
     "Whirlwind": {
       "min_casts": 5,
-      "note": "Whirlwind is trainable but primarily a Fury filler  -  high Whirlwind counts on Arms suggest wrong rotation"
+      "note": "Whirlwind is trainable but primarily a Fury filler - high Whirlwind counts on Arms suggest wrong rotation"
     }
   },
   "breakpoint": {
@@ -34,8 +34,8 @@
       "Mortal Strike",
       "Slam"
     ],
-    "note": "Arms brings Mortal Strike (50% healing reduction debuff  -  critical for fights with self-healing bosses) and Blood Frenzy (+4% physical damage taken by target from Rend bleeds). Slam requires Improved Slam talent to be efficient  -  without it the 1.5s cast time clips auto attacks badly."
+    "note": "Arms brings Mortal Strike (50% healing reduction debuff - critical for fights with self-healing bosses) and Blood Frenzy (+4% physical damage taken by target from Rend bleeds). Slam requires Improved Slam talent to be efficient - without it the 1.5s cast time clips auto attacks badly."
   },
-  "advisory": "Arms is often brought to raids specifically for Mortal Strike and Blood Frenzy rather than personal DPS, which may be lower than Fury. Overpower procs should be used immediately when they appear  -  they only last 5 seconds and hit harder than Slam. Sweeping Strikes allows 2 back-to-back instant attacks and synergizes well with Execute in cleave situations.",
+  "advisory": "Arms is often brought to raids specifically for Mortal Strike and Blood Frenzy rather than personal DPS, which may be lower than Fury. Overpower procs should be used immediately when they appear - they only last 5 seconds and hit harder than Slam. Sweeping Strikes allows 2 back-to-back instant attacks and synergizes well with Execute in cleave situations. Fight notes: Mortal Strike's healing-reduction shines on self-healing targets like Mother Shahraz and add packs that heal, and on Leotheras the Blind's inner demon. Pop Sweeping Strikes for cleave on stacked adds (Hydross/Karathress adds, Council); keep Rend rolling so Blood Frenzy uptime stays high, and refresh it on uptime-friendly fights rather than letting it fall off during movement.",
   "notes_verified": false
 }

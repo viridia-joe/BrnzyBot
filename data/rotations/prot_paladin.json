@@ -3,7 +3,7 @@
   "display": "Protection Paladin",
   "class": "Paladin",
   "role": "tank",
-  "summary": "Seal active at all times, Judgement on cooldown, Holy Shield kept up for block mitigation and threat, Consecration rolling (the AoE/multi-target backbone), Avenger's Shield on pulls. There is NO 969 rotation in TBC - that's a WotLK construct. Threat is seal + Judgement + Holy Shield + Consecration + melee.",
+  "summary": "Keep a threat seal active at all times, Judgement on cooldown, Holy Shield up for block mitigation and threat, and Consecration rolling as the AoE/multi-target backbone. Avenger's Shield opens pulls. Threat is seal + Judgement + Holy Shield + Consecration + melee.",
   "core_spells": [
     "Holy Shield",
     "Consecration",
@@ -14,14 +14,15 @@
   ],
   "downrank_watch": [],
   "ranks_verified": false,
+  "_dev_note": "Wrong-expansion guard (do NOT surface to users): Hammer of the Righteous and Divine Storm are WotLK abilities; if they appear the log is mislabeled. Keep them in off_rotation for detection but the user-facing notes stay terse.",
   "off_rotation": {
     "Hammer of the Righteous": {
       "min_casts": 1,
-      "note": "does NOT exist in TBC Classic (WotLK ability) - the most common wrong-expansion mistake for prot paladins; log is mislabeled"
+      "note": "not a TBC ability - log may be mislabeled"
     },
     "Divine Storm": {
       "min_casts": 1,
-      "note": "does NOT exist in TBC Classic (WotLK Ret ability)"
+      "note": "not a TBC ability - log may be mislabeled"
     },
     "Crusader Strike": {
       "min_casts": 3,
@@ -33,11 +34,11 @@
     },
     "Seal of Blood": {
       "min_casts": 3,
-      "note": "Retribution seal (self-damage for AP) - wrong spec for a tank"
+      "note": "Retribution seal - wrong spec for a tank"
     },
     "Holy Light": {
       "min_casts": 5,
-      "note": "Holy spec heal - a Prot paladin healing heavily is wrong spec or an emergency"
+      "note": "heavy healing on a tank parse - wrong spec or an emergency"
     },
     "Holy Shock": {
       "min_casts": 3,
@@ -50,7 +51,7 @@
       "Consecration",
       "Judgement"
     ],
-    "note": "Holy Shield should be one of the HIGHEST cast counts and held at very high uptime - it's both the block wall and a major threat source; gaps are the single biggest mitigation/threat loss (usually mana-starvation or forgetting to refresh). Judgement on cooldown, Consecration rolling for sustained AoE threat, and the active seal should show near-constant uptime via melee swings."
+    "note": "Holy Shield should be one of the highest cast counts and held at near-full uptime - it's both the block wall and a major threat source, so gaps are the biggest mitigation and threat loss (usually mana-starvation or a missed refresh). Judgement on cooldown, Consecration rolling for sustained AoE threat, and the active seal at near-constant uptime via melee."
   },
-  "advisory": "TBC AoE/multi-target tank. Blessing of Sanctuary should be active (mitigation buff). Avenger's Shield is mainly a pull / ranged-threat opener (longish cooldown), not a filler. A tank casting Divine Shield (bubble) mid-fight drops all aggro - heavy mid-pull use is a red flag. Hammer of the Righteous does NOT exist in TBC, so do not expect it - its presence means the log is wrong-expansion. The mana budget caps how much Holy Shield + Consecration you can sustain, so prioritization matters."
+  "advisory": "Blessing of Sanctuary should be active. Avenger's Shield is a pull / ranged-threat opener (longish cooldown), not a filler. A tank casting Divine Shield (bubble) mid-fight drops all aggro - heavy mid-pull use is a red flag. Mana budget caps how much Holy Shield + Consecration you can sustain, so prioritize Holy Shield uptime. Fight notes: this is the premier add/multi-target tank - on add-heavy fights (Hyjal trash, Mount, Karathress adds) lead with Consecration + Avenger's Shield and tab-Consecrate; on single-target tank-and-spank, Holy Shield + Judgement + seal melee carry the threat."
 }

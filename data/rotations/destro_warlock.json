@@ -25,13 +25,13 @@
   "off_rotation": {
     "Incinerate": {
       "min_casts": 3,
-      "note": "Incinerate is for the fire/Conflagrate build  -  a Shadow Bolt destro lock should be casting Shadow Bolt"
+      "note": "Incinerate is for the fire/Conflagrate build - a Shadow Bolt destro lock should be casting Shadow Bolt"
     },
     "Searing Pain": {
       "min_casts": 3,
       "note": "a low-value fire filler"
     }
   },
-  "advisory": "Shadow Bolt is the primary nuke for the DS/Ruin build. Keep Immolate up for the Improved Immolate bonus and let Shadow Bolt fill the rest.",
+  "advisory": "Shadow Bolt is the primary nuke for the DS/Ruin build. Keep Immolate up for the Improved Immolate bonus and let Shadow Bolt fill the rest. Fight notes: on movement-heavy fights (Vashj striders, Kael adds, Solarian phases) your Immolate uptime and Shadow Bolt cast count suffer - clip nothing and weave Immolate the instant you stop. On add-heavy pulls (Karathress, Hyjal waves) Seed of Corruption is a strong AoE filler if you can spare GCDs, otherwise keep Curse of the Elements rolling so the casters benefit.",
   "notes_verified": false
 }

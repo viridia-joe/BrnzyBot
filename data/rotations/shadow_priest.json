@@ -29,11 +29,11 @@
   "off_rotation": {
     "Smite": {
       "min_casts": 3,
-      "note": "a holy nuke  -  Shadowform spriests should not be casting Smite"
+      "note": "a holy nuke - Shadowform spriests should not be casting Smite"
     },
     "Holy Fire": {
       "min_casts": 3,
-      "note": "a holy nuke  -  wrong school for Shadowform"
+      "note": "a holy nuke - wrong school for Shadowform"
     },
     "Greater Heal": {
       "min_casts": 3,
@@ -48,6 +48,6 @@
       "note": "healing during a DPS parse"
     }
   },
-  "advisory": "Mind Flay is filler only  -  never clip a Mind Blast or refresh window for it. Vampiric Touch and Shadow Word: Pain should have near-100% uptime.",
+  "advisory": "Mind Flay is filler only - never clip a Mind Blast or refresh window for it. Vampiric Touch and Shadow Word: Pain should have near-100% uptime. Fight notes: your DoTs are the value engine, so on movement-heavy fights (Vashj striders, Kael, Solarian teleports) pre-cast VT and SW:Pain before you have to reposition and keep them rolling rather than chasing Mind Flay ticks; on short-lived adds DoTs rarely pay off, so default to Mind Blast / SW:Death and save full DoT application for the boss and other long-lived targets.",
   "notes_verified": false
 }

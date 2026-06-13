@@ -43,7 +43,7 @@ def test_all_data_json_valid():
 
 def test_rotation_profiles_no_unicode_punctuation():
     """Fancy Unicode (em-dashes, curly quotes) breaks Discord on some clients."""
-    FORBIDDEN = ["—", "–", "‘", "’", "“", "”", "…"]
+    FORBIDDEN = ["—", "–", "‘", "’", "“", "”", "…", "→", "←", "↔", "⟶"]
     errors = []
     for path in glob.glob(os.path.join(_ROOT, "data", "rotations", "*.json")):
         text = open(path, encoding="utf-8-sig").read()

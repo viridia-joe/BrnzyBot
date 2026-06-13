@@ -21,15 +21,15 @@
   "off_rotation": {
     "Mortal Strike": {
       "min_casts": 5,
-      "note": "Arms ability  -  a Fury warrior should not be casting Mortal Strike; check spec"
+      "note": "Arms ability - wrong spec for a Fury warrior; check spec"
     },
     "Shield Bash": {
       "min_casts": 3,
-      "note": "interrupt that requires a shield  -  Fury warriors use two weapons; this suggests a wrong stance or keybind"
+      "note": "interrupt that requires a shield - Fury warriors dual-wield; suggests a wrong stance or keybind"
     },
     "Shield Block": {
       "min_casts": 3,
-      "note": "defensive shield cooldown  -  wrong spec for Fury DPS"
+      "note": "defensive shield cooldown - wrong spec for Fury DPS"
     }
   },
   "breakpoint": {
@@ -37,8 +37,7 @@
       "Bloodthirst",
       "Whirlwind"
     ],
-    "note": "Bloodthirst and Whirlwind should both appear on their respective cooldowns. Heroic Strike is the rage dump  -  it replaces (not delays) the next auto attack when queued, so high Heroic Strike counts with good timing indicate good rage management. Rampage (5-stack AP buff from crits) should maintain near-100% uptime once ramped up."
+    "note": "Bloodthirst and Whirlwind should both appear on their respective cooldowns. Heroic Strike is the rage dump - it replaces (not delays) the next auto attack when queued, so high Heroic Strike counts with good timing indicate good rage management. Rampage (5-stack AP buff from crits) should maintain near-100% uptime once ramped up."
   },
-  "advisory": "Fury is the dominant TBC warrior DPS spec. Dual-wield with fast off-hand maximizes white hit and Whirlwind damage. Death Wish (+20% damage, ~3-minute cooldown) should appear regularly. Execute replaces the normal rotation below 20%  -  a surge in Execute casts at the end of a fight is expected and correct. Berserker Stance vs Battle Stance swap may appear depending on rage and encounter.",
-  "notes_verified": false
+  "advisory": "Fury is the dominant TBC warrior DPS spec. Dual-wield with fast off-hand maximizes white hit and Whirlwind damage. Death Wish (+20% damage, ~3-minute cooldown) should appear regularly. Execute replaces the normal rotation below 20% - a surge in Execute casts at the end of a fight is expected and correct. Berserker Stance vs Battle Stance swap may appear depending on rage and encounter. Fight notes: on add-heavy or cleave pulls (Hydross adds, High King Maulgar council, Karathress) Whirlwind hits multiple targets, so let rage feed extra Whirlwinds rather than dumping it all into Heroic Strike. On pure single-target tank-and-spank, prioritize Heroic Strike to bleed excess rage and keep Bloodthirst on cooldown; on movement-heavy fights (Vashj, Kael) protect Bloodthirst/Whirlwind uptime over chasing Execute lines."
 }

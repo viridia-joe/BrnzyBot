@@ -22,9 +22,9 @@
   "off_rotation": {
     "Fireball": {
       "min_casts": 5,
-      "note": "an arcane build casting Fireball heavily  -  check spec/macros"
+      "note": "Fire ability - heavy Fireball use is wrong spec for an Arcane mage"
     }
   },
-  "advisory": "Arcane Blast gains damage and cost per stack; the standard rotation manages stacks rather than spamming blindly, dropping to Arcane Missiles or Frostbolt to conserve mana. Frostbolt as an occasional filler is normal, not an anomaly.",
+  "advisory": "Arcane Blast gains damage and cost per stack; the standard rotation manages stacks rather than spamming blindly, dropping to Arcane Missiles or Frostbolt to conserve mana. Frostbolt as an occasional filler is normal, not an anomaly. Fight notes: on movement-heavy fights (Vashj phase transitions, Kael weapon phase) lean on instant Arcane Missiles clipping and Presence of Mind to keep casting on the move; on add-heavy pulls (Karathress, Hyjal trash, Council) swap your filler to Arcane Explosion / Blizzard for AoE; watch mana on long fights and bank Evocation / mana gems for the burn windows.",
   "notes_verified": false
 }

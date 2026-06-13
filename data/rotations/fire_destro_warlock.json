@@ -28,13 +28,13 @@
   "off_rotation": {
     "Shadow Bolt": {
       "min_casts": 5,
-      "note": "a fire/Incinerate build should fill with Incinerate, not Shadow Bolt  -  check your build and action bars"
+      "note": "a fire/Incinerate build should fill with Incinerate, not Shadow Bolt - check your build and action bars"
     },
     "Searing Pain": {
       "min_casts": 3,
       "note": "a low-value fire filler"
     }
   },
-  "advisory": "Immolate must stay up  -  Incinerate does bonus damage to an Immolated target, so a dropped Immolate is a direct DPS loss.",
+  "advisory": "Immolate must stay up - Incinerate does bonus damage to an Immolated target, so a dropped Immolate is a direct DPS loss. Fight notes: on movement-heavy fights (Vashj phase transitions, Kael adds, Lady Vashj's striders) refresh Immolate before repositioning so the Incinerate bonus does not fall off; on add-heavy pulls (Hydross adds, Karathress) Conflagrate consumes Immolate, so weigh holding it for single-target burst versus tagging the priority target. Keep Curse of the Elements on the boss for the raid-wide fire/shadow amp.",
   "notes_verified": false
 }

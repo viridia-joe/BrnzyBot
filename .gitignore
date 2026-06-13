@@ -20,3 +20,7 @@ terraform/terraform.tfstate
 terraform/terraform.tfstate.backup
 terraform/terraform.tfstate.*.backup
 terraform/*.tfvars
+
+# Deploy changelog artifacts (written by deploy.yml on the VM)
+.deploy_sha
+.deploy_log

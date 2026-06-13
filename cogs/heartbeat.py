@@ -43,6 +43,7 @@ class HeartbeatCog(commands.Cog, name="Heartbeat"):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot    = bot
         self._pool: dict | None = None
+        self._first_tick = True   # first tick after boot may post a deploy changelog
         self.tick.start()
 
     def cog_unload(self) -> None:
@@ -63,7 +64,20 @@ class HeartbeatCog(commands.Cog, name="Heartbeat"):
     @tasks.loop(hours=8)
     async def tick(self) -> None:
         pool = self._content()
-        if not any(pool.values()):
+
+        # On the first tick after a fresh deploy, post a changelog (New Features /
+        # Improvements / Bug Fixes) instead of the usual lore. One-shot: subsequent
+        # ticks, and reboots on the same commit, fall through to normal content.
+        deploy_msg = None
+        if self._first_tick:
+            self._first_tick = False
+            try:
+                from core.changelog import deploy_changelog_if_new
+                deploy_msg = deploy_changelog_if_new()
+            except Exception as e:
+                log.warning("deploy changelog check failed: %s", e)
+
+        if not deploy_msg and not any(pool.values()):
             return
 
         for guild in self.bot.guilds:
@@ -74,7 +88,7 @@ class HeartbeatCog(commands.Cog, name="Heartbeat"):
             channel = self.bot.get_channel(int(channel_id))
             if not channel:
                 continue
-            msg = self._pick(guild_id, pool)
+            msg = deploy_msg or self._pick(guild_id, pool)
             try:
                 await channel.send(msg)
             except discord.HTTPException as e:

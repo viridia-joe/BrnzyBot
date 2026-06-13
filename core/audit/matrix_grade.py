@@ -59,9 +59,12 @@ def grade_cell(cell, boss_name: str) -> dict:
             wasted.append((sub, needs_type))
 
     if profile is None:
-        # Unprofiled spec: just show what consumables are present, no grading.
-        out["elixir"] = (NA, ", ".join(cell.auras) or "—")
-        out["potion"] = (OK if cell.potions else MISSING, f"{cell.potions} used")
+        # Unprofiled spec: show flask/elixir names present, no grading.
+        fe = [a for a in (cell.auras or [])
+              if "flask" in a.lower() or "elixir" in a.lower()]
+        out["elixir"] = (NA, ", ".join(fe) or "—")
+        out["food"] = (OK if any("well fed" in n for n in names_lower) else MISSING, "")
+        out["potion"] = (OK if cell.potions else NA, f"{cell.potions} used")
         return out
 
     # --- food ---
@@ -86,11 +89,11 @@ def grade_cell(cell, boss_name: str) -> dict:
     elixir_rules = [r for r in profile.consumes if r.slot in ("battle_elixir", "guardian_elixir")]
     flask_present, flask_best = _matches(flask_rule.accepted, names_lower) if flask_rule else (False, False)
 
+    # The named flask/elixir(s) only — exclude food ("Well Fed") and non-consumable
+    # buffs so the Elixirs/Flasks column shows just the relevant consumables.
     shown = [a for a in (cell.auras or [])
-             if any(k in a.lower() for k in ("flask", "elixir", "wisdom", "firepower",
-                                             "spellpower", "mageblood", "agility",
-                                             "strength", "fortitude", "demonslaying",
-                                             "draenic", "defense", "healing"))]
+             if ("flask" in a.lower() or "elixir" in a.lower())
+             and "well fed" not in a.lower()]
     label = ", ".join(shown) if shown else "—"
 
     if flask_present:

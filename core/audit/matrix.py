@@ -145,7 +145,8 @@ def gather_raid_matrix(report_code: str, include_wipes: bool = False) -> RaidMat
 
     m = RaidMatrix(report_code=report_code)
 
-    fights_all = wcl_client.get_fights(report_code)
+    meta = wcl_client.get_report_meta(report_code)
+    fights_all = meta.get("fights") or []
     if not fights_all:
         m.warnings.append("No fights found in that report.")
         return m
@@ -155,9 +156,8 @@ def gather_raid_matrix(report_code: str, include_wipes: bool = False) -> RaidMat
         return m
     m.fights = [{"id": f["id"], "name": f.get("name", "?"), "kill": bool(f.get("kill"))}
                 for f in kept]
-    m.zone = (fights_all[0].get("zone") or {}).get("name", "") if isinstance(
-        fights_all[0].get("zone"), dict) else ""
-    m.start_time = min((f.get("startTime") or 0) for f in kept) or None
+    m.zone = meta.get("zone") or ""
+    m.start_time = meta.get("start_time")   # absolute epoch ms (report-level)
     kept_ids = {f["id"] for f in kept}
 
     actors = wcl_client.get_master_actors(report_code)

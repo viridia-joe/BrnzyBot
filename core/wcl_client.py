@@ -239,6 +239,8 @@ _FIGHTS_QUERY = """
 query ReportFights($code: String!) {
   reportData {
     report(code: $code) {
+      startTime
+      zone { name }
       fights(killType: All) {
         id
         name
@@ -266,6 +268,20 @@ def get_fights(report_code: str) -> list[dict]:
             .get("report", {})
             .get("fights", [])
     )
+
+
+def get_report_meta(report_code: str) -> dict:
+    """Report-level metadata: {start_time (epoch ms), zone, fights}. One call."""
+    if _fixture_dir():
+        return {"start_time": None, "zone": "",
+                "fights": _fixture(f"{report_code}.fights", [])}
+    data = graphql(_FIGHTS_QUERY, {"code": report_code})
+    report = (data.get("reportData", {}) or {}).get("report", {}) or {}
+    return {
+        "start_time": report.get("startTime"),
+        "zone": (report.get("zone") or {}).get("name", ""),
+        "fights": report.get("fights", []),
+    }
 
 
 # ---------------------------------------------------------------------------

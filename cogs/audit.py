@@ -128,5 +128,69 @@ class AuditCog(commands.Cog, name="Audit"):
                 pass
 
 
+    # -----------------------------------------------------------------------
+    # /raidaudit — whole-night consumable matrix (players × boss kills)
+    # -----------------------------------------------------------------------
+    @app_commands.command(
+        name="raidaudit",
+        description="Whole-raid consumable matrix from a WCL report — food, oils, flasks, potions per boss.",
+    )
+    @app_commands.describe(
+        url="Warcraft Logs report URL (a full clear works best).",
+    )
+    async def slash_raidaudit(
+        self,
+        interaction: discord.Interaction,
+        url: str,
+    ) -> None:
+        guild_id = str(interaction.guild_id)
+
+        code, _f = parse_report_url(url)
+        if not code:
+            await interaction.response.send_message(
+                "That doesn't look like a Warcraft Logs report link. Paste the full "
+                "URL, e.g. `https://classic.warcraftlogs.com/reports/aBcD1234EfGh5678`.",
+                ephemeral=True,
+            )
+            return
+
+        allowed, _ = check_rate_limit(guild_id)
+        if not allowed:
+            await interaction.response.send_message(
+                "This server has hit the free plan daily limit (20 commands). "
+                "Upgrade to Pro for unlimited usage — use `/subscribe`.",
+                ephemeral=True,
+            )
+            return
+
+        await interaction.response.defer(thinking=True)
+        log_usage(guild_id, str(interaction.user.id), "raidaudit")
+
+        loop = asyncio.get_running_loop()
+        try:
+            def _build() -> str:
+                from core.audit.matrix import gather_raid_matrix
+                from core.audit.matrix_render import render_matrix
+                return render_matrix(gather_raid_matrix(code))
+            result_text = await loop.run_in_executor(None, _build)
+        except Exception as exc:
+            log.exception("raidaudit failed")
+            result_text = f"Raid audit failed: {exc}"
+
+        try:
+            for chunk in _chunks(result_text):
+                await asyncio.wait_for(interaction.followup.send(chunk), timeout=15)
+        except asyncio.TimeoutError:
+            log.error("followup.send timed out for /raidaudit")
+            try:
+                await interaction.followup.send(
+                    "That raid audit took too long to send — a full clear is a lot of "
+                    "data and Warcraft Logs may be slow. Give it a moment and try again.",
+                    ephemeral=True,
+                )
+            except Exception:
+                pass
+
+
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(AuditCog(bot))

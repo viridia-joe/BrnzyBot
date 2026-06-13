@@ -168,8 +168,11 @@ CASTER_CONSUMES = (
                 ("Adept's Elixir", "Major Firepower", "Major Shadow Power"), required=False),
     ConsumeRule("guardian_elixir", "Guardian Elixir",
                 ("Draenic Wisdom", "Major Mageblood"), required=False),
-    ConsumeRule("weapon_oil", "Weapon Oil", ("Wizard Oil",), note="Superior/Brilliant Wizard Oil"),
-    ConsumeRule("potion", "Mana/Damage Potions", ("Super Mana Potion", "Destruction Potion")),
+    ConsumeRule("weapon_oil", "Weapon Oil", ("Wizard Oil", "Superior Wizard Oil",
+                "Brilliant Wizard Oil", "Spellpower"), required=False,
+                note="Superior/Brilliant Wizard Oil or Spellpower (a minor gain — not flask-tier)"),
+    ConsumeRule("potion", "Mana/Damage Potions", ("Super Mana Potion", "Destruction Potion"),
+                required=False),
 )
 
 MELEE_STR_CONSUMES = (

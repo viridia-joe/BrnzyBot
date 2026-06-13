@@ -4,14 +4,115 @@
     "zone_slug": "tempest_keep",
     "phase": 2,
     "content_phase": 2,
-    "strat_index": false,
+    "strat_index": true,
     "updated": "2026-06-13",
-    "note": "Relocated from bossguide_data.py; not yet research-verified for /strat."
+    "sources": [
+      "icy-veins.com/tbc-classic",
+      "warcraft.wiki.gg",
+      "wowhead.com/tbc"
+    ]
   },
   "bosses": [
     {
       "name": "Al'ar",
       "slug": "alar",
+      "summary": "Two-stage fire fight. Al'ar must always have a melee body (a tank) on him or Flame Buffet punishes the whole raid; he has no ranged threat table, like Ragnaros. In phase 1 he hops between four elevated platforms in sequence; the raid keeps a tank on his platform, kills Ember adds (they explode on death and drain his health), and jumps down to the floor whenever he flies to center for Flame Quills. At zero health he detonates and Rebirths at full health in the center to begin phase 2, a ground fight with armor-shred tank swaps, Dive Bombs that spawn embers, fire patches and Charges. The raid kills him twice.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Platform phase",
+          "hp_range": "full health bar",
+          "description": "Al'ar moves between four platforms in sequence (clockwise). A tank must always be in melee on his current platform. Embers spawn on shifts; Flame Quills forces periodic jumps down to the floor."
+        },
+        {
+          "number": 2,
+          "name": "Rebirth transition",
+          "hp_range": "0% of the first bar",
+          "description": "At zero health he detonates (Ember Blast knockback) and immediately revives at full health in the room center. The raid spreads away from center during the swap."
+        },
+        {
+          "number": 3,
+          "name": "Ground phase",
+          "hp_range": "second full health bar",
+          "description": "Free-roaming ground fight. Main tank holds Al'ar; off-tank taunts each Melt Armor and grabs Dive Bomb embers. Spread near walls for Dive Bomb, Charge and Flame Patch. Bloodlust is commonly used here."
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Flame Buffet",
+          "mechanic_type": "special",
+          "targets": "raid",
+          "description": "Cast only when no one is in melee range of Al'ar; hammers the whole raid with escalating fire damage. He has no ranged threat table, so a melee body (normally a tank) must always be on him. This is the core rule of the fight, not a tank-swap trigger.",
+          "important": true
+        },
+        {
+          "name": "Flame Quills",
+          "mechanic_type": "movement",
+          "targets": "raid",
+          "description": "Instead of moving to the next platform, Al'ar flies to the center and fires quills outward, heavily damaging anyone left on the platforms. Everyone, tanks included, jumps down to the lower floor.",
+          "important": true
+        },
+        {
+          "name": "Ember of Al'ar",
+          "mechanic_type": "add_spawn",
+          "targets": "raid",
+          "description": "Small phoenix adds that spawn on platform shifts in phase 1 and from Dive Bombs in phase 2. On death they cast Ember Blast, a fire explosion, so they are tanked and killed away from the raid. Each ember killed also drains a chunk of Al'ar's health.",
+          "important": true
+        },
+        {
+          "name": "Rebirth",
+          "mechanic_type": "special",
+          "targets": "raid",
+          "description": "At zero health in phase 1 Al'ar detonates and revives at full health in the room center, dealing heavy fire damage and knockback to anyone close. The raid spreads off center during the swap.",
+          "important": true
+        },
+        {
+          "name": "Melt Armor",
+          "mechanic_type": "tank_swap",
+          "targets": "tank",
+          "description": "Phase 2 debuff on the current tank that sharply reduces armor. A second tank taunts immediately; the tanks swap on every application. This, not Flame Buffet, is the tank swap.",
+          "important": true
+        },
+        {
+          "name": "Dive Bomb",
+          "mechanic_type": "movement",
+          "targets": "random",
+          "description": "Phase 2: Al'ar flies up, targets the ground under a random player, and crashes down for heavy fire damage, spawning two embers. Move off the marker and stay spread. Older guides call this Meteor; it is the same ability.",
+          "important": true
+        },
+        {
+          "name": "Flame Patch",
+          "mechanic_type": "movement",
+          "targets": "random",
+          "description": "Phase 2 fire patches under random players that deal damage over time and increase fire damage taken. Move out of them.",
+          "important": false
+        },
+        {
+          "name": "Charge",
+          "mechanic_type": "movement",
+          "targets": "random",
+          "description": "Phase 2: shortly after a Dive Bomb, Al'ar charges a random player. Ranged and healers hug the walls so the knockback goes into a wall, not across the room.",
+          "important": false
+        },
+        {
+          "name": "Berserk",
+          "mechanic_type": "enrage",
+          "targets": "raid",
+          "description": "Hard enrage if the fight runs long.",
+          "important": false
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "Rotate tanks so one is always in melee on Al'ar's current platform; ranged and melee follow him platform to platform while a ground tank gathers embers and kills them clear of the raid. Jump down on Flame Quills. At zero health he Rebirths in the center: spread out, then main-tank him on the ground while an off-tank taunts every Melt Armor and grabs the Dive Bomb embers. Dodge Dive Bomb, Flame Patch and Charge, and burn him down before the enrage."
+        }
+      ],
+      "roles": {
+        "tank": "Phase 1: one tank must always be in melee on Al'ar's current platform, rotating to the next platform as he moves; a ground tank gathers embers and drags them clear before Ember Blast. Phase 2: a main tank holds Al'ar while an off-tank taunts on every Melt Armor and picks up the two embers from each Dive Bomb.",
+        "healer": "Heavy raid healing throughout, for Flame Quills in phase 1 and Dive Bomb, Flame Patch, Rebirth and general fire in phase 2. Keep tanks topped through Melt Armor windows.",
+        "dps": "Melee must hit Al'ar on the platforms and follow him from platform to platform, since he ignores anyone outside melee range. All DPS burn embers fast (they drain his health) and avoid ember death explosions. Jump down off the platforms on Flame Quills."
+      },
       "bossguide": {
         "boss_num": 1,
         "raid_short": "TK",
@@ -29,12 +130,62 @@
           "tank_healers": 4,
           "raid_healers": 3
         },
-        "context": "FIGHT: Al'ar - Tempest Keep Boss 1\n\nKEY MECHANICS:\nP1 (100% to 25%): Al'ar flies between 4 elevated platforms (numbered 1->2->3->4, counterclockwise).\n- Only RANGED DPS can hit Al'ar during platform phase - melee cannot reach.\n- Al'ar gains Flame Buffet stacks on tank - TWO tanks swap each platform shift.\n- On each platform, tank A engages, tank B taunts when A has about 3 stacks, Al'ar flies to next platform, repeat.\n- Ember of Al'ar adds spawn between platform shifts - Ground Tank picks them up on the ground.\n- Embers self-resurrect if not killed (become Phoenix). Kill fast.\n\nP2 (25% to 0%): Al'ar crash-lands center. Normal tank-and-spank.\n- Ember adds keep spawning - Ember Tank kites them away from raid (Ember Blast on death = AoE).\n- Meteor: red circle ground warning - move out immediately.\n- Bloodlust/Heroism at P2 engagement.\n\nROLES NEEDED:\n- {skull} Platform Tank A: first to engage on each platform.\n- {cross} Platform Tank B: taunts about 3 Flame Buffet stacks, swaps with A.\n- {triangle} Ground/Ember Tank: handles Ember adds; kites them in P2.\n- Platform tank healers: 2-3 following tanks across platforms.\n- Ground/raid healers: 2-3 on ground covering adds and raid.\n- Ranged DPS: primary damage in P1. Misdirect hunter for P2 pickup.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull}/{cross} for platform tanks, {triangle} for the ground tank.\n- Emphasize ranged-only P1 damage and Ember kill priority.\n- Note Bloodlust at P2 pull."
+        "context": "FIGHT: Al'ar - Tempest Keep Boss 1\n\nKEY MECHANICS:\n- A melee body (a tank) must ALWAYS be on Al'ar or Flame Buffet hammers the whole raid. He has no ranged threat table (Ragnaros-style) - melee MUST hit him.\nP1 (full health bar): flies between 4 platforms in sequence (clockwise). A tank stays in melee on his current platform. Ember adds spawn on shifts - kill them AWAY from raid (Ember Blast on death) and they drain his HP.\n- Flame Quills: he flies to center and fires quills - EVERYONE jumps down off the platforms to the floor.\n- At 0% he detonates and REBIRTHS at full health in the center (heavy fire + knockback) - spread off center.\nP2 (second full bar, ground): Melt Armor shreds the current tank's armor - off-tank taunts every application. Dive Bomb crashes on a random player and spawns 2 embers - move off the marker. Flame Patch and Charge - hug walls. Bloodlust here.\n\nROLES NEEDED:\n- {skull} Platform/Main tank: always in melee on Al'ar; main-tanks him in P2.\n- {cross} Off-tank: taunts every Melt Armor in P2.\n- {triangle} Ember tank: gathers embers and drags them clear of the raid.\n- Tank healers: 2-3 following the tanks. Raid healers: 2-3 on the floor.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull}/{cross} for the swap tanks, {triangle} for the ember tank.\n- Emphasize: keep a melee on him, melee CAN hit him, jump down on Flame Quills, spread on Rebirth.\n- Note Melt Armor swaps (P2) and Bloodlust at P2."
       }
     },
     {
       "name": "Void Reaver",
       "slug": "voidreaver",
+      "summary": "Widely the easiest boss in The Eye, a pure gear and DPS check rather than a coordination test. Void Reaver is tanked in the center while the raid spreads around it. It has only three mechanics: Knock Away (knocks the current tank back and reduces threat, so tanks rotate), Arcane Orb (a ground-targeted projectile thrown at a random non-melee player that also silences), and Pounding (a repeating AoE around the boss). A forgiving hard enrage closes it out. The boss is not tauntable, so the next tank must already be in melee on high threat.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Single phase",
+          "hp_range": "100% to 0%",
+          "description": "One continuous phase. Tank center, spread the raid, rotate tanks through Knock Away, dodge Arcane Orbs, heal through Pounding, and beat the enrage."
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Knock Away",
+          "mechanic_type": "tank_swap",
+          "targets": "tank",
+          "description": "Knocks the current tank back and reduces their threat (it does not fully wipe it). Void Reaver is not tauntable, so the next-highest-threat tank must already be in melee to hold it. It cannot be cast while Pounding is channeling.",
+          "important": true
+        },
+        {
+          "name": "Arcane Orb",
+          "mechanic_type": "movement",
+          "targets": "random",
+          "description": "A slow projectile launched at a random raider who is NOT in melee range; it lands on the ground where they were standing (it does not track) and on impact deals heavy arcane damage and silences everyone in the radius. Stay spread and move off the marked spot.",
+          "important": true
+        },
+        {
+          "name": "Pounding",
+          "mechanic_type": "aoe",
+          "targets": "raid",
+          "description": "A repeating AoE centered on Void Reaver that damages everyone close, mostly melee. Largely healed through; melee can step out during the channel to ease the healing.",
+          "important": false
+        },
+        {
+          "name": "Enrage",
+          "mechanic_type": "enrage",
+          "targets": "raid",
+          "description": "Hard enrage around the ten-minute mark; a real but forgiving DPS check.",
+          "important": false
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "Tank Void Reaver dead center for maximum room. Three tanks build threat from the pull and rotate naturally as Knock Away throws each one back (it is not tauntable). Ranged and healers spread well apart and move off Arcane Orb markers; melee stack on the boss and heal through Pounding. Burn it down before the enrage."
+        }
+      ],
+      "roles": {
+        "tank": "Multiple tanks (three is the safe baseline; two works when geared) rotate naturally through Knock Away. Because the boss is not tauntable, each must hold threat by raw threat generation in melee. Hunter Misdirection on the lead tank helps.",
+        "healer": "Heal through Pounding and top off Arcane Orb victims; watch for the silence on any caster caught in an orb.",
+        "dps": "Maximize damage for the enrage. Ranged spread well apart and move off orb markers; melee stack on the boss and watch Pounding. Melee are not targeted by Arcane Orb."
+      },
       "bossguide": {
         "boss_num": 2,
         "raid_short": "TK",
@@ -43,19 +194,103 @@
           "void reaver",
           "voidreaver",
           "vr",
-          "lootreaver"
+          "lootreaver",
+          "loot reaver"
         ],
         "role_counts": {
           "tanks": 3,
           "tank_healers": 3,
           "raid_healers": 3
         },
-        "context": "FIGHT: Void Reaver - Tempest Keep Boss 2\n\nKEY MECHANICS:\n- Knock Away: periodically knocks the current tank back - next tank picks up immediately. 3 tanks rotating.\n- Pounding: raid-wide AoE on a short timer - heal through, nothing to dodge.\n- Arcane Orbs: fall from the ceiling targeting random players - watch the sky and MOVE OUT of the purple circle.\n- Void Reaver is NOT TAUNTABLE - the next tank must be in melee on high threat for the natural rotation.\n- Ten-minute hard enrage - a real but forgiving DPS check.\n\nROLES NEEDED:\n- {skull} Tank 1, {cross} Tank 2, {triangle} Tank 3: all stay in melee behind the boss.\n- Tank healers: 1 per tank plus 1 raid healer.\n- Raid healers: 2-3 covering Pounding.\n- Misdirect chain: 3 hunters, one per tank in rotation order.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull}/{cross}/{triangle} for the 3 tanks and list the MD chain.\n- Remind the raid to spread and watch Arcane Orbs."
+        "context": "FIGHT: Void Reaver - Tempest Keep Boss 2 (the 'Loot Reaver')\n\nKEY MECHANICS:\n- Tanked in the CENTER; raid spreads around it. Only three mechanics; a gear/DPS check.\n- Knock Away: knocks the current tank back and REDUCES their threat (not a full wipe). The boss is NOT TAUNTABLE, so the next tank must already be in melee on high threat. 3 tanks rotate naturally.\n- Arcane Orb: slow projectile at a RANDOM non-melee player; lands on the GROUND where they stood (no tracking) and silences everyone in the radius on impact. SPREAD and move off the spot.\n- Pounding: repeating AoE around the boss (mostly melee) - healed through; melee can step out.\n- Hard enrage near 10 minutes - real but forgiving.\n\nROLES NEEDED:\n- {skull} Tank 1, {cross} Tank 2, {triangle} Tank 3: all stay in melee behind the boss, building threat from the pull.\n- Tank healers: 1 per tank. Raid healers: 2-3 covering Pounding.\n- Misdirect chain: hunters onto the lead tank.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull}/{cross}/{triangle} for the 3 tanks; list the MD chain.\n- Remind the raid to spread and move off Arcane Orb markers. Note the boss is untauntable."
       }
     },
     {
       "name": "High Astromancer Solarian",
       "slug": "solarian",
+      "summary": "A caster tank-and-spank with a recurring split phase and a void-form burn at low health. In the main phase the raid nukes her while healing random-target arcane damage and managing Wrath of the Astromancer, a spreading arcane debuff. On a timer she vanishes to the center, opens three portals that flood the room with Solarium Agents, then returns flanked by two Solarium Priests that must be interrupted or they heal her. At twenty percent she transforms into a voidwalker, drops the add cycle, and gains a melee-range fear with heavy shadow damage.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Main phase",
+          "hp_range": "100% to 20%",
+          "description": "Tank-and-spank. Heal through Arcane Missiles and Blinding Light, and manage Wrath of the Astromancer. Runs on a timer before each split."
+        },
+        {
+          "number": 2,
+          "name": "Split phase",
+          "hp_range": "on a timer",
+          "description": "Solarian vanishes to the center; three portals open at random spots and spawn Solarium Agents. She returns a short time later with two Solarium Priests casting Greater Heal on her; interrupt or kill them fast. The cycle repeats until twenty percent."
+        },
+        {
+          "number": 3,
+          "name": "Void form",
+          "hp_range": "below 20%",
+          "description": "Solarian transforms into a voidwalker; no more portals. She gains Void Bolt (shadow) on the tank and Psychic Scream (melee-range fear). Pure burn; Bloodlust here."
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Wrath of the Astromancer",
+          "mechanic_type": "debuff",
+          "targets": "random",
+          "description": "A single-target arcane debuff that, on expiry, knocks the target and nearby players into the air and then bounces to the nearest player. The afflicted player moves away from the raid, or to designated arcane-resistance soakers. It does NOT teleport the player and is not a fixed-radius bomb.",
+          "important": true
+        },
+        {
+          "name": "Blinding Light",
+          "mechanic_type": "aoe",
+          "targets": "raid",
+          "description": "A periodic raid-wide arcane damage pulse during the main phase.",
+          "important": false
+        },
+        {
+          "name": "Arcane Missiles",
+          "mechanic_type": "special",
+          "targets": "random",
+          "description": "Channeled arcane damage into a random player; healed through.",
+          "important": false
+        },
+        {
+          "name": "Solarium Portals",
+          "mechanic_type": "add_spawn",
+          "targets": "raid",
+          "description": "On the split, three portals open at random locations and disgorge Solarium Agents. Off-tanks gather them and the raid AoEs them down.",
+          "important": true
+        },
+        {
+          "name": "Solarium Priests",
+          "mechanic_type": "interrupt",
+          "targets": "raid",
+          "description": "When Solarian returns from a split she is accompanied by two priests casting Greater Heal on her. Assign interrupts to lock them down or kill them fast, or they reset the split.",
+          "important": true
+        },
+        {
+          "name": "Void Bolt",
+          "mechanic_type": "special",
+          "targets": "tank",
+          "description": "Void-form heavy shadow nuke on the tank.",
+          "important": false
+        },
+        {
+          "name": "Psychic Scream",
+          "mechanic_type": "fear",
+          "targets": "raid",
+          "description": "Void-form melee-range fear. Counter with Fear Ward on the tank and Tremor Totem for the melee.",
+          "important": true
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "Tank Solarian and burn her, spreading enough that Wrath of the Astromancer only catches its target, who runs clear of the raid. On each split, gather and AoE the Solarium Agents from the three random portals, then interrupt the two Solarium Priests that arrive with her on her return. Repeat until twenty percent, then Bloodlust and burn the voidwalker, countering Psychic Scream with Fear Ward and Tremor Totem."
+        }
+      ],
+      "roles": {
+        "tank": "A main tank holds Solarian (a Protection Paladin also helps grab adds); an off-tank picks up the Solarium Agents on each split. Some groups add one or two arcane-resistance soaker tanks for Wrath.",
+        "healer": "Spot-heal Wrath and Arcane Missiles targets, cover the raid through Blinding Light, and sustain the tank through Void Bolt; heavy tank healing in the void phase.",
+        "dps": "Burn Solarian, swap to AoE the Agents on each split, and keep a priest-interrupt rotation ready. Melee mind the void-phase fear."
+      },
       "bossguide": {
         "boss_num": 3,
         "raid_short": "TK",
@@ -73,12 +308,121 @@
           "raid_healers": 3,
           "interrupts": 3
         },
-        "context": "FIGHT: High Astromancer Solarian - Tempest Keep Boss 3\n\nKEY MECHANICS:\n- Wrath of the Astromancer: a targeted player gets a growing AoE bomb - RUN TO THE FAR WALL and let it pop away from the raid.\n- Arcane Missiles: random target - heal through.\n- Add phase (about every 50 sec): Solarian vanishes; 3 portals open and casters spawn. AoE them fast and interrupt their heals.\n- Solarian returns after a short time with two adds on top of her.\n- Phase 2 (20% HP): she becomes a Voidwalker with a fear AoE - Tremor Totem / Fear Ward. Bloodlust here.\n\nROLES NEEDED:\n- {skull} MT (Solarian): faces her away from raid.\n- {cross} Add tank: picks up casters from all 3 portals.\n- MT healers: 2-3. Raid healers: 2-3 covering Wrath and the add phase.\n- Interrupt team: 3-4 players. Fear Ward on MT and Tremor Totem for P2.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull} for MT, {cross} for the add tank.\n- Name the interrupt team. Note Wrath targets RUN AWAY. Bloodlust at 20%."
+        "context": "FIGHT: High Astromancer Solarian - Tempest Keep Boss 3\n\nKEY MECHANICS:\n- Wrath of the Astromancer: a single-target arcane debuff that on expiry knocks up the target and nearby players and BOUNCES to the nearest player. Afflicted player moves AWAY from the raid (or to arcane-resist soakers). It does NOT teleport and is NOT a run-to-the-wall bomb.\n- Blinding Light: periodic raid-wide arcane pulse in the main phase. Arcane Missiles: random target, healed through.\n- Split (on a ~timer): she vanishes to center; 3 portals open at RANDOM spots and spawn Solarium Agents - off-tank gathers, raid AoEs. She returns shortly with 2 Solarium Priests casting Greater Heal - INTERRUPT or kill them fast.\n- 20%: transforms into a Voidwalker - Void Bolt (shadow) and Psychic Scream (melee fear). Tremor Totem / Fear Ward. Bloodlust here.\n\nROLES NEEDED:\n- {skull} MT (Solarian): faces her away from the raid.\n- {cross} Add tank: picks up the Solarium Agents on each split.\n- MT healers: 2-3. Raid healers: 2-3 covering Wrath and the split.\n- Interrupt team: 3 players assigned to the two priests on her return.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull} for MT, {cross} for the add tank. Name the priest-interrupt team.\n- Note: Wrath target runs AWAY (bounce, not a bomb). Bloodlust at 20%."
       }
     },
     {
       "name": "Kael'thas Sunstrider",
       "slug": "kaelthas",
+      "summary": "The final boss of The Eye, a five-phase council, weapons and solo endurance fight. Phase 1 is a gauntlet of his four advisors fought one at a time. Phase 2 spawns seven animated legendary weapons the raid kills and then equips for the rest of the fight. Phase 3 resurrects all four advisors at once. Phase 4 is Kael'thas himself with Phoenixes, Pyroblast and Mind Control; phase 5 is Gravity Lapse, which repeats until he dies. One of TBC's most coordination-heavy fights.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Advisors",
+          "hp_range": "one at a time",
+          "description": "Four advisors fought one at a time, in order: Thaladred the Darkener, then Lord Sanguinar, then Grand Astromancer Capernian, then Master Engineer Telonicus."
+        },
+        {
+          "number": 2,
+          "name": "Legendary weapons",
+          "hp_range": "seven adds",
+          "description": "Seven animated legendary weapons attack the raid; assigned players kill, then loot and equip them for the rest of the fight."
+        },
+        {
+          "number": 3,
+          "name": "Advisor resurrection",
+          "hp_range": "all four return",
+          "description": "All four advisors resurrect at full health while Kael'thas is up. Bloodlust here. Split ranged onto Thaladred then Capernian, melee onto Sanguinar then Telonicus."
+        },
+        {
+          "number": 4,
+          "name": "Kael'thas",
+          "hp_range": "engages",
+          "description": "Kael'thas becomes attackable: Phoenixes (kited, each leaving a Phoenix Egg that must die fast), Pyroblast (interrupt, often after a Shock Barrier shield), Flame Strike, Fireball and Mind Control."
+        },
+        {
+          "number": 5,
+          "name": "Gravity Lapse",
+          "hp_range": "around 50%",
+          "description": "The raid is lifted into the air and takes ongoing arcane damage. Spread to maximum distance because Nether Beam chains to nearby players, and never touch Nether Vapor clouds. Repeats on a cycle until death."
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Thaladred's Gaze",
+          "mechanic_type": "special",
+          "targets": "random",
+          "description": "Thaladred the Darkener fixates a player and chases them, hitting extremely hard. A kiter runs him around the room edge; he is killed in a back corner.",
+          "important": true
+        },
+        {
+          "name": "Bellowing Roar",
+          "mechanic_type": "fear",
+          "targets": "raid",
+          "description": "Lord Sanguinar's area fear. Counter with Fear Ward and Tremor Totem; ranged stay back and spread.",
+          "important": false
+        },
+        {
+          "name": "Capernian's Arcane",
+          "mechanic_type": "special",
+          "targets": "raid",
+          "description": "Grand Astromancer Capernian casts arcane and uses Arcane Explosion if anyone is in melee range, so melee stay off her; she is held at range, where a warlock works well. Conflagration hits random nearby players.",
+          "important": true
+        },
+        {
+          "name": "Telonicus' Bombs",
+          "mechanic_type": "movement",
+          "targets": "raid",
+          "description": "Master Engineer Telonicus drops fire bombs on the ground and applies a periodic stun. Watch your feet and avoid clumping.",
+          "important": false
+        },
+        {
+          "name": "Legendary Weapons",
+          "mechanic_type": "add_spawn",
+          "targets": "raid",
+          "description": "Seven animated weapons attack the raid: Cosmic Infuser, Phaseshift Bulwark, Devastation, Staff of Disintegration, Netherstrand Longbow, Warp Slicer and Infinity Blade. Assigned players loot and equip them for the rest of the fight; some have on-use effects, others are passive. The Infinity Blade breaks Mind Control on the player it strikes.",
+          "important": true
+        },
+        {
+          "name": "Phoenix",
+          "mechanic_type": "add_spawn",
+          "targets": "raid",
+          "description": "Phase 4: Kael'thas summons Phoenixes that are kited; on death each leaves a Phoenix Egg that must be killed quickly or it respawns the Phoenix.",
+          "important": true
+        },
+        {
+          "name": "Pyroblast",
+          "mechanic_type": "interrupt",
+          "targets": "tank",
+          "description": "Phase 4: a long fire cast, often following a Shock Barrier shield, that must be interrupted.",
+          "important": true
+        },
+        {
+          "name": "Mind Control",
+          "mechanic_type": "special",
+          "targets": "raid",
+          "description": "Phase 4: Kael'thas mind-controls raid members. Attacking the victim with the Infinity Blade instantly breaks it.",
+          "important": true
+        },
+        {
+          "name": "Gravity Lapse",
+          "mechanic_type": "movement",
+          "targets": "raid",
+          "description": "Phase 5 (around fifty percent): the raid floats and takes ongoing arcane damage. Spread to maximum distance because Nether Beam chains to nearby players, and never touch Nether Vapor clouds. Repeats until he dies.",
+          "important": true
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "Phase 1: kill the four advisors in order (Thaladred kited and killed in a corner, Sanguinar fear-warded, Capernian range-held off melee, Telonicus' bombs dodged). Phase 2: kill the seven weapons and have assigned players equip them. Phase 3: Bloodlust as all four advisors return, splitting ranged and melee across them. Phase 4: tank Kael, kite Phoenixes and kill their eggs fast, interrupt Pyroblast, break Mind Control with the Infinity Blade. Phase 5: spread for Gravity Lapse and avoid Nether Vapor until he dies."
+        }
+      ],
+      "roles": {
+        "tank": "Phase 1: a tank for each advisor in turn, with Capernian held at range by a caster rather than melee-tanked. Phase 2: tanks pull the dangerous weapons (Cosmic Infuser and Devastation) away from the raid and take the shield. Phase 4: a tank holds Kael'thas while a tank or hunter kites the Phoenixes.",
+        "healer": "Spread for Telonicus' bombs, fear and arcane; expect heavy raid-wide damage through phases 4 and 5. A healer can equip the Cosmic Infuser after phase 2.",
+        "dps": "Follow the phase 1 kill order; in phase 2 equip your assigned weapon fast (caster: Staff of Disintegration; hunter: Netherstrand Longbow; melee: Warp Slicer; Infinity Blade holders break Mind Control). Keep a Pyroblast interrupt rotation in phase 4, and in phase 5 spread and dodge Nether Vapor."
+      },
       "bossguide": {
         "boss_num": 4,
         "raid_short": "TK",
@@ -98,7 +442,7 @@
           "raid_healers": 3,
           "interrupts": 3
         },
-        "context": "FIGHT: Kael'thas Sunstrider - Tempest Keep Boss 4 (Final) - 5 PHASES\n\nP1: ADVISORS (one at a time; kill order Thaladred -> Sanguinar -> Capernian -> Telonicus).\n- Thaladred: fixates a target (Gaze); a kiter runs him around the room edge, killed in a back corner.\n- Sanguinar: tank-and-spank; Fear on tank (Fear Ward); ranged stay back.\n- Capernian: lock-tanked by a warlock; arcane AoE around her - keep healers back.\n- Telonicus: drops bombs on the ground; melee watch their feet.\n\nP2: 7 LEGENDARY WEAPONS spawn and fight the raid. DPS each until dead. DO NOT LOOT UNLESS ASSIGNED.\n- Assign Cosmic Infuser -> MT, Phaseshift Bulwark -> 2nd tank, Devastation -> 3rd tank, Staff of Disintegration -> warlock (activate its aura). Remaining weapons to available players.\n\nP3: all 4 advisors RESURRECT at full HP, same kill order. Hardest phase. Pre-position tanks near corpses. Bloodlust here.\n\nP4 (under ~50%): Kael'thas engages. A tank kites the Phoenix away while ranged kill it and its egg fast. Interrupt Pyroblast; face Fireball away from raid.\n\nP5 (Gravity Lapse, repeats): everyone floats - spread MAX distance (Nether Beam chains). Do not touch Nether Vapor clouds. Land near the ground as it ends.\n\nROLES NEEDED:\n- {skull} Thaladred kiter, {cross} Sanguinar tank, {triangle} Capernian warlock, {moon} Telonicus tank, {star} P4 Kael'thas MT, {square} Phoenix tank.\n- Legendary weapon assignments (name who gets each, esp. the Staff for its aura).\n- Interrupt team for Pyroblast. Healers: 2 per tank group, 2 raid. Misdirect hunters for P1/P4 pickups.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull}/{cross}/{triangle}/{moon}/{star}/{square} for the six roles.\n- List advisor kill order and the P2 weapon assignments. Note Bloodlust in P3."
+        "context": "FIGHT: Kael'thas Sunstrider - Tempest Keep Boss 4 (Final) - 5 PHASES\n\nP1 ADVISORS (one at a time; kill order Thaladred -> Sanguinar -> Capernian -> Telonicus).\n- Thaladred: fixates a target (Gaze); a kiter runs him around the room edge, killed in a back corner.\n- Sanguinar: tank-and-spank; Bellowing Roar fear (Fear Ward / Tremor); ranged stay back.\n- Capernian: arcane caster; Arcane Explosion if anyone is in MELEE - keep melee OFF, range-tank her (a warlock works).\n- Telonicus: drops bombs and a periodic stun; melee watch their feet.\n\nP2: 7 LEGENDARY WEAPONS animate and attack. Kill them; assigned players LOOT and EQUIP them for the rest of the fight. The seven: Cosmic Infuser (mace, heals the other weapons - pull aside; a healer can equip after), Phaseshift Bulwark (shield, tank), Devastation (axe, melee - pull aside), Staff of Disintegration (caster), Netherstrand Longbow (hunter), Warp Slicer (melee), Infinity Blade (melee - breaks Mind Control on the player it hits).\n\nP3: all 4 advisors RESURRECT at full HP while Kael is up. Bloodlust here. Split ranged (Thaladred, then Capernian) and melee (Sanguinar, then Telonicus).\n\nP4: Kael engages. Kite Phoenixes and kill their eggs fast; INTERRUPT Pyroblast (often after a Shock Barrier shield); break Mind Control with the Infinity Blade.\n\nP5 (~50%): Gravity Lapse - everyone floats. Spread to MAX distance (Nether Beam chains); do NOT touch Nether Vapor clouds. Repeats until he dies.\n\nROLES NEEDED:\n- {skull} Thaladred kiter, {cross} Sanguinar tank, {triangle} Capernian range-tank (warlock), {moon} Telonicus tank, {star} P4 Kael'thas MT, {square} Phoenix kiter.\n- Legendary weapon assignments: name who loots each of the 7 (caster Staff, hunter Longbow, melee Warp Slicer, Infinity Blade for MC breaks).\n- Interrupt team for Pyroblast. Healers: 2 per tank group, 2 raid. Misdirect hunters for pickups.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull}/{cross}/{triangle}/{moon}/{star}/{square} for the six roles.\n- List the advisor kill order and the P2 weapon assignments. Note Bloodlust in P3."
       }
     }
   ]

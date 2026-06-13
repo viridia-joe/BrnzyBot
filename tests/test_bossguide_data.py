@@ -61,7 +61,20 @@ def test_leotheras_demon_tank_is_fire_not_shadow():
     assert "shadow resist" not in ctx
 
 
-def test_strat_fts_indexes_ssc_but_not_tk():
+def test_tk_corrections_held():
+    # Regression guards for the hallucinations the TK research pass caught.
+    kael = BG.BOSS_DATA["kaelthas"].context.lower()
+    assert "thori'dal" not in kael, "Thori'dal is a Sunwell legendary, not in the Kael fight"
+    assert "venom bolt" not in kael
+    for w in ("cosmic infuser", "phaseshift bulwark", "infinity blade"):
+        assert w in kael, f"verified weapon '{w}' missing from Kael context"
+    alar = BG.BOSS_DATA["alar"].context.lower()
+    assert "only ranged" not in alar, "Al'ar P1 is not ranged-only; melee must hit him"
+    assert "melee" in alar
+
+
+def test_strat_fts_indexes_ssc_and_tk():
+    # Both phase-2 raids are now research-verified and indexed for /strat.
     conn = _build_db()
     ssc_n = conn.execute(
         "SELECT COUNT(*) FROM bosses WHERE zone_slug='serpentshrine_cavern'"
@@ -70,7 +83,7 @@ def test_strat_fts_indexes_ssc_but_not_tk():
         "SELECT COUNT(*) FROM bosses WHERE zone_slug='tempest_keep'"
     ).fetchone()[0]
     assert ssc_n == 6, f"expected 6 SSC bosses in /strat, got {ssc_n}"
-    assert tk_n == 0, "TK should be strat_index=false (bossguide-only)"
+    assert tk_n == 4, f"expected 4 TK bosses in /strat, got {tk_n}"
 
 
 def test_strat_fts_search_finds_ssc_content():

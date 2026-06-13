@@ -37,9 +37,13 @@ Shermnshamn ❌       ❌      ❌   ✅        ✅
 - **Food / Oil / Potion**: ✅/⚠️/❌ grid, abbreviated boss names as columns.
 - **Elixirs/Flasks**: show the *named* consumable per cell (the mockup's most
   detailed row), with ⚠️ when present-but-suboptimal, ❌ when missing.
-- Column count is bounded by Discord width — abbreviate boss names (Hydross,
-  Lurker, Leo, FLK, Morogrim, Vashj) and cap at ~6–7 columns; if a clear has more
-  kills, split into two tables or note the overflow (no silent truncation).
+- Column count is bounded by Discord width. **Chunk bosses into wings / logical
+  partitions of 4–6 per table** (e.g. Karazhan: the lower wing, then the upper
+  wing/Curator→Prince, then Nightbane; SSC fits in one table of 6). When an
+  instance has no natural wing, make a judgment call and split into comfortable
+  4–6-boss tables. Each consumable category (Food/Oil/Elixir/Potion) repeats its
+  table per chunk. Abbreviate boss names (Hydross, Lurker, Leo, FLK, Morogrim,
+  Vashj). Never silently truncate — every kill appears in some chunk.
 
 ## Data gathering
 
@@ -61,12 +65,25 @@ the command defers. Acceptable for an officer-run "review the night" command.
 
 ## Optimal-consume grading
 
-Each cell is graded ✅ / ⚠️ / ❌ against the spec's **best** choice for that fight:
+Grading philosophy differs by role — this is the heart of the feature:
 
-- **✅ optimal** — present and the best-in-slot consumable for the spec.
-- **⚠️ suboptimal** — present but a weaker choice (e.g. a caster on Flask of
-  Supreme Power when Blinding Light is better for them; an elixir pair that's fine
-  but not best), OR a **wasted type-gated** consumable (Demonslaying on a non-demon).
+- **DPS: strict.** DPS is measured on throughput, and the best throughput
+  flask/elixir is unequivocally best ~99% of the time. A present-but-suboptimal
+  throughput consumable on a DPS is a real, flaggable miss (⚠️).
+- **Healers: graceful.** Healer needs are situational and hard to read from a
+  parse — throughput vs longevity is a legitimate judgment call (e.g. an MP5
+  flask over a +healing flask on a long, mana-intensive fight is often the
+  *correct* choice, not a mistake). So for healers, treat any reasonable
+  flask/elixir as **acceptable** (✅, or a soft note), and only ❌ a genuinely
+  absent consumable. Never hard-flag a healer for picking longevity over throughput.
+
+Each cell is graded ✅ / ⚠️ / ❌ against the spec's choice for that fight:
+
+- **✅ optimal / acceptable** — present and best-in-slot (DPS), or any reasonable
+  choice (healer).
+- **⚠️ suboptimal** — DPS only: present but a weaker throughput choice than the
+  spec's best. ALSO any role: a **wasted type-gated** consumable (Demonslaying on
+  a non-demon).
 - **❌ missing** — no consumable in that slot.
 
 ### Creature-type awareness (the Leotheras nuance)

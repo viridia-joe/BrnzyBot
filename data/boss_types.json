@@ -1,0 +1,40 @@
+{
+  "_comment": "TBC Classic raid boss creature types, for creature-type-gated consumable grading. Elixir of Demonslaying (+265 AP) only helps vs Demon; Consecrated Sharpening Stone (+to-hit/dmg) only helps vs Undead. Matched by lowercased boss name substring. Wings group bosses into comfortable 4-6-boss matrix tables. Sources: tbc.wowhead.com, warcraft.wiki.gg (researched 2026-06).",
+
+  "demon_bosses": [
+    "terestian illhoof",
+    "prince malchezaar",
+    "magtheridon"
+  ],
+  "undead_bosses": [
+    "attumen",
+    "moroes",
+    "nightbane"
+  ],
+  "_notes": {
+    "leotheras the blind": "Humanoid — his demon FORM is cosmetic; only the Inner Demon adds are Demon-type. Demonslaying on Leo's body is wasted.",
+    "high astromancer solarian": "Humanoid — transforms to a void form in P3 but the targetable mob stays Humanoid; demonslaying unreliable, treat as wasted.",
+    "kaelthas sunstrider": "Humanoid (blood elf), NOT a demon.",
+    "void reaver": "Mechanical.",
+    "alar": "Elemental (phoenix)."
+  },
+
+  "wings": {
+    "Karazhan": [
+      ["Attumen the Huntsman", "Moroes", "Maiden of Virtue", "Opera", "The Curator"],
+      ["Shade of Aran", "Terestian Illhoof", "Netherspite", "Chess", "Prince Malchezaar", "Nightbane"]
+    ],
+    "Gruul's Lair": [
+      ["High King Maulgar", "Gruul the Dragonkiller"]
+    ],
+    "Magtheridon's Lair": [
+      ["Magtheridon"]
+    ],
+    "Serpentshrine Cavern": [
+      ["Hydross the Unstable", "The Lurker Below", "Leotheras the Blind", "Fathom-Lord Karathress", "Morogrim Tidewalker", "Lady Vashj"]
+    ],
+    "Tempest Keep": [
+      ["Al'ar", "Void Reaver", "High Astromancer Solarian", "Kael'thas Sunstrider"]
+    ]
+  }
+}

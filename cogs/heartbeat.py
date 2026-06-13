@@ -80,6 +80,7 @@ class HeartbeatCog(commands.Cog, name="Heartbeat"):
         if not deploy_msg and not any(pool.values()):
             return
 
+        posted_changelog = False
         for guild in self.bot.guilds:
             guild_id   = str(guild.id)
             channel_id = get_heartbeat_channel(guild_id)
@@ -91,8 +92,27 @@ class HeartbeatCog(commands.Cog, name="Heartbeat"):
             msg = deploy_msg or self._pick(guild_id, pool)
             try:
                 await channel.send(msg)
+                if deploy_msg:
+                    posted_changelog = True
             except discord.HTTPException as e:
                 log.warning("Heartbeat post failed for guild %s: %s", guild_id, e)
+
+        # Only mark the deploy announced once the changelog actually posted
+        # somewhere — otherwise a boot with no heartbeat channel configured (or an
+        # uncached channel) would consume the announcement and you'd get a normal
+        # tip on the next deploy instead of the changelog.
+        if deploy_msg and posted_changelog:
+            try:
+                from core.changelog import mark_announced
+                mark_announced()
+                log.info("Posted deploy changelog and marked announced")
+            except Exception as e:
+                log.warning("mark_announced failed: %s", e)
+        elif deploy_msg and not posted_changelog:
+            # Couldn't post (no channel yet) — retry on the next tick by NOT
+            # consuming it; re-arm the one-shot.
+            self._first_tick = True
+            log.info("Deploy changelog ready but no channel posted to; will retry")
 
     @tick.before_loop
     async def _before_tick(self) -> None:

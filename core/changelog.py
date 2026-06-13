@@ -156,15 +156,22 @@ def build_changelog(since_sha: str, max_per_bucket: int = 6) -> str | None:
 def deploy_changelog_if_new() -> str | None:
     """
     If the running commit differs from the last announced one, return a changelog
-    string and record this commit as announced. Returns None when nothing changed
-    (so the heartbeat falls back to its normal lore post).
+    string. Returns None when nothing changed (heartbeat falls back to lore).
+
+    Does NOT record the SHA — the caller must call mark_announced() only AFTER the
+    message actually posts, so a send failure (no heartbeat channel set yet,
+    channel not cached at boot) doesn't silently consume the announcement.
     """
     sha = current_sha()
     if not sha:
         return None
-    last = _last_announced()
-    if sha == last:
+    if sha == _last_announced():
         return None
-    msg = build_changelog(last)
-    _save_announced(sha)   # record even if msg is None, so we don't retry endlessly
-    return msg
+    return build_changelog(_last_announced())
+
+
+def mark_announced() -> None:
+    """Record the running commit as announced (call after the changelog posts)."""
+    sha = current_sha()
+    if sha:
+        _save_announced(sha)

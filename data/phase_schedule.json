@@ -1,0 +1,27 @@
+{
+  "_comment": "Realm-driven TBC phase calendar. Separates the calendar phase (what the realm calls the current phase, used for gear tier markers) from content_phase_max (the WowSims item-DB ceiling the optimizer filters on). release=null means announced-but-undated: the previous dated phase holds until a real date lands. Updating a date is a one-line edit, no code change. See docs/PHASE_READINESS.md section 1.",
+  "rulesets": {
+    "anniversary": {
+      "label": "TBC Classic Anniversary (2026)",
+      "phases": [
+        {"phase": 1, "release": "2026-02-19", "content_phase_max": 1, "arena_season": 1,
+         "raids": ["Karazhan", "Gruul's Lair", "Magtheridon's Lair"]},
+        {"phase": 2, "release": "2026-05-14", "content_phase_max": 2, "arena_season": 2,
+         "raids": ["Serpentshrine Cavern", "Tempest Keep: The Eye"]},
+        {"phase": 3, "release": null, "release_window": "Summer 2026", "content_phase_max": 4, "arena_season": 3,
+         "raids": ["Mount Hyjal", "Black Temple", "Zul'Aman"]},
+        {"phase": 4, "release": null, "release_window": "Autumn 2026", "content_phase_max": 5, "arena_season": 4,
+         "raids": ["Sunwell Plateau"]}
+      ]
+    }
+  },
+  "realms": {
+    "dreamscythe": "anniversary",
+    "_default": "anniversary"
+  },
+  "sources": [
+    "https://www.wowhead.com/tbc/guide/the-burning-crusade-classic-anniversary-phase-release-roadmap",
+    "https://www.icy-veins.com/tbc-classic/tbc-classic-anniversary-overview",
+    "https://warcraft.wiki.gg/wiki/World_of_Warcraft:_Burning_Crusade_Classic_Anniversary_Edition"
+  ]
+}

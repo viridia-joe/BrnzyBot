@@ -36,7 +36,6 @@ import config
 from core.gear_cache import get_gear
 from core.gear_context import build_context, load_spec, compute_item_ep
 from core.classifier import resolve_spec
-from db.server_config import get_guild_phase
 
 ITEM_DB_PATH = config.ITEM_DB_PATH
 
@@ -206,7 +205,9 @@ def handle_srprio(character: str, spec: str, realm: str, raid: str,
                     "no cached snapshot exists. Try again in a moment.")
         context = build_context(snapshot, spec)
         spec_data = load_spec(spec) or {"weights": {}}
-        phase = phase_override if phase_override is not None else get_guild_phase(guild_id)
+        # srprio filters raid loot by the optimizer item ceiling (phase <= ?).
+        from core import phase as _phase
+        phase = _phase.resolve_for_guild(guild_id, override=phase_override).content_phase_max
         candidates = _load_raid_candidates(item_db, raid_key, spec_data, phase)
     finally:
         item_db.close()

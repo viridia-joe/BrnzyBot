@@ -24,7 +24,7 @@ from core.node_health import check_nodes
 from core.gear_optimizer import solve_upgrades, solve_bis, OptimizeParams
 from core.classifier import resolve_spec
 from core.healer_analysis import analyze_healer
-from db.server_config import get_guild_phase
+from core import phase as _phase
 
 ITEM_DB_PATH = config.ITEM_DB_PATH
 
@@ -214,10 +214,9 @@ def _format_priority_skeleton(character: str, spec_desc: str, context,
         lines.append(
             f"\nNo upgrades found **within {phase_label} loot** — {character} is at or near "
             f"BiS for this phase.\n"
-            f"⚙️ If your guild is further along, the search is phase-gated: only "
-            f"{phase_label} (and earlier) items are considered. Set the actual phase with "
-            f"`/setup phase <n>` (currently **{phase}**) and re-run — later-tier upgrades "
-            f"are excluded until then."
+            f"⚙️ The search is phase-gated to {phase_label} (and earlier); the phase auto-advances "
+            f"with the realm's release schedule. To preview a later tier, pass `phase:` on the "
+            f"command, or an admin can override with `/setup phase <n>`."
         )
         return "\n".join(lines)
 
@@ -287,9 +286,13 @@ def handle_gear_question(
             "Try again in a moment."
         )
 
-    phase    = phase_override if phase_override is not None else get_guild_phase(guild_id)
+    # Realm-driven phase: content_phase_max is the optimizer item ceiling (the
+    # `phase <= ?` filter); calendar_phase drives user-facing labels and markers.
+    _pinfo   = _phase.resolve_for_guild(guild_id, override=phase_override)
+    phase    = _pinfo.calendar_phase
     context  = build_context(snapshot, spec)
-    priority = _build_upgrade_priority(character, spec, snapshot, context, phase=phase,
+    priority = _build_upgrade_priority(character, spec, snapshot, context,
+                                       phase=_pinfo.content_phase_max,
                                        include_arena=include_arena)
     skeleton = _format_priority_skeleton(character, context.spec_desc, context, priority, phase=phase)
 
@@ -367,7 +370,10 @@ def handle_gear_list(
         )
 
     context = build_context(snapshot, spec)
-    phase   = phase_override if phase_override is not None else get_guild_phase(guild_id)
+    # calendar_phase = user-facing label/markers; content_phase_max = item ceiling.
+    _pinfo  = _phase.resolve_for_guild(guild_id, override=phase_override)
+    phase   = _pinfo.calendar_phase
+    _ceiling = _pinfo.content_phase_max
 
     # Run BIS solve for per-slot comparison
     bis_by_slot: dict[str, list] = {}
@@ -379,7 +385,7 @@ def handle_gear_list(
             try:
                 is_alliance_shaman = "shaman" in spec.lower() and getattr(snapshot, "faction", -1) == 1
                 params = OptimizeParams(
-                    phase=phase,
+                    phase=_ceiling,
                     include_pvp=False,
                     include_arena=include_arena,
                     include_world_boss=False,

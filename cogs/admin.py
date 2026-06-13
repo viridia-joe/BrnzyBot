@@ -36,8 +36,8 @@ from db.server_config import (
     remove_character,
     set_botduel_log_channel,
     set_guild_config,
-    set_guild_phase,
-    get_guild_phase,
+    set_phase_override,
+    get_phase_override,
     set_heartbeat_channel,
     set_officer_role,
     set_response_target,
@@ -101,18 +101,49 @@ class AdminCog(commands.Cog, name="Admin"):
             f"(LLM enhancement also requires the instance's `ENABLE_LLM` backend to be on.)",
             ephemeral=True)
 
-    @setup_group.command(name="phase", description="Set the current TBC content phase for this guild (1–6).")
-    @app_commands.describe(phase="Content phase number (1 = Karazhan, 2 = SSC/TK, etc.)")
+    @setup_group.command(
+        name="phase",
+        description="Override the content phase, or 'auto' to derive it from the realm + date (default).",
+    )
+    @app_commands.describe(phase="A phase number, or 'auto' (recommended) to auto-advance on each release date.")
     @_require_manage_guild()
-    async def setup_phase(self, interaction: discord.Interaction, phase: int) -> None:
-        if not 1 <= phase <= 6:
-            await interaction.response.send_message("Phase must be between 1 and 6.", ephemeral=True)
-            return
+    async def setup_phase(self, interaction: discord.Interaction, phase: str) -> None:
+        from core import phase as phasemod
         guild_id = str(interaction.guild_id)
-        set_guild_phase(guild_id, phase)
+        cfg = get_guild_config(guild_id) or {}
+        realm = cfg.get("server_slug") or config.DEFAULT_REALM
+
+        value = phase.strip().lower()
+        if value in ("auto", "off", "clear", "none"):
+            set_phase_override(guild_id, None)
+            info = phasemod.resolve_for_guild(guild_id)
+            await interaction.response.send_message(
+                f"Phase set to **auto** — derived from realm + date. "
+                f"Currently **Phase {info.calendar_phase}** "
+                f"({', '.join(info.raids) or 'no raids listed'}). "
+                "It will advance automatically on each release date; no command needed.",
+                ephemeral=True,
+            )
+            return
+
+        if not value.isdigit():
+            await interaction.response.send_message(
+                "Use a phase number, or `auto` to derive it automatically.", ephemeral=True)
+            return
+
+        n = int(value)
+        max_phase = phasemod.max_calendar_phase(realm)
+        if not 1 <= n <= max_phase:
+            await interaction.response.send_message(
+                f"Phase must be between 1 and {max_phase} for this realm, or `auto`.",
+                ephemeral=True)
+            return
+        set_phase_override(guild_id, n)
+        info = phasemod.resolve_for_guild(guild_id)
         await interaction.response.send_message(
-            f"Content phase set to **Phase {phase}**. "
-            "Gear recommendations will now filter by phase-appropriate sources.",
+            f"Content phase **overridden** to **Phase {info.calendar_phase}** "
+            f"(item ceiling {info.content_phase_max}). Use `/setup phase auto` to "
+            "return to automatic realm-driven phasing.",
             ephemeral=True,
         )
 

@@ -25,6 +25,7 @@ def _data_files():
         os.path.join(data, "meta_gems.json"),
         os.path.join(data, "fun_content.json"),
         os.path.join(data, "healer_thresholds.json"),
+        os.path.join(data, "phase_schedule.json"),
     ):
         files.extend(glob.glob(pattern))
     return sorted(f for f in files if os.path.exists(f))

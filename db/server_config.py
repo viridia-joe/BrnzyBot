@@ -51,6 +51,14 @@ _MIGRATIONS = [
     "ALTER TABLE guild_config ADD COLUMN botduel_log_channel_id TEXT",
     "ALTER TABLE guild_config ADD COLUMN heartbeat_channel_id TEXT",
     "ALTER TABLE guild_config ADD COLUMN last_haiku_ts INTEGER",
+    # Realm-driven phase model (docs/PHASE_READINESS.md s1): phase is normally
+    # derived from realm + date (core/phase.py). phase_override is the optional
+    # admin escape hatch (NULL = auto). One-time backfill: a deliberate legacy
+    # current_phase (anything other than the old default of 1) becomes the
+    # override, so guilds that left it at the default silently start auto-advancing.
+    "ALTER TABLE guild_config ADD COLUMN phase_override INTEGER",
+    "UPDATE guild_config SET phase_override = current_phase "
+    "WHERE phase_override IS NULL AND current_phase <> 1",
 ]
 
 
@@ -161,23 +169,60 @@ def set_guild_config(
         )
 
 
-def set_guild_phase(guild_id: str, phase: int, path: str = DB_PATH) -> None:
+def set_phase_override(guild_id: str, phase: Optional[int], path: str = DB_PATH) -> None:
+    """Set (or clear) the admin phase override. None = clear -> auto.
+
+    Clearing also resets the legacy current_phase to the old default so the
+    one-time backfill migration can never resurrect a stale value as an override.
+    """
     with _conn(path) as conn:
-        conn.execute(
-            """INSERT INTO guild_config (guild_id, current_phase)
-               VALUES (?, ?)
-               ON CONFLICT (guild_id)
-               DO UPDATE SET current_phase=excluded.current_phase""",
-            (guild_id, phase),
-        )
+        if phase is None:
+            conn.execute(
+                """INSERT INTO guild_config (guild_id, phase_override, current_phase)
+                   VALUES (?, NULL, 1)
+                   ON CONFLICT (guild_id)
+                   DO UPDATE SET phase_override=NULL, current_phase=1""",
+                (guild_id,),
+            )
+        else:
+            conn.execute(
+                """INSERT INTO guild_config (guild_id, phase_override)
+                   VALUES (?, ?)
+                   ON CONFLICT (guild_id)
+                   DO UPDATE SET phase_override=excluded.phase_override""",
+                (guild_id, phase),
+            )
+
+
+def get_phase_override(guild_id: str, path: str = DB_PATH) -> Optional[int]:
+    """Return the stored admin phase override, or None if the guild is on auto.
+
+    Degrades to None (auto) if the table/column isn't there yet, so a pre-init
+    or partially-migrated DB resolves to the realm default rather than crashing.
+    """
+    try:
+        with _conn(path) as conn:
+            row = conn.execute(
+                "SELECT phase_override FROM guild_config WHERE guild_id=?", (guild_id,)
+            ).fetchone()
+    except sqlite3.OperationalError:
+        return None
+    return row["phase_override"] if row and row["phase_override"] is not None else None
+
+
+# Legacy accessors. set_guild_phase now writes an override (its only caller was
+# the admin /setup phase command); get_guild_phase is retained for any reader not
+# yet routed through core.phase. New code should use core.phase.resolve_for_guild.
+def set_guild_phase(guild_id: str, phase: int, path: str = DB_PATH) -> None:
+    set_phase_override(guild_id, phase, path=path)
 
 
 def get_guild_phase(guild_id: str, path: str = DB_PATH) -> int:
-    with _conn(path) as conn:
-        row = conn.execute(
-            "SELECT current_phase FROM guild_config WHERE guild_id=?", (guild_id,)
-        ).fetchone()
-    return row["current_phase"] if row else 1
+    override = get_phase_override(guild_id, path=path)
+    if override is not None:
+        return override
+    from core import phase as _phase
+    return _phase.resolve_for_guild(guild_id).content_phase_max
 
 
 # ---------------------------------------------------------------------------

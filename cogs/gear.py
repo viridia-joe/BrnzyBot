@@ -158,7 +158,7 @@ class GearCog(commands.Cog, name="Gear"):
     @app_commands.describe(
         character="Character name (must be registered with /addchar)",
         spec="Spec override (e.g. elemental, destro, shadow). Uses registered spec if omitted.",
-        phase="Phase to optimize for (1–5). Defaults to guild's current phase.",
+        phase="Override the content phase; omit to use the realm's current phase (auto).",
         arena="Consider rated arena gear (default on). Set false if you don't do arena.",
     )
     async def slash_gearprio(
@@ -180,9 +180,13 @@ class GearCog(commands.Cog, name="Gear"):
             )
             return
 
-        if phase is not None and not (1 <= phase <= 5):
+        from core import phase as _phasemod
+        _max_phase = _phasemod.max_calendar_phase(
+            (get_guild_config(guild_id) or {}).get("server_slug") or config.DEFAULT_REALM)
+        if phase is not None and not (1 <= phase <= _max_phase):
             await interaction.response.send_message(
-                "Phase must be between 1 and 5.", ephemeral=True
+                f"Phase must be between 1 and {_max_phase}, or omit it to use the realm's current phase.",
+                ephemeral=True,
             )
             return
 
@@ -353,7 +357,7 @@ class GearCog(commands.Cog, name="Gear"):
     @app_commands.describe(
         character="Character name",
         spec="Override spec (e.g. affliction, destro). Uses registered spec if omitted.",
-        phase="Phase to optimize for (1–5). Defaults to guild's current phase.",
+        phase="Override the content phase; omit to use the realm's current phase (auto).",
         arena="Consider rated arena gear (default on). Set false if you don't do arena.",
     )
     async def slash_gearcheck(
@@ -437,7 +441,7 @@ class GearCog(commands.Cog, name="Gear"):
         character="Character name",
         raid="Raid instance (e.g. Karazhan, Gruul, SSC, TK). Soft reserve is raids only.",
         spec="Override spec. Uses registered spec if omitted.",
-        phase="Phase to consider (1–5). Defaults to guild's current phase.",
+        phase="Override the content phase; omit to use the realm's current phase (auto).",
     )
     async def slash_srprio(
         self,

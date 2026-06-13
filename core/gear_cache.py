@@ -559,11 +559,19 @@ def spec_from_stats(wow_class: str, stats: dict) -> str | None:
     # far more Stamina + Armor than the same character DPSing (e.g. a Warrior
     # tank ~1000 stam / 17k armor vs ~700 stam / 9.5k armor as fury), and any
     # block rating is plate-tank-only. This reads the *fight*, not the character.
-    plate_tank = (stam > 900 and armor > 14000) or block > 0
-    bear_tank  = (stam > 1000 and armor > 14000)
+    # Tank detection MUST come before the healer check. A plate tank stacks Int
+    # too (spell power for threat / Holy Shield), so a Prot paladin can look like
+    # a healer on int+spirit alone — but a real tank carries far more Armor +
+    # Stamina and, decisively, BLOCK RATING (plate-tank-only). Block > 0 or a
+    # heavy armor+stam statline is an unambiguous tank tell that wins outright.
+    # (Fixes Valindreai, a Prot pal with armor 16k / stam 1200 / block 82 being
+    # mis-read as holy_paladin.)
+    strong_tank = block > 0 or (stam > 1000 and armor > 15000)
+    plate_tank  = strong_tank or (stam > 900 and armor > 14000)
+    bear_tank   = strong_tank or (stam > 1000 and armor > 14000)
 
     if cls == "Druid":
-        if bear_tank and agi < intel + 400:        # bear: huge stam+armor
+        if bear_tank and agi < intel + 400:        # bear: huge stam+armor (no block in forms)
             return "feral_bear_druid"
         if agi > intel and agi > 350:               # cat: agility melee
             return "feral_cat_druid"
@@ -571,18 +579,18 @@ def spec_from_stats(wow_class: str, stats: dict) -> str | None:
             return "resto_druid"                    # int/spirit, no crit = healer
         return "balance_druid"                      # caster with crit = moonkin
     if cls == "Paladin":
+        if plate_tank:                              # block/armor/stam = Prot, even with Int
+            return "prot_paladin"
         if caster and spirit > 150 and crit_spell < 200:
             return "holy_paladin"
-        if plate_tank:
-            return "prot_paladin"
         return "ret_paladin"
-    if cls == "Shaman":
+    if cls == "Shaman":                             # shamans don't tank in TBC
         if caster and spirit > 200 and crit_spell < 120:
             return "resto_shaman"
         if agi > intel:
             return "enh_shaman"
         return "ele_shaman"
-    if cls == "Priest":
+    if cls == "Priest":                             # priests don't tank
         if spirit > 250 and crit_spell < 150:
             return "holy_priest"
         return "shadow_priest"

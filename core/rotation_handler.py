@@ -552,8 +552,11 @@ def handle_rotation_check(
             pass  # fuzzy match is best-effort; don't block the real error
         return resolved
 
-    # 2. Resolve the spec: prefer an explicitly provided spec, otherwise derive
-    #    it from THIS pull (per-fight detection handles spec-switchers correctly).
+    # 2. Resolve the spec: try the provided spec, but if it has no profile (e.g.
+    #    a stale registry entry, or a spec we don't cover like healers), fall
+    #    through to per-fight detection from THIS pull. The log is authority — a
+    #    raider whose registered spec is wrong (a Prot pal saved as Holy, a
+    #    spec-switcher) still gets checked against what they actually played.
     spec_key = _resolve_spec_key(spec) if spec else None
     profile = load_profile(spec_key) if spec_key else None
     spec_was_detected = False
@@ -563,7 +566,17 @@ def handle_rotation_check(
             profile = load_profile(derived)
             spec_was_detected = profile is not None
     if profile is None:
+        # Nothing covers this pull. If a spec was detected but it's a role we
+        # don't grade (healers have no rotation profile), say so specifically.
+        detected = _derive_spec_from_log(resolved.code, resolved.fight_id, resolved.actor_id)
         covered = ", ".join(covered_specs()) or "(none)"
+        if detected and not load_profile(detected):
+            return (
+                f"**{character}** played **{detected.replace('_', ' ')}** in "
+                f"{resolved.fight_name}, which rotation check doesn't grade "
+                f"(healing rotations aren't scored from a cast list). "
+                f"Covered specs: {covered}."
+            )
         who = f"**{spec}**" if spec else f"**{character}**'s spec"
         return (
             f"Rotation check doesn't cover {who} yet. "

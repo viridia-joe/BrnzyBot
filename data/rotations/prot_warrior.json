@@ -1,0 +1,53 @@
+{
+  "spec": "prot_warrior",
+  "display": "Protection Warrior",
+  "class": "Warrior",
+  "role": "tank",
+  "summary": "Threat rotation in Defensive Stance with a shield: Shield Slam on cooldown, Revenge when it procs, Devastate as the filler (builds Sunder stacks), Heroic Strike as the off-GCD rage dump. Keep Shield Block near 100% uptime, maintain Thunder Clap + Demoralizing Shout debuffs. Shield Wall / Last Stand on damage spikes.",
+  "core_spells": [
+    "Shield Slam",
+    "Revenge",
+    "Devastate",
+    "Heroic Strike",
+    "Shield Block",
+    "Thunder Clap",
+    "Demoralizing Shout"
+  ],
+  "downrank_watch": [],
+  "ranks_verified": false,
+  "off_rotation": {
+    "Bloodthirst": {
+      "min_casts": 3,
+      "note": "Fury ability - a tank casting Bloodthirst is in the wrong stance/spec and has dropped mitigation"
+    },
+    "Mortal Strike": {
+      "min_casts": 3,
+      "note": "Arms ability - wrong spec for a Protection tank"
+    },
+    "Whirlwind": {
+      "min_casts": 3,
+      "note": "requires Berserker Stance - a Prot tank in Berserker Stance takes +10% crit and loses defensive mitigation"
+    },
+    "Recklessness": {
+      "min_casts": 1,
+      "note": "Berserker Stance cooldown (+crit, +crit taken) - dangerous on a tank, indicates wrong stance"
+    },
+    "Death Wish": {
+      "min_casts": 1,
+      "note": "Fury talent - wrong spec for a tank"
+    },
+    "Shockwave": {
+      "min_casts": 1,
+      "note": "does NOT exist in TBC Classic (WotLK ability) - the log is mislabeled or wrong-expansion"
+    }
+  },
+  "breakpoint": {
+    "spells": [
+      "Shield Slam",
+      "Revenge",
+      "Shield Block"
+    ],
+    "note": "Shield Slam (highest threat) and Revenge (when proc'd) should appear near their cooldown caps. Devastate is the filler that also maintains Sunder Armor stacks. Shield Block should be one of the HIGHEST cast counts in the log (~5s cooldown, kept up near-100% for block mitigation) - a low Shield Block count means the warrior is taking unmitigated melee damage. Heroic Strike eats excess rage off the GCD."
+  },
+  "advisory": "TBC main-tank spec. Stays in Defensive Stance with a shield the entire fight - any Berserker/Battle Stance abilities (Whirlwind, Bloodthirst, Recklessness) mean defenses were dropped. A properly-specced Prot warrior shows Devastate, not standalone Sunder Armor (Devastate replaces it and applies the stacks). Shield Wall (big damage reduction CD) and Last Stand (emergency health) should appear on spike-damage phases. Spell Reflection is situational. The #1 competence signal is high Shield Block uptime alongside Shield Slam/Revenge used on cooldown."
+}

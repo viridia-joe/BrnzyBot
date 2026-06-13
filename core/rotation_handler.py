@@ -567,7 +567,7 @@ def handle_rotation_check(
         who = f"**{spec}**" if spec else f"**{character}**'s spec"
         return (
             f"Rotation check doesn't cover {who} yet. "
-            f"Currently supported (caster DPS): {covered}."
+            f"Currently supported: {covered}."
         )
 
     try:

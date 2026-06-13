@@ -1,0 +1,60 @@
+{
+  "spec": "feral_bear_druid",
+  "display": "Feral Druid (Bear)",
+  "class": "Druid",
+  "role": "tank",
+  "summary": "Dire Bear Form the whole fight: Mangle (Bear) on cooldown (top threat), Lacerate to build and hold a 5-stack bleed, Maul as the off-GCD rage dump, Swipe for AoE. Maintain Faerie Fire (Feral) and Demoralizing Roar. Bears have no block/parry - mitigation is passive armor + dodge, so there's no per-GCD defensive cast.",
+  "core_spells": [
+    "Mangle (Bear)",
+    "Lacerate",
+    "Maul",
+    "Swipe (Bear)",
+    "Faerie Fire (Feral)",
+    "Demoralizing Roar"
+  ],
+  "downrank_watch": [],
+  "ranks_verified": false,
+  "off_rotation": {
+    "Shred": {
+      "min_casts": 3,
+      "note": "Cat Form ability - the druid is in Cat (DPS), not Bear; no tanking armor or threat"
+    },
+    "Rip": {
+      "min_casts": 3,
+      "note": "Cat Form finisher - wrong form for tanking"
+    },
+    "Mangle (Cat)": {
+      "min_casts": 3,
+      "note": "Cat Form ability - tank should be in Bear Form using Mangle (Bear)"
+    },
+    "Ferocious Bite": {
+      "min_casts": 3,
+      "note": "Cat Form finisher - wrong form for tanking"
+    },
+    "Rake": {
+      "min_casts": 3,
+      "note": "Cat Form bleed - wrong form for tanking"
+    },
+    "Survival Instincts": {
+      "min_casts": 1,
+      "note": "does NOT exist in TBC Classic (WotLK ability) - log is mislabeled or wrong-expansion"
+    },
+    "Berserk": {
+      "min_casts": 1,
+      "note": "does NOT exist in TBC Classic (WotLK ability)"
+    },
+    "Healing Touch": {
+      "min_casts": 3,
+      "note": "caster-form heal - a tank shapeshifting out to heal loses all mitigation; emergency only"
+    }
+  },
+  "breakpoint": {
+    "spells": [
+      "Mangle (Bear)",
+      "Lacerate",
+      "Maul"
+    ],
+    "note": "Mangle (Bear) cast count should be near its theoretical max (used on its ~6s cooldown) - it's the top single-target threat and the #1 bear competence signal. Lacerate should ramp to and hold a 5-stack bleed. Maul (off the GCD) should appear frequently as the rage dump, riding alongside Mangle/Lacerate; no Maul means rage capping and wasted threat."
+  },
+  "advisory": "TBC bear tank. Should be in Dire Bear Form the entire fight - any Cat-form abilities (Shred, Rip, Rake, Mangle Cat) mean the druid is in Cat (DPS), not tanking. Bears have no Shield Block/Holy Shield equivalent; mitigation is passive (high armor + dodge), so don't expect a per-GCD defensive cast. Frenzied Regeneration is a cooldown-style self-heal on damage spikes (a handful per fight), not a rotational ability. Barkskin and Challenging Roar (AoE taunt) are situational cooldowns. Survival Instincts and Berserk do NOT exist in TBC."
+}

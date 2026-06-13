@@ -160,23 +160,30 @@ FERAL_SLOTS    = _ARMOR_SLOTS                              # weapon enchants don
 HUNTER_SLOTS   = _ARMOR_SLOTS + ("Relic",)                # Relic index = ranged weapon (scope)
 
 CASTER_CONSUMES = (
-    ConsumeRule("food", "Food", ("Blackened Basilisk", "Well Fed"), note="+spell damage food"),
+    ConsumeRule("food", "Food", ("Well Fed", "Stormchops"),
+                note="all stat food shows as 'Well Fed' in the log; +spell damage food preferred"),
     ConsumeRule("flask", "Flask",
                 ("Flask of Supreme Power", "Flask of Pure Death", "Flask of Blinding Light"),
                 required=False, note="A flask satisfies both elixir slots."),
+    # Buff names as they appear in the log: Adept's Elixir → "Spellpower Elixir";
+    # Elixir of Major Firepower → "Major Firepower"; etc.
     ConsumeRule("battle_elixir", "Battle Elixir",
-                ("Adept's Elixir", "Major Firepower", "Major Shadow Power"), required=False),
+                ("Spellpower Elixir", "Adept's Elixir", "Major Firepower",
+                 "Major Shadow Power", "Felmight"), required=False),
     ConsumeRule("guardian_elixir", "Guardian Elixir",
                 ("Draenic Wisdom", "Major Mageblood"), required=False),
-    ConsumeRule("weapon_oil", "Weapon Oil", ("Wizard Oil", "Superior Wizard Oil",
-                "Brilliant Wizard Oil", "Spellpower"), required=False,
-                note="Superior/Brilliant Wizard Oil or Spellpower (a minor gain — not flask-tier)"),
+    # Superior Wizard Oil (+42 SP) is BiS for nearly all casters; Brilliant
+    # (+36 SP / +14 crit) is acceptable. accepted[0] = best for DPS grading.
+    ConsumeRule("weapon_oil", "Weapon Oil",
+                ("Superior Wizard Oil", "Brilliant Wizard Oil",
+                 "Superior Mana Oil", "Brilliant Mana Oil"),
+                required=False, note="Superior Wizard Oil is best; Brilliant is acceptable."),
     ConsumeRule("potion", "Mana/Damage Potions", ("Super Mana Potion", "Destruction Potion"),
                 required=False),
 )
 
 MELEE_STR_CONSUMES = (
-    ConsumeRule("food", "Food", ("Roasted Clefthoof", "Spicy Hot Talbuk", "Well Fed"),
+    ConsumeRule("food", "Food", ("Well Fed", "Stormchops"),
                 note="+strength or +hit food"),
     ConsumeRule("flask", "Flask", ("Flask of Relentless Assault",), required=False),
     ConsumeRule("battle_elixir", "Battle Elixir",
@@ -189,7 +196,7 @@ MELEE_STR_CONSUMES = (
 )
 
 MELEE_AGI_CONSUMES = (
-    ConsumeRule("food", "Food", ("Grilled Mudfish", "Spicy Hot Talbuk", "Well Fed"),
+    ConsumeRule("food", "Food", ("Well Fed", "Stormchops"),
                 note="+agility or +hit food"),
     ConsumeRule("flask", "Flask", ("Flask of Relentless Assault",), required=False),
     ConsumeRule("battle_elixir", "Battle Elixir", ("Elixir of Major Agility",), required=False),
@@ -201,7 +208,7 @@ MELEE_AGI_CONSUMES = (
 )
 
 HUNTER_CONSUMES = (
-    ConsumeRule("food", "Food", ("Grilled Mudfish", "Spicy Hot Talbuk", "Ravager Dog", "Well Fed"),
+    ConsumeRule("food", "Food", ("Well Fed", "Stormchops"),
                 note="+agility or +AP food"),
     ConsumeRule("flask", "Flask", ("Flask of Relentless Assault",), required=False),
     ConsumeRule("battle_elixir", "Battle Elixir", ("Elixir of Major Agility",), required=False),
@@ -214,7 +221,7 @@ HUNTER_CONSUMES = (
 HEALER_META = "Insightful Earthstorm Diamond"   # mana restore proc
 
 HEALER_CONSUMES = (
-    ConsumeRule("food", "Food", ("Golden Fish Sticks", "Spicy Crawdad", "Well Fed"),
+    ConsumeRule("food", "Food", ("Well Fed", "Stormchops"),
                 note="+healing or +spirit food"),
     ConsumeRule("flask", "Flask", ("Flask of Mighty Restoration",), required=False,
                 note="Mighty Restoration (+25 mp5), or run double elixirs"),
@@ -234,7 +241,7 @@ TANK_META = "Powerful Earthstorm Diamond"   # +stamina meta
 # defense/agi elixirs, sharpening stone for threat (optional — many run a
 # permanent weapon enchant instead).
 TANK_CONSUMES = (
-    ConsumeRule("food", "Food", ("Fisherman's Feast", "Spicy Hot Talbuk", "Well Fed"),
+    ConsumeRule("food", "Food", ("Well Fed", "Stormchops"),
                 note="+stamina (Fisherman's Feast) or +hit (threat) food"),
     ConsumeRule("flask", "Flask", ("Flask of Fortification", "Flask of Relentless Assault"),
                 required=False, note="Fortification (survival) or Relentless Assault (threat)"),
@@ -250,7 +257,7 @@ TANK_CONSUMES = (
 
 # Bear tanks: no weapon enchant/stone works in form, so no weapon-buff slot.
 BEAR_TANK_CONSUMES = (
-    ConsumeRule("food", "Food", ("Fisherman's Feast", "Grilled Mudfish", "Well Fed"),
+    ConsumeRule("food", "Food", ("Well Fed", "Stormchops"),
                 note="+stamina or +agility food"),
     ConsumeRule("flask", "Flask", ("Flask of Fortification", "Flask of Relentless Assault"),
                 required=False),

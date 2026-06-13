@@ -21,6 +21,21 @@
 
 ---
 
+## 🗺️ Phase 2–5 readiness — see [`docs/PHASE_READINESS.md`](docs/PHASE_READINESS.md)
+
+**Priority:** High · **Effort:** High (content is the long pole)
+
+Plan for content-phase rollovers: a **realm + date driven** phase model
+(auto-advances realm-wide, removes the per-guild `/setup phase` burden; fixes the
+Anniversary 4-phase vs. original 5-phase mismatch and the Zul'Aman item-ceiling
+trap), consolidating the three boss-content stores into one `content_phase`-tagged
+schema, and a sourced anti-hallucination research workstream for the SSC→Sunwell
+strategies (reusing the proven verify-raid-tips deep-research loop). Source-data
+enrichment (former keystone) has shipped — §4 now just retires the redundant
+world-boss/arena stopgaps. Sequenced to land before Anniversary P3 (summer 2026).
+
+---
+
 ## Reaction Feedback Harvesting (👍 / 👎 on bot responses)
 
 **Priority:** Medium · **Effort:** Medium

@@ -116,17 +116,22 @@ ELE_SHAMAN = SpecProfile(
         ),
         ConsumeRule(
             slot="battle_elixir", label="Battle Elixir",
-            accepted=("Adept's Elixir", "Elixir of Major Firepower"),
+            # Buff names as they appear in the log: Adept's Elixir → "Spellpower
+            # Elixir"; Elixir of Major Firepower → "Major Firepower".
+            accepted=("Spellpower Elixir", "Adept's Elixir", "Major Firepower",
+                      "Elixir of Major Firepower"),
             required=False,
             note="Use double-elixirs OR a flask, not both.",
         ),
         ConsumeRule(
             slot="guardian_elixir", label="Guardian Elixir",
-            accepted=("Elixir of Draenic Wisdom", "Elixir of Major Mageblood"),
+            accepted=("Draenic Wisdom", "Major Mageblood"),
             required=False,
         ),
         ConsumeRule(
             slot="weapon_oil", label="Weapon Oil",
+            # Elemental scales well with crit, so Brilliant (+14 crit) is the best
+            # caster oil here, not Superior (see weights note below).
             accepted=("Brilliant Wizard Oil", "Superior Wizard Oil"),
             note="Frequently the most-missed buff (see Brnzy: 'Weapon Buffs: No?').",
         ),
@@ -175,6 +180,21 @@ MELEE_DW_SLOTS = _ARMOR_SLOTS + ("Main Hand", "Off Hand")
 FERAL_SLOTS    = _ARMOR_SLOTS                              # weapon enchants don't work in forms
 HUNTER_SLOTS   = _ARMOR_SLOTS + ("Relic",)                # Relic index = ranged weapon (scope)
 
+# Wizard Oil choice is crit-weight dependent. Brilliant (+36 SP, +14 crit) beats
+# Superior (+42 SP) when a spec's crit-rating:spell-power weight exceeds ~0.43
+# (the +14 crit / -6 SP trade). HIGH-crit casters — Destruction Warlock (~0.88),
+# Elemental Shaman (~0.65), Fire Mage (~0.6), Balance Druid (~0.5) — prefer
+# Brilliant. LOW-crit casters — Affliction (DoTs can't crit in TBC), Arcane,
+# Shadow (Mind Flay can't crit), Frost — prefer Superior. accepted[0] = best.
+_OIL_CRIT_BEST = ConsumeRule(
+    "weapon_oil", "Weapon Oil",
+    ("Brilliant Wizard Oil", "Superior Wizard Oil"),
+    required=False, note="Brilliant Wizard Oil (+14 crit) is best for this high-crit spec.")
+_OIL_SP_BEST = ConsumeRule(
+    "weapon_oil", "Weapon Oil",
+    ("Superior Wizard Oil", "Brilliant Wizard Oil"),
+    required=False, note="Superior Wizard Oil (+42 SP) is best; this spec's crit weight is low.")
+
 CASTER_CONSUMES = (
     ConsumeRule("food", "Food", FOOD_AURAS,
                 note="most food shows 'Well Fed'; some legacy foods show named buffs"),
@@ -188,14 +208,15 @@ CASTER_CONSUMES = (
                  "Major Shadow Power", "Felmight"), required=False),
     ConsumeRule("guardian_elixir", "Guardian Elixir",
                 ("Draenic Wisdom", "Major Mageblood"), required=False),
-    # Superior Wizard Oil (+42 SP) is BiS for nearly all casters; Brilliant
-    # (+36 SP / +14 crit) is acceptable. accepted[0] = best for DPS grading.
-    ConsumeRule("weapon_oil", "Weapon Oil",
-                ("Superior Wizard Oil", "Brilliant Wizard Oil",
-                 "Superior Mana Oil", "Brilliant Mana Oil"),
-                required=False, note="Superior Wizard Oil is best; Brilliant is acceptable."),
+    _OIL_SP_BEST,   # low-crit default; high-crit specs use CASTER_CONSUMES_CRIT
     ConsumeRule("potion", "Mana/Damage Potions", ("Super Mana Potion", "Destruction Potion"),
                 required=False),
+)
+
+# Same as CASTER_CONSUMES but Brilliant Wizard Oil is graded best — for the
+# high-crit caster specs (Destro, Fire mage, Boomkin). ele_shaman defines its own.
+CASTER_CONSUMES_CRIT = tuple(
+    _OIL_CRIT_BEST if r.slot == "weapon_oil" else r for r in CASTER_CONSUMES
 )
 
 MELEE_STR_CONSUMES = (
@@ -312,14 +333,16 @@ def _tank(spec: str, display: str, slots, consumes) -> SpecProfile:
 
 _DPS_PROFILES = [
     # ── Caster DPS ────────────────────────────────────────────────────────
+    # Low-crit casters → Superior Wizard Oil best (CASTER_CONSUMES).
     _dps("affliction_warlock", "Affliction Warlock", "caster_dps", CASTER_SLOTS, CASTER_META, CASTER_CONSUMES),
-    _dps("destro_warlock", "Destruction Warlock", "caster_dps", CASTER_SLOTS, CASTER_META, CASTER_CONSUMES),
-    _dps("fire_destro_warlock", "Destruction Warlock (Fire)", "caster_dps", CASTER_SLOTS, CASTER_META, CASTER_CONSUMES),
     _dps("arcane_mage", "Arcane Mage", "caster_dps", CASTER_SLOTS, CASTER_META, CASTER_CONSUMES),
-    _dps("fire_mage", "Fire Mage", "caster_dps", CASTER_SLOTS, CASTER_META, CASTER_CONSUMES),
     _dps("frost_mage", "Frost Mage", "caster_dps", CASTER_SLOTS, CASTER_META, CASTER_CONSUMES),
     _dps("shadow_priest", "Shadow Priest", "caster_dps", CASTER_SLOTS, CASTER_META, CASTER_CONSUMES),
-    _dps("balance_druid", "Balance Druid", "caster_dps", CASTER_SLOTS, CASTER_META, CASTER_CONSUMES),
+    # High-crit casters → Brilliant Wizard Oil best (CASTER_CONSUMES_CRIT).
+    _dps("destro_warlock", "Destruction Warlock", "caster_dps", CASTER_SLOTS, CASTER_META, CASTER_CONSUMES_CRIT),
+    _dps("fire_destro_warlock", "Destruction Warlock (Fire)", "caster_dps", CASTER_SLOTS, CASTER_META, CASTER_CONSUMES_CRIT),
+    _dps("fire_mage", "Fire Mage", "caster_dps", CASTER_SLOTS, CASTER_META, CASTER_CONSUMES_CRIT),
+    _dps("balance_druid", "Balance Druid", "caster_dps", CASTER_SLOTS, CASTER_META, CASTER_CONSUMES_CRIT),
     # ── Melee DPS ─────────────────────────────────────────────────────────
     _dps("arms_warrior", "Arms Warrior", "melee_dps", MELEE_2H_SLOTS, PHYS_META, MELEE_STR_CONSUMES),
     _dps("fury_warrior", "Fury Warrior", "melee_dps", MELEE_DW_SLOTS, PHYS_META, MELEE_STR_CONSUMES),

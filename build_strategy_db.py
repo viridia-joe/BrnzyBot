@@ -130,6 +130,12 @@ def build(db_path: str, data_dir: str) -> None:
     for path in json_files:
         zone_data = _load_zone(str(path))
         meta = zone_data.get("_meta", {})
+        # Unified store: a file may carry bossguide-only content not yet verified
+        # for /strat (e.g. relocated, un-researched raids). strat_index=False keeps
+        # it out of the FTS DB while bossguide still reads it from the JSON.
+        if not meta.get("strat_index", True):
+            log.info("  Skipping %s for /strat FTS (strat_index=false)", path.name)
+            continue
         zone_name = meta.get("zone", path.stem.replace("_", " ").title())
         zone_slug = meta.get("zone_slug", path.stem)
         phase     = meta.get("phase", 1)

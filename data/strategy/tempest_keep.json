@@ -1,0 +1,105 @@
+{
+  "_meta": {
+    "zone": "Tempest Keep: The Eye",
+    "zone_slug": "tempest_keep",
+    "phase": 2,
+    "content_phase": 2,
+    "strat_index": false,
+    "updated": "2026-06-13",
+    "note": "Relocated from bossguide_data.py; not yet research-verified for /strat."
+  },
+  "bosses": [
+    {
+      "name": "Al'ar",
+      "slug": "alar",
+      "bossguide": {
+        "boss_num": 1,
+        "raid_short": "TK",
+        "has_diagram": true,
+        "aliases": [
+          "alar",
+          "al'ar",
+          "al ar",
+          "phoenix god",
+          "phoenix",
+          "the phoenix"
+        ],
+        "role_counts": {
+          "tanks": 3,
+          "tank_healers": 4,
+          "raid_healers": 3
+        },
+        "context": "FIGHT: Al'ar - Tempest Keep Boss 1\n\nKEY MECHANICS:\nP1 (100% to 25%): Al'ar flies between 4 elevated platforms (numbered 1->2->3->4, counterclockwise).\n- Only RANGED DPS can hit Al'ar during platform phase - melee cannot reach.\n- Al'ar gains Flame Buffet stacks on tank - TWO tanks swap each platform shift.\n- On each platform, tank A engages, tank B taunts when A has about 3 stacks, Al'ar flies to next platform, repeat.\n- Ember of Al'ar adds spawn between platform shifts - Ground Tank picks them up on the ground.\n- Embers self-resurrect if not killed (become Phoenix). Kill fast.\n\nP2 (25% to 0%): Al'ar crash-lands center. Normal tank-and-spank.\n- Ember adds keep spawning - Ember Tank kites them away from raid (Ember Blast on death = AoE).\n- Meteor: red circle ground warning - move out immediately.\n- Bloodlust/Heroism at P2 engagement.\n\nROLES NEEDED:\n- {skull} Platform Tank A: first to engage on each platform.\n- {cross} Platform Tank B: taunts about 3 Flame Buffet stacks, swaps with A.\n- {triangle} Ground/Ember Tank: handles Ember adds; kites them in P2.\n- Platform tank healers: 2-3 following tanks across platforms.\n- Ground/raid healers: 2-3 on ground covering adds and raid.\n- Ranged DPS: primary damage in P1. Misdirect hunter for P2 pickup.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull}/{cross} for platform tanks, {triangle} for the ground tank.\n- Emphasize ranged-only P1 damage and Ember kill priority.\n- Note Bloodlust at P2 pull."
+      }
+    },
+    {
+      "name": "Void Reaver",
+      "slug": "voidreaver",
+      "bossguide": {
+        "boss_num": 2,
+        "raid_short": "TK",
+        "has_diagram": false,
+        "aliases": [
+          "void reaver",
+          "voidreaver",
+          "vr",
+          "lootreaver"
+        ],
+        "role_counts": {
+          "tanks": 3,
+          "tank_healers": 3,
+          "raid_healers": 3
+        },
+        "context": "FIGHT: Void Reaver - Tempest Keep Boss 2\n\nKEY MECHANICS:\n- Knock Away: periodically knocks the current tank back - next tank picks up immediately. 3 tanks rotating.\n- Pounding: raid-wide AoE on a short timer - heal through, nothing to dodge.\n- Arcane Orbs: fall from the ceiling targeting random players - watch the sky and MOVE OUT of the purple circle.\n- Void Reaver is NOT TAUNTABLE - the next tank must be in melee on high threat for the natural rotation.\n- Ten-minute hard enrage - a real but forgiving DPS check.\n\nROLES NEEDED:\n- {skull} Tank 1, {cross} Tank 2, {triangle} Tank 3: all stay in melee behind the boss.\n- Tank healers: 1 per tank plus 1 raid healer.\n- Raid healers: 2-3 covering Pounding.\n- Misdirect chain: 3 hunters, one per tank in rotation order.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull}/{cross}/{triangle} for the 3 tanks and list the MD chain.\n- Remind the raid to spread and watch Arcane Orbs."
+      }
+    },
+    {
+      "name": "High Astromancer Solarian",
+      "slug": "solarian",
+      "bossguide": {
+        "boss_num": 3,
+        "raid_short": "TK",
+        "has_diagram": true,
+        "aliases": [
+          "solarian",
+          "high astromancer solarian",
+          "astromancer",
+          "sol",
+          "solar"
+        ],
+        "role_counts": {
+          "tanks": 2,
+          "tank_healers": 3,
+          "raid_healers": 3,
+          "interrupts": 3
+        },
+        "context": "FIGHT: High Astromancer Solarian - Tempest Keep Boss 3\n\nKEY MECHANICS:\n- Wrath of the Astromancer: a targeted player gets a growing AoE bomb - RUN TO THE FAR WALL and let it pop away from the raid.\n- Arcane Missiles: random target - heal through.\n- Add phase (about every 50 sec): Solarian vanishes; 3 portals open and casters spawn. AoE them fast and interrupt their heals.\n- Solarian returns after a short time with two adds on top of her.\n- Phase 2 (20% HP): she becomes a Voidwalker with a fear AoE - Tremor Totem / Fear Ward. Bloodlust here.\n\nROLES NEEDED:\n- {skull} MT (Solarian): faces her away from raid.\n- {cross} Add tank: picks up casters from all 3 portals.\n- MT healers: 2-3. Raid healers: 2-3 covering Wrath and the add phase.\n- Interrupt team: 3-4 players. Fear Ward on MT and Tremor Totem for P2.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull} for MT, {cross} for the add tank.\n- Name the interrupt team. Note Wrath targets RUN AWAY. Bloodlust at 20%."
+      }
+    },
+    {
+      "name": "Kael'thas Sunstrider",
+      "slug": "kaelthas",
+      "bossguide": {
+        "boss_num": 4,
+        "raid_short": "TK",
+        "has_diagram": true,
+        "aliases": [
+          "kaelthas",
+          "kael'thas",
+          "kael",
+          "kaelthas sunstrider",
+          "kael thas",
+          "kt",
+          "sunstrider"
+        ],
+        "role_counts": {
+          "tanks": 4,
+          "tank_healers": 5,
+          "raid_healers": 3,
+          "interrupts": 3
+        },
+        "context": "FIGHT: Kael'thas Sunstrider - Tempest Keep Boss 4 (Final) - 5 PHASES\n\nP1: ADVISORS (one at a time; kill order Thaladred -> Sanguinar -> Capernian -> Telonicus).\n- Thaladred: fixates a target (Gaze); a kiter runs him around the room edge, killed in a back corner.\n- Sanguinar: tank-and-spank; Fear on tank (Fear Ward); ranged stay back.\n- Capernian: lock-tanked by a warlock; arcane AoE around her - keep healers back.\n- Telonicus: drops bombs on the ground; melee watch their feet.\n\nP2: 7 LEGENDARY WEAPONS spawn and fight the raid. DPS each until dead. DO NOT LOOT UNLESS ASSIGNED.\n- Assign Cosmic Infuser -> MT, Phaseshift Bulwark -> 2nd tank, Devastation -> 3rd tank, Staff of Disintegration -> warlock (activate its aura). Remaining weapons to available players.\n\nP3: all 4 advisors RESURRECT at full HP, same kill order. Hardest phase. Pre-position tanks near corpses. Bloodlust here.\n\nP4 (under ~50%): Kael'thas engages. A tank kites the Phoenix away while ranged kill it and its egg fast. Interrupt Pyroblast; face Fireball away from raid.\n\nP5 (Gravity Lapse, repeats): everyone floats - spread MAX distance (Nether Beam chains). Do not touch Nether Vapor clouds. Land near the ground as it ends.\n\nROLES NEEDED:\n- {skull} Thaladred kiter, {cross} Sanguinar tank, {triangle} Capernian warlock, {moon} Telonicus tank, {star} P4 Kael'thas MT, {square} Phoenix tank.\n- Legendary weapon assignments (name who gets each, esp. the Staff for its aura).\n- Interrupt team for Pyroblast. Healers: 2 per tank group, 2 raid. Misdirect hunters for P1/P4 pickups.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull}/{cross}/{triangle}/{moon}/{star}/{square} for the six roles.\n- List advisor kill order and the P2 weapon assignments. Note Bloodlust in P3."
+      }
+    }
+  ]
+}

@@ -1,0 +1,557 @@
+{
+  "_meta": {
+    "zone": "Serpentshrine Cavern",
+    "zone_slug": "serpentshrine_cavern",
+    "phase": 2,
+    "content_phase": 2,
+    "strat_index": true,
+    "updated": "2026-06-13",
+    "sources": [
+      "icy-veins.com/tbc-classic",
+      "warcraft.wiki.gg",
+      "wowhead.com/tbc"
+    ]
+  },
+  "bosses": [
+    {
+      "name": "Hydross the Unstable",
+      "slug": "hydross",
+      "summary": "Two-tank dual-resistance fight. In the water Hydross is in his Pure form (deals and is immune to Frost); dragged onto land he becomes Corrupted (deals and is immune to Nature). Each form stacks a raid-wide Mark that amplifies that school, so the raid lets stacks build, then drags him across the boundary to swap forms, which clears the Mark but spawns four adds of the form he is leaving. A controlled rhythm of stack, transition, and AoE adds.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Pure (Frost) form",
+          "hp_range": "in the water",
+          "description": "Frost-resist tank holds Hydross in the water. Mark of Hydross stacks and amplifies Frost; transition before it becomes unhealable."
+        },
+        {
+          "number": 2,
+          "name": "Corrupted (Nature) form",
+          "hp_range": "on land",
+          "description": "Nature-resist tank holds Hydross on land. Mark of Corruption stacks and amplifies Nature; transition back before it spikes."
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Mark of Hydross",
+          "mechanic_type": "debuff",
+          "targets": "raid",
+          "description": "Raid-wide stacking debuff in the Pure (Frost) form that increases Frost damage taken. Transition forms before the stacks make incoming Frost damage unhealable.",
+          "important": true
+        },
+        {
+          "name": "Mark of Corruption",
+          "mechanic_type": "debuff",
+          "targets": "raid",
+          "description": "Nature-form mirror of Mark of Hydross; increases Nature damage taken. Transition before it spikes.",
+          "important": true
+        },
+        {
+          "name": "Transition adds",
+          "mechanic_type": "add_spawn",
+          "targets": "raid",
+          "description": "Each form change spawns four elemental adds of the form he is leaving, each immune to that school. Pure Spawns (Frost) are killed with non-Frost damage; Tainted Spawns (Nature) can be crowd controlled and are killed with non-Nature damage. AoE them down before the next transition.",
+          "important": true
+        },
+        {
+          "name": "Threat reset on transition",
+          "mechanic_type": "special",
+          "targets": "raid",
+          "description": "Changing form resets all threat. Every DPS must stop before a transition, or an accidental re-cross of the line spawns a second wave of adds. This is the signature wipe.",
+          "important": true
+        },
+        {
+          "name": "Water Tomb",
+          "mechanic_type": "stun",
+          "targets": "random",
+          "description": "Pure-form area stun on a random player and anyone close to them. Stay spread so it catches only one person.",
+          "important": false
+        },
+        {
+          "name": "Vile Sludge",
+          "mechanic_type": "debuff",
+          "targets": "random",
+          "description": "Corrupted-form damage-over-time on a random player that also reduces their damage and healing done. The afflicted player spreads away from the raid.",
+          "important": false
+        },
+        {
+          "name": "Enrage",
+          "mechanic_type": "enrage",
+          "targets": "raid",
+          "description": "Hard enrage around the ten-minute mark. Do not over-stack Marks and slow the kill.",
+          "important": false
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "Frost-resist tank opens in the water. Let the Mark build to roughly four stacks, then drag Hydross across the boundary onto land; Nature-resist tank takes over. AoE the four spawned adds with the non-immune school while the boss is held, then swap back. Repeat, all DPS stopping at each transition, until he dies before the enrage."
+        }
+      ],
+      "roles": {
+        "tank": "Two tanks: one in a Frost Resistance set holds the Pure (water) form, one in a Nature Resistance set holds the Corrupted (land) form, swapping who is active at every transition. A third tank with mixed resistance picks up the four adds each swap.",
+        "healer": "Healing demand climbs with each Mark stack, so the transition call is effectively healer driven. Spot-heal Water Tomb and Vile Sludge targets.",
+        "dps": "Use the school the current form is not immune to. Burn the boss between transitions, then immediately AoE the four adds. Stop before every transition to avoid an accidental extra form change."
+      },
+      "bossguide": {
+        "boss_num": 1,
+        "raid_short": "SSC",
+        "has_diagram": true,
+        "aliases": [
+          "hydross",
+          "hydross the unstable",
+          "hyd"
+        ],
+        "role_counts": {
+          "tanks": 3,
+          "tank_healers": 4,
+          "raid_healers": 2,
+          "hunters": 2
+        },
+        "context": "FIGHT: Hydross the Unstable - Serpentshrine Cavern Boss 1\n\nKEY MECHANICS:\n- Two positional forms. In the water = Pure form = Frost damage, immune to Frost. On land = Corrupted form = Nature damage, immune to Nature.\n- A raid-wide Mark stacks in each form and amplifies that school. Transition (drag him across the boundary) at about 4 stacks to clear it.\n- Each transition resets threat (all DPS STOP) and spawns 4 adds of the form he is leaving, immune to that school. AoE them with the opposite school.\n- Pure form: Water Tomb area stun on a random player - raid SPREADS. Corrupted form: Vile Sludge DoT plus damage/healing reduction - afflicted moves out.\n- Hard enrage near 10 minutes.\n\nROLES NEEDED:\n- {skull} Frost-resist tank: holds the water (Pure) form.\n- {cross} Nature-resist tank: holds the land (Corrupted) form. Swaps active role at each transition.\n- {triangle} Add tank (mixed resist): picks up the 4 adds each swap.\n- Tank healers: 3-4 following the active resist tank.\n- Raid healers: 1-2 covering adds and the raid.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull}/{cross} for the two resist tanks, {triangle} for the add tank.\n- Emphasize the DPS-stop-at-transition rule.\n- Note resistance sets: one Frost, one Nature."
+      }
+    },
+    {
+      "name": "The Lurker Below",
+      "slug": "lurker",
+      "summary": "Flooded-platform fight that must be fished up: a player with maxed fishing casts into the Strange Pool to surface and pull him. He alternates an active phase, where the raid dodges the rotating Spout by jumping into the water and spreads for Geyser, with a submerge intermission that spawns nine adds across the platforms. A positioning and add-control fight, not a DPS race.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Active phase",
+          "hp_range": "surfaced",
+          "description": "Main tank holds him center. Raid dodges the rotating Spout by jumping into the water and spreads for Geyser. Always keep a melee in range so Water Bolt is never cast."
+        },
+        {
+          "number": 2,
+          "name": "Submerge intermission",
+          "hp_range": "submerged",
+          "description": "He dives and spawns nine adds: six ranged Coilfang Ambushers (two on each outer platform) and three melee Coilfang Guardians on the main platform. Kill Guardians first. He re-emerges after a short time whether or not adds are dead."
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Spout",
+          "mechanic_type": "movement",
+          "targets": "raid",
+          "description": "A rotating water beam that knocks back and deals heavy damage as it sweeps. Jump into the surrounding water to break line of sight and avoid it; do not spam-jump.",
+          "important": true
+        },
+        {
+          "name": "Geyser",
+          "mechanic_type": "aoe",
+          "targets": "random",
+          "description": "Random-target area knockback. Stay spread, especially melee, so it hits only one person.",
+          "important": false
+        },
+        {
+          "name": "Water Bolt",
+          "mechanic_type": "special",
+          "targets": "random",
+          "description": "Cast only when no one is in melee range, and nearly one-shots its target. Always keep a melee or tank in range so it never fires.",
+          "important": true
+        },
+        {
+          "name": "Submerge adds",
+          "mechanic_type": "add_spawn",
+          "targets": "raid",
+          "description": "Six ranged Coilfang Ambushers (two per outer platform) and three melee Coilfang Guardians. Kill Guardians first. Ambushers evade if targeted across platforms, which can despawn the boss, so assigned players must be on the Ambusher's platform.",
+          "important": true
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "Clear the surrounding trash first so the pool can be fished. A maxed-fishing player casts the Strange Pool to pull. Tank center, raid spreads and jumps into water for Spout. On submerge, ranged groups go to their assigned outer platforms for the Ambushers while the off-tank gathers and the raid kills the three Guardians first."
+        }
+      ],
+      "roles": {
+        "tank": "Main tank holds the Lurker dead center and stays in melee range at all times to prevent Water Bolt. Off-tank gathers the three Coilfang Guardians on the main platform and keeps them together.",
+        "healer": "Spread for Geyser. During submerge, position on the platform of the players you are healing, since healing across platforms can pull an Ambusher into an evade loop.",
+        "dps": "Pre-assigned ranged go to each outer platform for the two Ambushers there; melee burn the three Guardians first. Everyone spreads for Geyser and jumps into the water to dodge Spout."
+      },
+      "bossguide": {
+        "boss_num": 2,
+        "raid_short": "SSC",
+        "has_diagram": true,
+        "aliases": [
+          "lurker",
+          "lurker below",
+          "the lurker below",
+          "lurker-below",
+          "tlb"
+        ],
+        "role_counts": {
+          "tanks": 2,
+          "tank_healers": 3,
+          "raid_healers": 3
+        },
+        "context": "FIGHT: The Lurker Below - Serpentshrine Cavern Boss 2\n\nKEY MECHANICS:\n- Pulled by fishing the Strange Pool (maxed fishing). Clear surrounding trash first.\n- Active phase: rotating Spout beam - JUMP INTO THE WATER to avoid it (do not spam jump). Geyser random-target knockback - SPREAD.\n- Keep a melee/tank in melee range at all times or Water Bolt one-shots a random player.\n- Submerge: 9 adds - 6 ranged Coilfang Ambushers (2 per outer platform) and 3 melee Coilfang Guardians (main platform). Kill Guardians first.\n- Ambushers evade across platforms and can despawn the boss, so the assigned players must stand on that platform.\n\nROLES NEEDED:\n- {skull} Main tank: holds the boss center, always in melee range.\n- {cross} Off-tank: gathers the 3 Coilfang Guardians on submerge.\n- Tank healers: 3 on the tanks.\n- Raid healers: 3 covering Spout/Geyser splash; heal on your assigned platform during submerge.\n- Ranged DPS: assigned per outer platform for the Ambushers.\n\nASSIGNMENT FORMAT RULES:\n- Name a fisher to pull.\n- Assign ranged groups to outer platforms (NW/NE/SW etc.).\n- Remind raid: jump in water for Spout, spread for Geyser, keep melee on the boss."
+      }
+    },
+    {
+      "name": "Morogrim Tidewalker",
+      "slug": "morogrim",
+      "summary": "A tank-and-spank with a recurring murloc-add phase and a forced teleport. Earthquake periodically deals raid-wide damage and summons two packs of murlocs that off-tanks gather for AoE; Watery Grave teleports random players to the center and bursts them (they do not drown and do not need freeing, just healing). Below a quarter health he stops Watery Grave and summons fixating Water Globules instead.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Main phase",
+          "hp_range": "100% to 25%",
+          "description": "Tank the boss facing a wall to keep the raid out of the Tidal Wave cone. Off-tanks gather the murloc packs after each Earthquake; dedicated healers cover Watery Grave targets."
+        },
+        {
+          "number": 2,
+          "name": "Globule phase",
+          "hp_range": "below 25%",
+          "description": "He stops casting Watery Grave and summons Water Globules that fixate and chase players. Continue killing adds and burn him down."
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Watery Grave",
+          "mechanic_type": "special",
+          "targets": "random",
+          "description": "Teleports several random players to the central waterfall, briefly stunning them and bursting them with Frost damage. They do NOT drown and do not need to be freed - they just need dedicated healing.",
+          "important": true
+        },
+        {
+          "name": "Earthquake",
+          "mechanic_type": "add_spawn",
+          "targets": "raid",
+          "description": "Raid-wide area damage that also summons two packs of murlocs, one from each entrance.",
+          "important": true
+        },
+        {
+          "name": "Tidal Wave",
+          "mechanic_type": "movement",
+          "targets": "tank",
+          "description": "Frontal cone of Frost damage plus an attack-speed-slow debuff. Face the boss at a wall so no one stands in front.",
+          "important": false
+        },
+        {
+          "name": "Summon Water Globule",
+          "mechanic_type": "add_spawn",
+          "targets": "raid",
+          "description": "Below a quarter health, replaces Watery Grave; globules fixate on players and slowly chase them.",
+          "important": false
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "Pre-position the boss facing a wall. Off-tanks grab the murloc packs each Earthquake and drag them to the boss for cleave while one or two healers stay on the Watery Grave victims. Below 25%, manage the fixating globules and push to the kill."
+        }
+      ],
+      "roles": {
+        "tank": "Main tank holds Morogrim facing a wall to avoid the Tidal Wave cone. Two off-tanks pick up the murloc packs from each entrance after every Earthquake.",
+        "healer": "Assign one or two healers specifically to the Watery Grave targets, whose burst kills quickly if neglected. Hold raid healing until murlocs are tanked so you do not pull aggro.",
+        "dps": "AoE the murloc packs down fast each Earthquake. In the globule phase, out-position or kill the fixating Water Globules."
+      },
+      "bossguide": {
+        "boss_num": 3,
+        "raid_short": "SSC",
+        "has_diagram": true,
+        "aliases": [
+          "morogrim",
+          "morogrim tidewalker",
+          "tide",
+          "moro",
+          "tidewalker"
+        ],
+        "role_counts": {
+          "tanks": 2,
+          "tank_healers": 3,
+          "raid_healers": 3,
+          "cc": 2
+        },
+        "context": "FIGHT: Morogrim Tidewalker - Serpentshrine Cavern Boss 3\n\nKEY MECHANICS:\n- Tank the boss facing a WALL to keep the raid out of the Tidal Wave frontal cone.\n- Earthquake: raid-wide damage plus two packs of murloc adds (one per entrance). Off-tanks gather, raid AoEs them down fast.\n- Watery Grave: teleports several random players to the center and bursts them. They do NOT drown and do NOT need freeing - assign healers to them.\n- Below 25%: Watery Grave stops; fixating Water Globules chase players instead.\n\nROLES NEEDED:\n- {skull} Main tank: holds boss at a wall.\n- {cross} Murloc off-tank 1 and {triangle} off-tank 2: grab the two murloc packs each Earthquake.\n- Tank healers: 3.\n- Raid/Grave healers: 2-3 watching Watery Grave targets and the raid.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull} for MT, {cross}/{triangle} for murloc off-tanks.\n- Name the Watery Grave healers.\n- Note: do not raid-heal before murlocs are picked up."
+      }
+    },
+    {
+      "name": "Fathom-Lord Karathress",
+      "slug": "karathress",
+      "summary": "A council fight: Karathress plus three Fathom-Guard advisors tanked at once. Each advisor's death grants Karathress that advisor's signature ability, so the boss gets more dangerous as adds fall. Kill order is Tidalvess, then Sharkkis, then Caribdis, then Karathress; do not push the boss below three-quarters health while advisors live.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Council",
+          "hp_range": "advisors alive",
+          "description": "Four targets tanked simultaneously. Kill Tidalvess, then Sharkkis, then Caribdis, interrupting Caribdis's heals the whole time, then burn Karathress."
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Cataclysmic Bolt",
+          "mechanic_type": "special",
+          "targets": "random",
+          "description": "Hits a random mana user for about half their health. Keep mana users topped and heal through it.",
+          "important": true
+        },
+        {
+          "name": "Blessing of the Tides",
+          "mechanic_type": "special",
+          "targets": "raid",
+          "description": "When Karathress drops below three-quarters health he gains a large buff for each Fathom-Guard still alive. Kill the advisors before pushing the boss low.",
+          "important": true
+        },
+        {
+          "name": "Spitfire Totem (Tidalvess)",
+          "mechanic_type": "add_spawn",
+          "targets": "raid",
+          "description": "A searing totem that must be killed on sight; DPS swap to it instantly.",
+          "important": true
+        },
+        {
+          "name": "Healing Wave (Caribdis)",
+          "mechanic_type": "interrupt",
+          "targets": "raid",
+          "description": "Caribdis heals an ally and ignores line of sight and range, so an interrupt rotation must lock her down the entire time she is alive.",
+          "important": true
+        },
+        {
+          "name": "The Beast Within (Sharkkis)",
+          "mechanic_type": "special",
+          "targets": "tank",
+          "description": "Sharkkis enrages himself and his pet; the pet must be tanked and the enrage healed through.",
+          "important": false
+        },
+        {
+          "name": "Tidal Surge (Caribdis)",
+          "mechanic_type": "stun",
+          "targets": "raid",
+          "description": "An area freeze around Caribdis; she is tanked away in a corner to keep it off the raid.",
+          "important": false
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "Four tanks take Karathress and the three advisors. Kill Tidalvess first to stop totem spam, then Sharkkis (control the pet), then Caribdis (interrupt every heal), then Karathress. Never push Karathress below 75% while advisors are alive or Blessing of the Tides enrages him."
+        }
+      ],
+      "roles": {
+        "tank": "Four tanks, one per target. Caribdis is tanked off in a corner away from the raid to limit her area damage; Sharkkis's pet also needs picking up.",
+        "healer": "Heavy raid healing through Cataclysmic Bolt (about half a mana user's health) and Caribdis's area damage.",
+        "dps": "Follow the kill order. Swap to the Spitfire Totem instantly, and keep a dedicated interrupt rotation on Caribdis's heals for the whole fight."
+      },
+      "bossguide": {
+        "boss_num": 4,
+        "raid_short": "SSC",
+        "has_diagram": true,
+        "aliases": [
+          "karathress",
+          "fathom lord",
+          "fathom-lord karathress",
+          "fathom",
+          "flk"
+        ],
+        "role_counts": {
+          "tanks": 4,
+          "tank_healers": 5,
+          "raid_healers": 2,
+          "interrupts": 4
+        },
+        "context": "FIGHT: Fathom-Lord Karathress - Serpentshrine Cavern Boss 4\n\nKEY MECHANICS:\n- Council: Karathress plus 3 Fathom-Guards. Each advisor's death gives Karathress that advisor's ability, so the boss gets harder as adds die.\n- Kill order: Tidalvess (kill 1st, stop Spitfire Totem) -> Sharkkis (kill 2nd, control his pet) -> Caribdis (kill 3rd) -> Karathress.\n- An interrupt rotation must lock down Caribdis's Healing Wave the entire time she is alive (ignores line of sight/range).\n- Do NOT push Karathress below 75% with advisors alive - Blessing of the Tides buffs him per living advisor.\n- Cataclysmic Bolt hits a random mana user for about half their health - keep everyone topped.\n\nROLES NEEDED:\n- {skull} Karathress tank, {cross} Sharkkis+pet tank (corner), {triangle} Tidalvess tank, {moon} Caribdis tank (corner away from raid).\n- Tank healers: 4-5.\n- Interrupt team on Caribdis: 4 players (rogue/mage/shaman/warrior).\n\nASSIGNMENT FORMAT RULES:\n- Use {skull}/{cross}/{triangle}/{moon} for the four tanks.\n- Name the interrupt rotation on Caribdis.\n- State the kill order explicitly."
+      }
+    },
+    {
+      "name": "Leotheras the Blind",
+      "slug": "leotheras",
+      "summary": "A two-personality tank-swap fight. Leotheras alternates a melee Humanoid form, where he Whirlwinds and resets threat, with a ranged Demon form whose Chaos Blast is FIRE damage and is tanked at range by a Fire-Resistance warlock. In the Demon phase he marks players with Inner Demons only they can kill, and at fifteen percent the Demon splits off as its own full-health mob to be killed alongside the Humanoid.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Humanoid form",
+          "hp_range": "alternating",
+          "description": "Melee form. He Whirlwinds (untankable, drops all threat when it ends), so the raid spreads and DPS wait for the tank to rebuild threat afterward."
+        },
+        {
+          "number": 2,
+          "name": "Demon form",
+          "hp_range": "alternating",
+          "description": "Ranged form tanked by a Fire-Resistance warlock. Chaos Blast is fire damage and stacks. He casts Insidious Whisper, spawning Inner Demons each marked player must solo-kill."
+        },
+        {
+          "number": 3,
+          "name": "Split",
+          "hp_range": "below 15%",
+          "description": "The Demon splits into its own full-health mob while the Humanoid keeps its health. Both must be killed at the same time."
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Whirlwind",
+          "mechanic_type": "movement",
+          "targets": "raid",
+          "description": "Humanoid-form spin dealing heavy physical damage and a non-dispellable bleed. He is not tankable during it and drops all threat when it ends; the raid spreads and DPS wait for the tank to re-establish threat.",
+          "important": true
+        },
+        {
+          "name": "Chaos Blast",
+          "mechanic_type": "special",
+          "targets": "tank",
+          "description": "Demon-form FIRE attack with a stacking fire-damage-taken debuff, so the demon form is tanked at range by a warlock in Fire Resistance gear. Not shadow.",
+          "important": true
+        },
+        {
+          "name": "Insidious Whisper",
+          "mechanic_type": "special",
+          "targets": "random",
+          "description": "Spawns an Inner Demon for several random players that only that player can see and kill within a short window, or they are mind-controlled for the rest of the fight. Whispered players immediately switch to their own demon.",
+          "important": true
+        },
+        {
+          "name": "Fifteen percent split",
+          "mechanic_type": "special",
+          "targets": "raid",
+          "description": "The Demon form splits off as its own full-health mob; both forms must die together.",
+          "important": true
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "A plate tank holds the Humanoid form and re-threats after each Whirlwind; a Fire-Resistance warlock tanks the Demon form at range. On Insidious Whisper, marked players instantly kill their own Inner Demon. Balance damage so both forms reach the 15% split together and die simultaneously."
+        }
+      ],
+      "roles": {
+        "tank": "A plate main tank holds the Humanoid form and rebuilds threat after every Whirlwind. A warlock in Fire Resistance gear tanks the Demon form at range.",
+        "healer": "Heavy raid damage in the Humanoid form from Whirlwind; focus the warlock hard in the Demon form as Chaos Blast stacks. Watch for mind-controlled players.",
+        "dps": "Wait for threat after each Whirlwind. If marked by Insidious Whisper, instantly kill your own Inner Demon. Manage damage so both forms die together at the split."
+      },
+      "bossguide": {
+        "boss_num": 5,
+        "raid_short": "SSC",
+        "has_diagram": true,
+        "aliases": [
+          "leotheras",
+          "leo",
+          "leotheras the blind",
+          "leothe",
+          "the blind"
+        ],
+        "role_counts": {
+          "tanks": 2,
+          "tank_healers": 3,
+          "raid_healers": 3
+        },
+        "context": "FIGHT: Leotheras the Blind - Serpentshrine Cavern Boss 5\n\nKEY MECHANICS:\n- Alternates Humanoid form (melee, Whirlwinds and resets threat) and Demon form (ranged).\n- Whirlwind: not tankable, drops all threat when it ends - raid SPREADS and DPS WAIT for the tank to rebuild threat.\n- Demon form Chaos Blast is FIRE damage and stacks, so it is tanked at range by a warlock in FIRE Resistance gear (not shadow).\n- Insidious Whisper marks several players with an Inner Demon only they can see/kill, or they get mind-controlled. Kill your own demon fast.\n- At 15% the Demon splits into its own full-HP mob; kill both forms together.\n\nROLES NEEDED:\n- {skull} Humanoid tank: plate tank, re-threats after each Whirlwind.\n- {cross} Demon tank: warlock in FIRE Resistance gear, tanks at range.\n- Tank healers: 3 (focus the warlock in demon phase).\n- Raid healers: 3 covering Whirlwind.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull} for the Humanoid tank, {cross} for the warlock demon tank.\n- Emphasize FIRE resistance (not shadow) for the demon tank.\n- Remind everyone to kill their own Inner Demon and to wait for threat after Whirlwind."
+      }
+    },
+    {
+      "name": "Lady Vashj",
+      "slug": "vashj",
+      "summary": "The SSC end boss, a three-phase fight. Phase 1 is a tank-and-spank to seventy percent. At seventy percent she shields herself and becomes invulnerable: the raid kills Tainted Elementals for Tainted Cores and relays them by throwing to players at the four shield generators, each disabled generator removing health, while kiting Striders, tanking Elites, and killing Enchanted Elementals before they buff her. Phase 3 repeats phase 1 with adds still spawning and Toxic Spore Bats coating the floor in poison.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Tank and spank",
+          "hp_range": "100% to 70%",
+          "description": "Tank Vashj and dodge her abilities. Spread for Static Charge, mind the Entangle root, heal through Shock Blast and Multi-Shot."
+        },
+        {
+          "number": 2,
+          "name": "Shield and cores",
+          "hp_range": "invulnerable",
+          "description": "Vashj is invulnerable behind four shield generators. Kill Tainted Elementals for Tainted Cores, which root the carrier, and throw them down a relay chain to players at each generator. Kill Enchanted Elementals before they reach her, kite Striders, and tank Elites."
+        },
+        {
+          "number": 3,
+          "name": "Poison race",
+          "hp_range": "50% to 0%",
+          "description": "Like phase 1 but adds keep spawning and Toxic Spore Bats drop persistent poison clouds. Burn her down before the floor is covered."
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Shock Blast",
+          "mechanic_type": "special",
+          "targets": "tank",
+          "description": "Heavy nuke and a brief stun on the current target. Keep the tank topped and use cooldowns to survive the stun window.",
+          "important": true
+        },
+        {
+          "name": "Static Charge",
+          "mechanic_type": "debuff",
+          "targets": "random",
+          "description": "A debuff on a random player that damages allies near them. Spread out; the afflicted player moves away from the raid.",
+          "important": true
+        },
+        {
+          "name": "Tainted Core relay",
+          "mechanic_type": "special",
+          "targets": "raid",
+          "description": "Tainted Elementals drop a Tainted Core that roots whoever holds it and has a short timer. Throw it down a relay chain to a player stationed at each of the four shield generators; never run it solo.",
+          "important": true
+        },
+        {
+          "name": "Enchanted Elemental",
+          "mechanic_type": "add_spawn",
+          "targets": "raid",
+          "description": "A low-health add that runs at Vashj; if it reaches her she gains a stacking damage buff. Ranged kill them on sight.",
+          "important": true
+        },
+        {
+          "name": "Coilfang Strider",
+          "mechanic_type": "add_spawn",
+          "targets": "raid",
+          "description": "An un-tankable add that fears anyone in melee range and gains a speed buff. Ranged and damage-over-time kill it while it is kited.",
+          "important": true
+        },
+        {
+          "name": "Coilfang Elite",
+          "mechanic_type": "add_spawn",
+          "targets": "raid",
+          "description": "A hard-hitting melee add that can one-shot cloth; an off-tank picks it up immediately.",
+          "important": false
+        },
+        {
+          "name": "Toxic Spore Bats",
+          "mechanic_type": "add_spawn",
+          "targets": "raid",
+          "description": "Phase 3 fliers that drop persistent, accumulating poison clouds on the floor. Kill them fast and keep moving out of the poison.",
+          "important": true
+        },
+        {
+          "name": "Entangle",
+          "mechanic_type": "movement",
+          "targets": "raid",
+          "description": "Roots players near Vashj for a few seconds. Ranged stay out of range; rooted melee keep attacking.",
+          "important": false
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "Phase 1: nuke to 70%, spread for Static Charge. Phase 2: a camper stands at each of the four generators; core runners loot Tainted Cores off Tainted Elementals and throw them down a chain to the campers to disable all four generators, while ranged kill Enchanted Elementals on sight, kite Striders, and an off-tank holds Elites. Phase 3: tank-and-spank with continued adds; kill Spore Bats and stay out of poison while burning her down."
+        }
+      ],
+      "roles": {
+        "tank": "Main tank holds Vashj and eats the Shock Blast stun in phases 1 and 3. In phase 2 an off-tank picks up the Coilfang Elites immediately; no one tanks the Striders.",
+        "healer": "Tank-weighted in phases 1 and 3. In phase 2 the tank pressure drops but everyone else takes more, so spread healers across the platform.",
+        "dps": "Phases 1 and 3: nuke Vashj, and in phase 3 kill Spore Bats and avoid poison. Phase 2: melee on Elites, ranged on Enchanted Elementals (priority), Strider kiting, and Tainted Elementals for cores. Mobile players relay the cores by throwing them to the generator campers."
+      },
+      "bossguide": {
+        "boss_num": 6,
+        "raid_short": "SSC",
+        "has_diagram": true,
+        "aliases": [
+          "vashj",
+          "lady vashj",
+          "the snake lady",
+          "snake lady",
+          "vasj"
+        ],
+        "role_counts": {
+          "tanks": 3,
+          "tank_healers": 4,
+          "raid_healers": 3,
+          "cube_catchers": 4,
+          "kiters": 1
+        },
+        "context": "FIGHT: Lady Vashj - Serpentshrine Cavern Boss 6 (Final) - 3 PHASES\n\nP1 (100% to 70%): Tank-and-spank. Static Charge marks a random player - run AWAY from the raid. Mind the Entangle root.\nP2 (invulnerable): Vashj shields behind FOUR generators. Kill Tainted Elementals for Tainted Cores; the core ROOTS the carrier and has a short timer, so THROW it down a relay chain to a player camping each generator. Each generator disabled removes health. Ranged kill Enchanted Elementals before they reach Vashj (stacking buff). Kite Coilfang Striders (un-tankable fear) with ranged/DoT. Off-tank picks up Coilfang Elites (one-shot cloth).\nP3 (50% to 0%): Like P1 plus Toxic Spore Bats dropping persistent poison on the floor. Burn her down before the floor fills. Bloodlust here.\n\nROLES NEEDED:\n- {skull} Main tank (Vashj P1/P3).\n- {cross} Elite off-tank (P2).\n- {square} Four generator campers: name each by quadrant (NW/NE/SE/SW).\n- {star} Strider kiter: name explicitly.\n- Core runners: mobile players who loot and THROW cores down the chain.\n- Healers: 4 on tank P1/P3, spread in P2.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull} for MT, {cross} for Elite tank, {square} for the 4 generator campers, {star} for the kiter.\n- Name all four generator campers by quadrant and the core-relay order.\n- Note Bloodlust in P3."
+      }
+    }
+  ]
+}

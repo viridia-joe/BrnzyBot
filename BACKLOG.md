@@ -18,6 +18,13 @@
 - Fight diagram framework — per-boss PNG lookup with authoring tool
 - Dead code removed — `core/gearprio.py`, `core/compute-upgrades.py`, `core/triage.py` body
 - Heartbeat mojibake fix — lore/tips/jokes UTF-8 repaired
+- Heartbeat content accuracy — raid tips (56/76 had hallucinated mechanics), lore (14 fixes), jokes (70 quality rewrites), CN-meme spammacros (17 rewritten) all deep-researched & corrected
+- Per-fight spec detection — `/audit`, `/rotationcheck`, `/addchar` detect spec from the log's stat block (handles dual-spec / spec-switchers); tank-vs-healer ordering fixed
+- Tank rotation profiles — prot warrior/paladin, bear druid (threat + wrong-stance/form flags)
+- `/raidaudit` — whole-night consumable matrix (food/oil/flask/potion per boss, role-aware grading, creature-type waste flags)
+- Deploy changelog — posts New Features/Improvements/Bug Fixes on redeploy instead of lore
+- 6-tier gear markers (🥇🔥🥈↔️❄️💩) by EP gap; unscored-item (proc trinket) backlog
+- Boss content store unified — SSC/TK wired into `/strat` + `/bossguide` (other session)
 
 ---
 
@@ -73,19 +80,6 @@ Preparation audit is shipped. Execution phase wired (cast analysis from rotation
 
 ---
 
-## Deep-Research the Heartbeat Lore + Jokes for Accuracy/Quality
-
-**Priority:** Medium · **Effort:** Medium
-
-The raid TIPS were full of hallucinated mechanics (Hydross NR/FR reversed, Leotheras "3 tanks + tremor totem", Morogrim "Tidal Surge", Vashj "5 generators", etc.) and got a full deep-research verification pass. The other heartbeat content needs the same treatment:
-
-- **Lore (95 entries):** deep-research each against Wowhead/Warcraft Wiki/WoWpedia TBC lore. Lower stakes than tips (flavor, not actionable) but the same hallucination risk - wrong character relationships, invented backstory, conflated lore. Verify and correct.
-- **Jokes (102 entries):** many are genuinely unfunny/terrible - this is a quality cull + rewrite, not just accuracy. Drop the dead ones, sharpen or replace with actually-funny WoW/raiding humor.
-- **"Chinese memes" / spammacros (25 entries):** these are MEANT to be broken-English, slightly-condescending-to-American-players callouts that actually reflect the fights (the classic CN-server meme voice). Right now they're weak. Research the real fight mechanics and rewrite them in that authentic voice - broken English, a little smug, but mechanically grounded (e.g. a real Vashj/Kael mechanic delivered in the meme register). Keep them in good taste.
-
-Reuse the `verify-raid-tips` workflow pattern (chunk by encounter/topic, structured JSON of index -> corrected text, then apply + validate JSON + no fancy Unicode).
-
----
 
 ## Food Buff Aura Names — verify the long tail
 
@@ -131,4 +125,4 @@ Framework shipped. Remaining: author real minimap backgrounds + per-boss JSON sp
 
 **Priority:** Low · **Effort:** Low
 
-`data/boss_strats.json` (~58 em-dashes), `data/strategy/*.json` (karazhan ~78, gruuls ~23, magtheridon ~11). Write `tools/scrub_emdashes.py`, eyeball diffs, replace with natural punctuation. Don't touch Python module docstrings (house convention per CLAUDE.md).
+`data/strategy/*.json` is **done** (scrubbed to plain ASCII and now covered by the `test_json_validity` unicode guard). Remaining: `data/boss_strats.json` (~58 em-dashes) if it's still user-facing. Don't touch Python module docstrings (house convention per CLAUDE.md).

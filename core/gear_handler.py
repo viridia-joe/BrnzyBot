@@ -32,16 +32,46 @@ _PHASE_LABELS = {1: "Phase 1", 2: "Phase 2", 3: "Phase 3", 4: "Phase 4", 5: "Pha
 _DUAL_SLOTS   = {"Ring", "Trinket"}
 
 
+_MARKER_LEGEND = ("_🥇 former-tier BiS (still best) · 🔥 current-tier BiS · "
+                  "↔️ sidegrade to BiS · 🥈 prior-tier, within 25% of BiS · "
+                  "❄️ 25–50% off BiS · 💩 50%+ off BiS_")
+
+
 def _bis_marker(item_phase: int | None, current_phase: int) -> str:
     """
-    Front marker for a slot where the player is already wearing best-in-slot:
-      🥇 = BiS from an *earlier* phase (still the best pick — much Phase-1 gear
-           stays BiS deep into later tiers)
+    Marker for a slot where the equipped item IS best-in-slot (no upgrade found):
+      🥇 = BiS from an *earlier* phase (much P1 gear stays BiS deep into later tiers)
       🔥 = BiS from the *current* tier
     """
     if item_phase and current_phase and item_phase < current_phase:
         return "🥇"
     return "🔥"
+
+
+def _upgrade_marker(pct_off: float, cur_phase: int | None, current_phase: int) -> str:
+    """
+    Marker for a slot that HAS an upgrade, graded by how far the equipped item is
+    from BiS (pct_off = gain / bis_ep) with a prior-tier nuance:
+      ↔️  sidegrade — essentially equal to BiS (≤5% off)
+      🥈  prior-phase piece within 25% of BiS — a respectable former-tier item
+      🔥  current-phase piece very close to BiS (≤10% off)
+      ❄️  25–50% off BiS — a real upgrade waiting
+      💩  50%+ off BiS — genuinely needs replacing
+    Items with no phase data (phase 0 = dungeon/world/proc items) are graded on the
+    EP gap alone — they never earn a 🥇/🥈 medal they didn't earn as raid tier gear.
+    """
+    if pct_off <= 0.05:
+        return "↔️"                                  # sidegrade to BiS
+    prior_phase = bool(cur_phase and current_phase and cur_phase < current_phase)
+    if prior_phase and pct_off <= 0.25:
+        return "🥈"                                  # former-tier, within 25%
+    if pct_off <= 0.10:
+        return "🔥"                                  # current piece, near BiS
+    if pct_off <= 0.25:
+        return "↔️"                                  # modest current-tier upgrade
+    if pct_off <= 0.50:
+        return "❄️"                                  # 25–50% off
+    return "💩"                                       # 50%+ off
 
 
 # ---------------------------------------------------------------------------
@@ -377,7 +407,9 @@ def handle_gear_list(
                         equipped_ids,
                     ).fetchall()
                     for name, item_phase in rows:
-                        equipped_phase_by_name[name] = item_phase or 1
+                        # Keep 0 as 0 (no tier data) so phase-0 dungeon/world/proc
+                        # items aren't mis-medaled as prior-tier raid gear.
+                        equipped_phase_by_name[name] = item_phase if item_phase is not None else 0
             finally:
                 item_db2.close()
         except Exception as e:
@@ -413,7 +445,7 @@ def handle_gear_list(
         lines.append("_⚠ Gear from cache — WCL was unavailable_")
 
     if verbose:
-        lines.append("_🥇 BiS from an earlier phase (still best) · 🔥 current-tier BiS · 🥈 prior-tier, upgrade available · ↔️ minor upgrade · ❄️ sizable upgrade_")
+        lines.append(_MARKER_LEGEND)
 
     lines.append("")
 
@@ -444,6 +476,17 @@ def handle_gear_list(
         cur_ep   = g["ep"]
         set_tag  = f" *[{g['set_name']}]*" if g.get("set_name") else ""
 
+        # An equipped item that EP-scores to 0 is almost always an on-use/proc
+        # effect the static EP model can't value (e.g. Quagmirran's Eye, Eye of
+        # Moam). Log it to the scoring backlog for hand-scoring rather than letting
+        # it read as worthless gear.
+        if cur_ep == 0 and g.get("item_id"):
+            try:
+                from core.score_backlog import record_unscored
+                record_unscored(g["item_id"], cur_name, slot, spec)
+            except Exception:
+                pass
+
         if bis_ok:
             bi = bis_idx.get(slot, 0)
             bis_list = bis_by_slot.get(slot, [])
@@ -461,11 +504,8 @@ def handle_gear_list(
                         oh_ep = cur_ep_by_slot.get("Off Hand", 0.0)
                         combined_gain = two_h_sr.ep - oh_ep
                         pct_off = combined_gain / two_h_sr.ep if two_h_sr.ep > 0 else 0
-                        mh_phase = equipped_phase_by_name.get(cur_name, phase)
-                        if mh_phase and phase and mh_phase < phase:
-                            marker = "🥈"
-                        else:
-                            marker = "❄️" if pct_off > 0.20 else ("↔️" if pct_off > 0.10 else "🔥")
+                        mh_phase = equipped_phase_by_name.get(cur_name)
+                        marker = _upgrade_marker(pct_off, mh_phase, phase)
                         if combined_gain > 0.5:
                             line = (
                                 f"{marker} **{slot}** {cur_name} `{cur_ep:.1f}` "
@@ -507,22 +547,14 @@ def handle_gear_list(
                 gain = sr.ep
                 bis_ep = cur_ep + gain
                 pct_off = gain / bis_ep if bis_ep > 0 else 0
-                cur_phase = equipped_phase_by_name.get(cur_name, phase)
+                # phase 0 = no tier data (dungeon/world/proc item) → no medal,
+                # graded on EP gap alone. equipped_phase_by_name stores 0 as-is now.
+                cur_phase = equipped_phase_by_name.get(cur_name)
                 if gain <= 0:
-                    # Equipped item is better than anything in the DB — it IS BiS.
-                    # Use the equipped item's actual phase for the 🥇/🔥 marker.
+                    # Equipped item beats anything in the DB — it IS BiS.
                     marker = _bis_marker(cur_phase, phase)
-                elif cur_phase and phase and cur_phase < phase:
-                    # They're wearing PRIOR-TIER gear that has a current-tier upgrade.
-                    # That's not "in greens" (❄️) — it's a respectable piece with a
-                    # clear step up. 🥈 distinguishes it from true undergeared slots.
-                    marker = "🥈"
-                elif pct_off <= 0.10:
-                    marker = "🔥"
-                elif pct_off <= 0.20:
-                    marker = "↔️"
                 else:
-                    marker = "❄️"
+                    marker = _upgrade_marker(pct_off, cur_phase, phase)
                 src_str = f" — {sr.source}" if sr.source else ""
                 if gain > 0.5:
                     line = (

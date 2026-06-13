@@ -119,7 +119,9 @@ class RaidMatrix:
 _CONSUMABLE_HINTS = ("flask", "elixir", "oil", "well fed", "food",
                      "windfury", "wizard", "mana ", "sharpening stone",
                      "spellpower", "firepower", "agility", "strength",
-                     "demonslaying", "mageblood", "draenic")
+                     "demonslaying", "mageblood", "draenic",
+                     # named legacy-food buffs (see profiles.FOOD_AURAS)
+                     "enlightened", "regeneration", "increased ", "electrified")
 
 
 def _consumable_auras(auras: list[dict]) -> list[str]:

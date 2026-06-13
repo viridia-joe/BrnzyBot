@@ -58,6 +58,14 @@ Preparation audit is shipped. Execution phase wired (cast analysis from rotation
 
 ---
 
+## Food Buff Aura Names — verify the long tail
+
+**Priority:** Low · **Effort:** Low
+
+Most TBC (Outland) food shows the generic **"Well Fed"** aura in WCL; some legacy Vanilla cooking foods still show their original **stat-named buffs**. `profiles.FOOD_AURAS` now matches the full set. **Confirmed against live Dreamscythe logs:** `Well Fed`, `Enlightened` (Skullfish Soup — +20 spell crit/+20 spirit; a crit/longevity pick, slight throughput loss vs +spell-damage food but legit). **From research, not yet seen in a live log — verify the exact aura string before fully trusting:** `Mana Regeneration` (Smoked Sagefish/Nightfin Soup), `Health Regeneration` (Tender Wolf Steak), `Increased Intellect` (Runn Tum Tuber Surprise), `Increased Stamina/Agility/Strength/Spirit` (legacy foods), `Electrified` (Stormchops proc — gives no stats, recognized but not a real food signal). When one of these shows up in a real audit, confirm the literal `name` field matches and tighten if needed.
+
+---
+
 ## Enchant Database
 
 **Priority:** Low · **Effort:** Medium

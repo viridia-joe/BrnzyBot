@@ -60,10 +60,12 @@ def grade_cell(cell, boss_name: str) -> dict:
 
     if profile is None:
         # Unprofiled spec: show flask/elixir names present, no grading.
+        from core.audit.profiles import FOOD_AURAS
         fe = [a for a in (cell.auras or [])
               if "flask" in a.lower() or "elixir" in a.lower()]
+        ate = any(f.lower() in n for f in FOOD_AURAS for n in names_lower)
         out["elixir"] = (NA, ", ".join(fe) or "—")
-        out["food"] = (OK if any("well fed" in n for n in names_lower) else MISSING, "")
+        out["food"] = (OK if ate else MISSING, "")
         out["potion"] = (OK if cell.potions else NA, f"{cell.potions} used")
         return out
 

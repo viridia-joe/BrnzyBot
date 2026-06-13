@@ -152,6 +152,22 @@ CASTER_META = "Chaotic Skyfire Diamond"
 PHYS_META   = "Relentless Earthstorm Diamond"
 
 # Enchant-bearing slots by weapon layout (labels match normalize.GEAR_SLOTS).
+# Food buff aura NAMES as they appear in WCL combat data. Most TBC (Outland)
+# food shows the generic "Well Fed"; legacy Vanilla cooking foods still use their
+# original stat-named auras. "Well Fed" and "Enlightened" (Skullfish Soup, +20
+# spell crit) are confirmed against live Dreamscythe logs; the rest are from
+# research (Wowhead TBC). Skullfish is a crit/longevity pick — a small throughput
+# loss vs raw +spell-damage food, but a legitimate "ate food" signal.
+FOOD_AURAS = (
+    "Well Fed",
+    "Enlightened",            # Skullfish Soup (+20 spell crit, +20 spirit)
+    "Mana Regeneration",      # Smoked Sagefish / Sagefish Delight / Nightfin Soup
+    "Health Regeneration",    # Tender Wolf Steak (+stam/spirit)
+    "Increased Intellect",    # Runn Tum Tuber Surprise
+    "Increased Stamina", "Increased Agility", "Increased Strength", "Increased Spirit",
+    "Stormchops", "Electrified",   # Stormchops proc food (no stats; recognized, not flagged)
+)
+
 _ARMOR_SLOTS   = ("Head", "Shoulder", "Back", "Chest", "Wrist", "Hands", "Legs", "Feet")
 CASTER_SLOTS   = _ARMOR_SLOTS + ("Main Hand",)
 MELEE_2H_SLOTS = _ARMOR_SLOTS + ("Main Hand",)            # 2H weapon occupies Main Hand
@@ -160,8 +176,8 @@ FERAL_SLOTS    = _ARMOR_SLOTS                              # weapon enchants don
 HUNTER_SLOTS   = _ARMOR_SLOTS + ("Relic",)                # Relic index = ranged weapon (scope)
 
 CASTER_CONSUMES = (
-    ConsumeRule("food", "Food", ("Well Fed", "Stormchops"),
-                note="all stat food shows as 'Well Fed' in the log; +spell damage food preferred"),
+    ConsumeRule("food", "Food", FOOD_AURAS,
+                note="most food shows 'Well Fed'; some legacy foods show named buffs"),
     ConsumeRule("flask", "Flask",
                 ("Flask of Supreme Power", "Flask of Pure Death", "Flask of Blinding Light"),
                 required=False, note="A flask satisfies both elixir slots."),
@@ -183,7 +199,7 @@ CASTER_CONSUMES = (
 )
 
 MELEE_STR_CONSUMES = (
-    ConsumeRule("food", "Food", ("Well Fed", "Stormchops"),
+    ConsumeRule("food", "Food", FOOD_AURAS,
                 note="+strength or +hit food"),
     ConsumeRule("flask", "Flask", ("Flask of Relentless Assault",), required=False),
     ConsumeRule("battle_elixir", "Battle Elixir",
@@ -196,7 +212,7 @@ MELEE_STR_CONSUMES = (
 )
 
 MELEE_AGI_CONSUMES = (
-    ConsumeRule("food", "Food", ("Well Fed", "Stormchops"),
+    ConsumeRule("food", "Food", FOOD_AURAS,
                 note="+agility or +hit food"),
     ConsumeRule("flask", "Flask", ("Flask of Relentless Assault",), required=False),
     ConsumeRule("battle_elixir", "Battle Elixir", ("Elixir of Major Agility",), required=False),
@@ -208,7 +224,7 @@ MELEE_AGI_CONSUMES = (
 )
 
 HUNTER_CONSUMES = (
-    ConsumeRule("food", "Food", ("Well Fed", "Stormchops"),
+    ConsumeRule("food", "Food", FOOD_AURAS,
                 note="+agility or +AP food"),
     ConsumeRule("flask", "Flask", ("Flask of Relentless Assault",), required=False),
     ConsumeRule("battle_elixir", "Battle Elixir", ("Elixir of Major Agility",), required=False),
@@ -221,7 +237,7 @@ HUNTER_CONSUMES = (
 HEALER_META = "Insightful Earthstorm Diamond"   # mana restore proc
 
 HEALER_CONSUMES = (
-    ConsumeRule("food", "Food", ("Well Fed", "Stormchops"),
+    ConsumeRule("food", "Food", FOOD_AURAS,
                 note="+healing or +spirit food"),
     ConsumeRule("flask", "Flask", ("Flask of Mighty Restoration",), required=False,
                 note="Mighty Restoration (+25 mp5), or run double elixirs"),
@@ -241,7 +257,7 @@ TANK_META = "Powerful Earthstorm Diamond"   # +stamina meta
 # defense/agi elixirs, sharpening stone for threat (optional — many run a
 # permanent weapon enchant instead).
 TANK_CONSUMES = (
-    ConsumeRule("food", "Food", ("Well Fed", "Stormchops"),
+    ConsumeRule("food", "Food", FOOD_AURAS,
                 note="+stamina (Fisherman's Feast) or +hit (threat) food"),
     ConsumeRule("flask", "Flask", ("Flask of Fortification", "Flask of Relentless Assault"),
                 required=False, note="Fortification (survival) or Relentless Assault (threat)"),
@@ -257,7 +273,7 @@ TANK_CONSUMES = (
 
 # Bear tanks: no weapon enchant/stone works in form, so no weapon-buff slot.
 BEAR_TANK_CONSUMES = (
-    ConsumeRule("food", "Food", ("Well Fed", "Stormchops"),
+    ConsumeRule("food", "Food", FOOD_AURAS,
                 note="+stamina or +agility food"),
     ConsumeRule("flask", "Flask", ("Flask of Fortification", "Flask of Relentless Assault"),
                 required=False),

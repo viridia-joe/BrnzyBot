@@ -41,17 +41,24 @@ def test_all_data_json_valid():
     assert not errors, "Invalid JSON in data files:\n" + "\n".join(errors)
 
 
-def test_rotation_profiles_no_unicode_punctuation():
-    """Fancy Unicode (em-dashes, curly quotes) breaks Discord on some clients."""
+def test_user_content_no_unicode_punctuation():
+    """Fancy Unicode (em-dashes, curly quotes) breaks Discord on some clients.
+    Covers rotation profiles, boss-strategy JSON, and the heartbeat content."""
     FORBIDDEN = ["—", "–", "‘", "’", "“", "”", "…", "→", "←", "↔", "⟶"]
+    patterns = [
+        os.path.join(_ROOT, "data", "rotations", "*.json"),
+        os.path.join(_ROOT, "data", "strategy", "*.json"),
+        os.path.join(_ROOT, "data", "fun_content.json"),
+    ]
     errors = []
-    for path in glob.glob(os.path.join(_ROOT, "data", "rotations", "*.json")):
-        text = open(path, encoding="utf-8-sig").read()
-        for ch in FORBIDDEN:
-            if ch in text:
-                name = os.path.basename(path)
-                errors.append(f"{name} contains {repr(ch)} (U+{ord(ch):04X})")
-    assert not errors, "Unicode fancy punctuation in rotation profiles:\n" + "\n".join(errors)
+    for pat in patterns:
+        for path in glob.glob(pat):
+            text = open(path, encoding="utf-8-sig").read()
+            for ch in FORBIDDEN:
+                if ch in text:
+                    rel = os.path.relpath(path, _ROOT)
+                    errors.append(f"{rel} contains {repr(ch)} (U+{ord(ch):04X})")
+    assert not errors, "Unicode fancy punctuation in user-facing content:\n" + "\n".join(errors)
 
 
 if __name__ == "__main__":

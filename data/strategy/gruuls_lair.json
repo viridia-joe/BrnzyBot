@@ -10,21 +10,34 @@
       "name": "High King Maulgar",
       "slug": "high_king_maulgar",
       "encounter_id": 1119,
-      "summary": "Council fight with 5 bosses: Maulgar (warrior), Olm the Summoner (warlock), Kiggler the Craed (mage), Blindeye the Seer (priest), and Krosh Firehand (mage). Each add requires a specific handling strategy. The pull is the most choreographed part — the entire encounter can unravel if the initial assignments aren't executed cleanly. Maulgar is killed last.",
+      "summary": "Council fight with 5 bosses: Maulgar (warrior), Olm the Summoner (warlock), Kiggler the Craed (mage), Blindeye the Seer (priest), and Krosh Firehand (mage). Each add requires a specific handling strategy. The pull is the most choreographed part - the entire encounter can unravel if the initial assignments aren't executed cleanly. Maulgar is killed last.",
       "phases": [
         {
           "number": 1,
-          "name": "Add Phase — Kill the Council",
+          "name": "Add Phase - Kill the Council",
           "hp_range": "Pull to ~4 adds dead",
-          "description": "Each of the 5 council members must be handled simultaneously with assigned players. Krosh must be spell-stolen from (he casts a massive Fire Shield) — a Mage must spell-steal it immediately or the tank dies. Blindeye heals the group — kill or interrupt him early. Olm banishes himself periodically and must be re-tanked. Kiggler polymorphs and chain-casts on random targets. Maulgar is tanked throughout but not focused for DPS until the others are dead.",
-          "key_mechanics": ["Spell Steal (Krosh)", "Cleave (Maulgar)", "Whirlwind (Maulgar)", "Olm Banish", "Blindeye Heals", "Kiggler Polymorph"]
+          "description": "Each of the 5 council members must be handled simultaneously with assigned players. Krosh must be spell-stolen from (he casts a massive Fire Shield) - a Mage must spell-steal it immediately or the tank dies. Blindeye heals the group - kill or interrupt him early. Olm banishes himself periodically and must be re-tanked. Kiggler polymorphs and chain-casts on random targets. Maulgar is tanked throughout but not focused for DPS until the others are dead.",
+          "key_mechanics": [
+            "Spell Steal (Krosh)",
+            "Cleave (Maulgar)",
+            "Whirlwind (Maulgar)",
+            "Olm Banish",
+            "Blindeye Heals",
+            "Kiggler Polymorph"
+          ]
         },
         {
           "number": 2,
           "name": "Maulgar Phase",
           "hp_range": "Last add dead to 0%",
-          "description": "Once all adds are dead, the full raid burns Maulgar. He deals heavy physical damage and uses Whirlwind that hits nearby players. Tank him away from the raid. He also casts Arcing Smash (wide frontal cleave) — face him into a wall or corner. Berserker Charge targets random raid members.",
-          "key_mechanics": ["Cleave", "Whirlwind", "Arcing Smash", "Berserker Charge", "Shockwave"]
+          "description": "Once all adds are dead, the full raid burns Maulgar. He deals heavy physical damage and uses Whirlwind that hits nearby players. Tank him away from the raid. He also casts Arcing Smash (wide frontal cleave) - face him into a wall or corner. Berserker Charge targets random raid members.",
+          "key_mechanics": [
+            "Cleave",
+            "Whirlwind",
+            "Arcing Smash",
+            "Berserker Charge",
+            "Shockwave"
+          ]
         }
       ],
       "abilities": [
@@ -32,7 +45,7 @@
           "name": "Krosh Fire Shield",
           "mechanic_type": "special",
           "targets": "self",
-          "description": "Krosh casts a Fire Shield on himself that dramatically increases his armor and reflects fire damage. A Mage must Spell Steal this immediately — the stolen buff gives the Mage massive armor and makes them nearly unkillable, effectively tanking Krosh. If the Mage fails to steal it, the tank taking Krosh hits will die almost immediately.",
+          "description": "Krosh casts a Fire Shield on himself that dramatically increases his armor and reflects fire damage. A Mage must Spell Steal this immediately - the stolen buff gives the Mage massive armor and makes them nearly unkillable, effectively tanking Krosh. If the Mage fails to steal it, the tank taking Krosh hits will die almost immediately.",
           "important": true
         },
         {
@@ -46,14 +59,14 @@
           "name": "Olm Banish",
           "mechanic_type": "special",
           "targets": "self",
-          "description": "Olm periodically banishes himself, making him untargetable. He re-appears after a few seconds. His tank must re-engage immediately. He also summons Felhounds — kill or CC the hounds.",
+          "description": "Olm periodically banishes himself, making him untargetable. He re-appears after a few seconds. His tank must re-engage immediately. He also summons Felhounds - kill or CC the hounds.",
           "important": true
         },
         {
           "name": "Kiggler Polymorph",
           "mechanic_type": "special",
           "targets": "random_player",
-          "description": "Polymorphs a random raid member. Can hit healers and disrupt healing at critical moments. Kiggler also chain-casts Arcane Shocks — his tank takes heavy magical damage.",
+          "description": "Polymorphs a random raid member. Can hit healers and disrupt healing at critical moments. Kiggler also chain-casts Arcane Shocks - his tank takes heavy magical damage.",
           "important": false
         },
         {
@@ -74,21 +87,23 @@
           "name": "Shockwave",
           "mechanic_type": "special",
           "targets": "tank",
-          "description": "Stuns the current target and nearby players. Tank must be aware of this — the OT should be ready to pick up if the MT is stunned.",
+          "description": "Stuns the current target and nearby players. Tank must be aware of this - the OT should be ready to pick up if the MT is stunned.",
           "important": false
         }
       ],
       "strategies": [
         {
-          "name": "Standard — Assigned Handlers",
+          "name": "Standard - Assigned Handlers",
           "summary": "Assign before the pull: Mage on Krosh (Spell Steal + tank), Hunter on Olm (misdirect pull, re-engage after Banish), Warlock or OT on Kiggler, OT on Blindeye (interrupt rotation), MT on Maulgar. On pull, execute simultaneously. Kill order: Blindeye first (stops healing), then Olm, then Kiggler, then Krosh, then Maulgar. Once all adds die, full raid burns Maulgar.",
-          "applicable_to": ["all"],
-          "notes": "This pull is the hardest part of the encounter. Brief everyone carefully. The Mage Spell Stealing Krosh is absolutely mandatory — no substitution. A Hunter misdirecting Olm to a specific player simplifies his pickup significantly."
+          "applicable_to": [
+            "all"
+          ],
+          "notes": "This pull is the hardest part of the encounter. Brief everyone carefully. The Mage Spell Stealing Krosh is absolutely mandatory - no substitution. A Hunter misdirecting Olm to a specific player simplifies his pickup significantly."
         }
       ],
       "roles": {
         "tank": "Main tank grabs Maulgar immediately on pull. A second tank handles Blindeye (interrupt priority) and/or Kiggler. A third tank or the Hunter holds Olm. When adds die, all tanks converge on Maulgar. During Maulgar phase: face him into a corner, call Whirlwind so melee moves out, use cooldowns during heavy incoming damage.",
-        "healer": "This fight requires healing multiple targets simultaneously — each tank is taking damage from a different source. Prioritize the Mage tanking Krosh (they have no armor without the stolen Fire Shield, so they're squishy). Keep the Maulgar tank topped during the full burn phase. Whirlwind creates burst damage on nearby melee — be ready.",
+        "healer": "This fight requires healing multiple targets simultaneously - each tank is taking damage from a different source. Prioritize the Mage tanking Krosh (they have no armor without the stolen Fire Shield, so they're squishy). Keep the Maulgar tank topped during the full burn phase. Whirlwind creates burst damage on nearby melee - be ready.",
         "dps": "Know your assignment. If you're killing Blindeye: interrupt every heal, kill fast. If you're on Kiggler: burst him down. Once assigned adds are dead, converge on the remaining adds in order. During Maulgar burn: stay behind him, move out during Whirlwind. Do not break CC on adds you're not assigned to."
       }
     },
@@ -96,14 +111,21 @@
       "name": "Gruul the Dragonkiller",
       "slug": "gruul_the_dragonkiller",
       "encounter_id": 1118,
-      "summary": "Single boss, one room, high execution demand. Gruul gains stacks of Growth every 30 seconds, increasing his damage and size. The fight must end before he becomes unkillable. Hurtful Strike hits the second-highest threat target for massive physical damage — always requires two tanks. Shatter and Ground Slam are the wipe mechanics: survive the Slam, spread before Shatter.",
+      "summary": "Single boss, one room, high execution demand. Gruul gains stacks of Growth every 30 seconds, increasing his damage and size. The fight must end before he becomes unkillable. Hurtful Strike hits the second-highest threat target for massive physical damage - always requires two tanks. Shatter and Ground Slam are the wipe mechanics: survive the Slam, spread before Shatter.",
       "phases": [
         {
           "number": 1,
-          "name": "Full Fight — Race Against Growth",
-          "hp_range": "100% – 0%",
-          "description": "Gruul starts at a manageable damage level but grows exponentially with each Growth stack (every 30s). At 15-20 stacks he becomes nearly unkillable. The fight is a DPS race. Ground Slam knocks the raid into the air and causes Cave-In rocks to fall — land safely by positioning. After Ground Slam, Shatter hits all players — if any two players are within 5 yards of each other during Shatter, it detonates for massive damage. Spread IMMEDIATELY after Ground Slam.",
-          "key_mechanics": ["Growth", "Hurtful Strike", "Ground Slam", "Cave-In", "Shatter", "Reverberation"]
+          "name": "Full Fight - Race Against Growth",
+          "hp_range": "100% - 0%",
+          "description": "Gruul starts at a manageable damage level but grows exponentially with each Growth stack (every 30s). At 15-20 stacks he becomes nearly unkillable. The fight is a DPS race. Ground Slam knocks the raid into the air and causes Cave-In rocks to fall - land safely by positioning. After Ground Slam, Shatter hits all players - if any two players are within 5 yards of each other during Shatter, it detonates for massive damage. Spread IMMEDIATELY after Ground Slam.",
+          "key_mechanics": [
+            "Growth",
+            "Hurtful Strike",
+            "Ground Slam",
+            "Cave-In",
+            "Shatter",
+            "Reverberation"
+          ]
         }
       ],
       "abilities": [
@@ -118,21 +140,21 @@
           "name": "Hurtful Strike",
           "mechanic_type": "cleave",
           "targets": "tank",
-          "description": "Targets the highest-threat non-tank player for a massive physical blow. In practice, this is the second-highest threat player — usually the off-tank. The OT must maintain second-highest threat at all times. If any DPS pulls above the OT's threat, Hurtful Strike hits a DPS player for typically lethal damage.",
+          "description": "Targets the highest-threat non-tank player for a massive physical blow. In practice, this is the second-highest threat player - usually the off-tank. The OT must maintain second-highest threat at all times. If any DPS pulls above the OT's threat, Hurtful Strike hits a DPS player for typically lethal damage.",
           "important": true
         },
         {
           "name": "Ground Slam",
           "mechanic_type": "special",
           "targets": "raid",
-          "description": "Slams the ground, sending all raid members flying into the air. After landing, cave-in rocks fall from the ceiling. Players must land in an open space — large rooms. After landing, immediately spread to 5+ yards from all other players before Shatter triggers.",
+          "description": "Slams the ground, sending all raid members flying into the air. After landing, cave-in rocks fall from the ceiling. Players must land in an open space - large rooms. After landing, immediately spread to 5+ yards from all other players before Shatter triggers.",
           "important": true
         },
         {
           "name": "Shatter",
           "mechanic_type": "aoe",
           "targets": "raid",
-          "description": "Triggers ~5 seconds after Ground Slam. Hits every player for damage based on proximity to other players — if any two players are within 5 yards of each other, the impact is lethal for both. Spread to 5+ yards from everyone immediately after Ground Slam. This is the primary wipe mechanic.",
+          "description": "Triggers ~5 seconds after Ground Slam. Hits every player for damage based on proximity to other players - if any two players are within 5 yards of each other, the impact is lethal for both. Spread to 5+ yards from everyone immediately after Ground Slam. This is the primary wipe mechanic.",
           "important": true
         },
         {
@@ -152,16 +174,18 @@
       ],
       "strategies": [
         {
-          "name": "Standard — Spread Positioning",
-          "summary": "Position the entire raid in a loose spread across the room from the start. MT holds Gruul, OT maintains second-highest threat (Hurtful Strike target). On Ground Slam: everyone is launched — quickly identify your landing spot and immediately spread 5+ yards from all other players before Shatter. DPS race — Lust/Heroism at the pull.",
-          "applicable_to": ["all"],
-          "notes": "Pre-mark spread positions at the start. The biggest failure mode is two players landing within 5 yards of each other after Ground Slam. Practice quick spreading. Gruul is a gear check — if Growth reaches 15+ stacks, your DPS needs improvement."
+          "name": "Standard - Spread Positioning",
+          "summary": "Position the entire raid in a loose spread across the room from the start. MT holds Gruul, OT maintains second-highest threat (Hurtful Strike target). On Ground Slam: everyone is launched - quickly identify your landing spot and immediately spread 5+ yards from all other players before Shatter. DPS race - Lust/Heroism at the pull.",
+          "applicable_to": [
+            "all"
+          ],
+          "notes": "Pre-mark spread positions at the start. The biggest failure mode is two players landing within 5 yards of each other after Ground Slam. Practice quick spreading. Gruul is a gear check - if Growth reaches 15+ stacks, your DPS needs improvement."
         }
       ],
       "roles": {
-        "tank": "Main tank Gruul throughout. Face him away from the raid to minimize cleave. The OT must maintain second-highest threat at all times — Hurtful Strike will otherwise kill DPS. After Ground Slam, re-engage immediately when you land. Use defensive cooldowns liberally as Growth stacks increase damage.",
-        "healer": "High incoming damage on the MT that increases every 30 seconds. Reverberation silences healers — time your casts carefully. After Ground Slam, players take significant landing damage — AoE heal immediately. Be ready for Shatter casualties if anyone gets too close.",
-        "dps": "Lust at the pull and burn hard — this is a DPS race. Do NOT pull above the OT's threat or you get Hurtful Strike. After Ground Slam: land, check your position, immediately spread 5+ yards from everyone before Shatter. Pre-assigned spread positions help. Stay on Gruul during the Slam — you can DPS during the air phase if you're a ranged."
+        "tank": "Main tank Gruul throughout. Face him away from the raid to minimize cleave. The OT must maintain second-highest threat at all times - Hurtful Strike will otherwise kill DPS. After Ground Slam, re-engage immediately when you land. Use defensive cooldowns liberally as Growth stacks increase damage.",
+        "healer": "High incoming damage on the MT that increases every 30 seconds. Reverberation silences healers - time your casts carefully. After Ground Slam, players take significant landing damage - AoE heal immediately. Be ready for Shatter casualties if anyone gets too close.",
+        "dps": "Lust at the pull and burn hard - this is a DPS race. Do NOT pull above the OT's threat or you get Hurtful Strike. After Ground Slam: land, check your position, immediately spread 5+ yards from everyone before Shatter. Pre-assigned spread positions help. Stay on Gruul during the Slam - you can DPS during the air phase if you're a ranged."
       }
     }
   ]

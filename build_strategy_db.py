@@ -207,7 +207,7 @@ def build(db_path: str, data_dir: str) -> None:
 
     print(
         f"Strategy DB built: {total_bosses} bosses, {total_abilities} abilities "
-        f"from {len(json_files)} zone file(s).\n  → {db_path}"
+        f"from {len(json_files)} zone file(s).\n  -> {db_path}"
     )
 
 

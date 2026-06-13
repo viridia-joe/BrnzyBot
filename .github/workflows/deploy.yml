@@ -59,7 +59,7 @@ jobs:
             # container has no git binary, so bake the data into files that get
             # COPYed into /app).
             git rev-parse HEAD > ~/brnzybot-git/.deploy_sha
-            git log -60 --pretty=format:'%H %s' > ~/brnzybot-git/.deploy_log
+            git log -60 --pretty=format:%H=%s > ~/brnzybot-git/.deploy_log
 
             # Restore secrets file (lives outside repo, survives deploys)
             if [ ! -f ~/brnzybot.env ]; then

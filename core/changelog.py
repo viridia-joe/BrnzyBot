@@ -106,7 +106,7 @@ def _subjects_since(since_sha: str) -> list[str]:
     if raw:
         subjects = []
         for line in raw.splitlines():
-            sha, _, subject = line.partition(" ")
+            sha, _, subject = line.partition("=")
             if since_sha and sha.startswith(since_sha[:12]):
                 break  # reached the last-announced commit
             subjects.append(subject)

@@ -1,0 +1,565 @@
+{
+  "_meta": {
+    "zone": "Zul'Aman",
+    "zone_slug": "zulaman",
+    "phase": 3,
+    "content_phase": 3,
+    "strat_index": true,
+    "updated": "2026-06-14",
+    "note": "Anniversary folds Zul'Aman into calendar P3; its gear is item content-phase 4 (see PHASE_READINESS s1).",
+    "sources": [
+      "icy-veins.com/tbc-classic",
+      "warcraft.wiki.gg",
+      "wowhead.com/tbc"
+    ]
+  },
+  "bosses": [
+    {
+      "name": "Nalorakk",
+      "slug": "nalorakk",
+      "summary": "The Bear Avatar of Zul'Aman, a two-tank swap fight against a troll who alternates a ranged troll form and a melee bear form on a timer. Troll form casts Mangle, which makes the target take far more bleed damage, and Surge, a charge at the most distant player; bear form layers heavy stacking bleeds and a silencing Deafening Roar. He does not drop threat when he shifts, so the two tanks taunt-swap on each transition so Mangle and the bear bleeds never land on the same tank. A hard ten-minute enrage caps it; he gives the largest timed-run bonus.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Troll form",
+          "hp_range": "alternating",
+          "description": "Ranged form. Mangle amplifies bleed damage on its target and Surge charges the most distant player. Ranged spread and rotate who is furthest."
+        },
+        {
+          "number": 2,
+          "name": "Bear form",
+          "hp_range": "alternating",
+          "description": "Melee form with heavy stacking bleeds and Deafening Roar (a short silence). The bear-form tank takes the bleeds; tanks swap on every transition. He does not drop threat when shifting."
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Mangle",
+          "mechanic_type": "tank_swap",
+          "targets": "tank",
+          "description": "Troll-form debuff on the current target that greatly increases the bleed damage they take. The Mangled tank must not also be the tank soaking the bear-form bleeds, so tanks swap.",
+          "important": true
+        },
+        {
+          "name": "Surge",
+          "mechanic_type": "movement",
+          "targets": "random",
+          "description": "Troll-form charge at the most distant player for heavy physical damage plus a large increase to physical damage taken. It hits several times per troll phase, so ranged spread and rotate who is furthest so one player is not caught repeatedly.",
+          "important": true
+        },
+        {
+          "name": "Brutal Swipe",
+          "mechanic_type": "cleave",
+          "targets": "tank",
+          "description": "Troll-form frontal cleave; keep non-tanks out of the front arc.",
+          "important": false
+        },
+        {
+          "name": "Lacerating Slash",
+          "mechanic_type": "debuff",
+          "targets": "tank",
+          "description": "Bear-form heavy stacking bleed on the current tank; combined with a lingering Mangle it can spike lethally, which is why the tanks swap.",
+          "important": true
+        },
+        {
+          "name": "Deafening Roar",
+          "mechanic_type": "interrupt",
+          "targets": "raid",
+          "description": "Bear-form area silence that can interrupt a healer mid-cast during a bleed-heavy window.",
+          "important": false
+        },
+        {
+          "name": "Enrage",
+          "mechanic_type": "enrage",
+          "targets": "raid",
+          "description": "Hard enrage around the ten-minute mark.",
+          "important": false
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "Two tanks taunt-swap on every form change so the Mangled tank is never the one soaking the bear bleeds. Ranged spread out and rotate who stands furthest so Surge is not piled on one player, and the raid heals through the bear-form bleeds and Deafening Roar while burning him before the enrage."
+        }
+      ],
+      "roles": {
+        "tank": "Two tanks, mandatory: one holds bear form, one holds troll form, each taunting the boss off the other on every form change so Mangle and the bear bleeds never stack on one tank.",
+        "healer": "Focus the active tank, with heavy bleed healing in bear form, and watch for Surge and Deafening Roar spikes.",
+        "dps": "Maintain spread (ranged well apart) and rotate who is the furthest player for Surge, and beat the enrage."
+      },
+      "bossguide": {
+        "boss_num": 1,
+        "raid_short": "ZA",
+        "has_diagram": false,
+        "aliases": [
+          "nalorakk",
+          "bear boss",
+          "bear",
+          "nalo"
+        ],
+        "role_counts": {
+          "tanks": 2,
+          "tank_healers": 2,
+          "raid_healers": 1
+        },
+        "context": "FIGHT: Nalorakk - Zul'Aman Bear boss (10-man)\n\nKEY MECHANICS:\n- Alternates TROLL form and BEAR form on a timer; he does NOT drop threat on shift.\n- TWO TANKS taunt-swap every transition: Mangle (troll) amplifies bleed damage, and the bear form stacks heavy bleeds - never let both land on one tank.\n- Surge (troll): charges the MOST DISTANT player for big damage + damage-taken increase. Ranged SPREAD and rotate who is furthest.\n- Deafening Roar (bear): area silence - watch healer casts. Hard 10-min enrage.\n\nROLES NEEDED:\n- {skull} Bear tank, {cross} Troll tank (swap each transition).\n- Healers: 2 on tanks, 1 raid.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull}/{cross} for the two swap tanks.\n- Remind ranged to spread and rotate for Surge."
+      }
+    },
+    {
+      "name": "Akil'zon",
+      "slug": "akilzon",
+      "summary": "The Eagle Avatar of Zul'Aman, a single-tank fight of positioning and healer endurance on an open platform. The raid normally spreads out so his arcing Static Disruption does not chain, then collapses tightly under a lifted player for the signature Electrical Storm, then re-spreads. After each storm he summons a flock of weak Soaring Eagles. There is no hard enrage; it is a battle of attrition that grinds healer mana, won by clean spread-and-stack execution.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Single phase",
+          "hp_range": "100% to 0%",
+          "description": "Spread out for Static Disruption, collapse under the lifted player for Electrical Storm, then re-spread. Clear or ignore the Soaring Eagles and grind him down before healers run dry."
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Electrical Storm",
+          "mechanic_type": "movement",
+          "targets": "raid",
+          "description": "Lifts a random player into the air in a bubble and builds a raid-wide lightning storm centered on them; damage to everyone NOT directly under the lifted player ramps the longer it lasts. The entire raid stacks tightly beneath the lifted player, then spreads back out the instant it ends.",
+          "important": true
+        },
+        {
+          "name": "Static Disruption",
+          "mechanic_type": "debuff",
+          "targets": "random",
+          "description": "An arcing nature bolt on a random player that also hits those near them and increases nature damage taken. This is why the raid stays spread out at all times except during Electrical Storm.",
+          "important": true
+        },
+        {
+          "name": "Gust of Wind",
+          "mechanic_type": "movement",
+          "targets": "random",
+          "description": "Throws a random player up and back; they take heavy damage on landing, so the raid stays topped.",
+          "important": false
+        },
+        {
+          "name": "Call Lightning",
+          "mechanic_type": "special",
+          "targets": "tank",
+          "description": "A single-target lightning nuke on the tank; steady tank-healing pressure.",
+          "important": false
+        },
+        {
+          "name": "Soaring Eagles",
+          "mechanic_type": "add_spawn",
+          "targets": "raid",
+          "description": "After each Electrical Storm he summons a flock of weak eagles that swoop random players. AoE them down if healers are struggling, or ignore them once the boss is low.",
+          "important": false
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "Spread in a loose ring so Static Disruption never chains, and the moment Electrical Storm lifts a player the whole raid collapses tightly beneath them to share the storm, then spreads again. Top the raid for Gust of Wind landings, decide whether to AoE the Soaring Eagles based on healer mana, and grind him down before healers run dry."
+        }
+      ],
+      "roles": {
+        "tank": "A single tank holds the boss and eats Call Lightning, stacking with the raid for Electrical Storm.",
+        "healer": "The limiting factor: pre-heal before stacking, top the raid for Gust of Wind landings and Static Disruption, and manage mana for a long attrition fight with no enrage.",
+        "dps": "Spread out, collapse onto the stack point on command, optionally clear the Soaring Eagles, and otherwise burn the boss."
+      },
+      "bossguide": {
+        "boss_num": 2,
+        "raid_short": "ZA",
+        "has_diagram": false,
+        "aliases": [
+          "akil'zon",
+          "akilzon",
+          "eagle boss",
+          "eagle",
+          "akil"
+        ],
+        "role_counts": {
+          "tanks": 1,
+          "tank_healers": 1,
+          "raid_healers": 2
+        },
+        "context": "FIGHT: Akil'zon - Zul'Aman Eagle boss (10-man)\n\nKEY MECHANICS:\n- SPREAD OUT normally (Static Disruption arcs/chains to nearby players).\n- Electrical Storm: lifts a random player and builds a raid-wide storm - the WHOLE raid STACKS tightly under the lifted player to share it, then SPREADS back out immediately.\n- Gust of Wind (knock-up, heavy landing damage - stay topped), Call Lightning (tank nuke).\n- Soaring Eagles after each storm - AoE or ignore. No hard enrage: a healer-mana attrition fight.\n\nROLES NEEDED:\n- {skull} Tank. Healers: 1 tank, 2 raid (mana management is everything).\n\nASSIGNMENT FORMAT RULES:\n- Use {skull} for the tank. Mark a stack point and name a storm caller.\n- Remind: spread normally, STACK under the lifted player for Electrical Storm."
+      }
+    },
+    {
+      "name": "Jan'alai",
+      "slug": "janalai",
+      "summary": "The Dragonhawk Avatar of Zul'Aman, a stationary boss flanked by two banks of dragonhawk eggs. The core puzzle is egg control: he summons Amani'shi Hatchers that run the egg rows hatching eggs into hatchlings at an accelerating rate, so the raid kills one Hatcher and lets the other release a managed wave to AoE down, aiming to empty the egg banks before he force-hatches everything at thirty-five percent. Meanwhile the raid dodges Flame Breath cones and Fire Bomb phases, and a separate melee frenzy hits at twenty percent.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Egg control",
+          "hp_range": "100% to 35%",
+          "description": "Control the Hatchers and eggs: kill one Hatcher, let the other release a wave for the off-tank to gather and the raid to AoE, while dodging Flame Breath and Fire Bombs. Aim to empty the egg banks before 35%."
+        },
+        {
+          "number": 2,
+          "name": "All-hatch and burn",
+          "hp_range": "below 35%",
+          "description": "At thirty-five percent he hatches all remaining eggs at once (ideally none if managed well), then a melee frenzy hits around twenty percent. Burn him down with cooldowns ready."
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Summon Hatcher",
+          "mechanic_type": "add_spawn",
+          "targets": "raid",
+          "description": "Periodically summons Amani'shi Hatchers that run to the egg banks and hatch eggs into Dragonhawk Hatchlings at an accelerating rate. Kill one Hatcher immediately and let the other release a controlled batch for the off-tank to gather and the raid to AoE down.",
+          "important": true
+        },
+        {
+          "name": "All-hatch at 35%",
+          "mechanic_type": "add_spawn",
+          "targets": "raid",
+          "description": "At thirty-five percent health he hatches every remaining egg at once. Managed correctly the banks are already empty; otherwise a tank must grab a huge swarm of hatchlings.",
+          "important": true
+        },
+        {
+          "name": "Flame Breath",
+          "mechanic_type": "movement",
+          "targets": "raid",
+          "description": "A frontal cone of fire damage aimed in a random direction. Spread and keep ranged and healers out of the line.",
+          "important": true
+        },
+        {
+          "name": "Fire Bombs",
+          "mechanic_type": "movement",
+          "targets": "raid",
+          "description": "He teleports the raid to the center, raises fire walls, and scatters bombs that detonate after a few seconds. Move off the bombed tiles to clear ground inside the walls.",
+          "important": true
+        },
+        {
+          "name": "Frenzy",
+          "mechanic_type": "enrage",
+          "targets": "tank",
+          "description": "Around twenty percent he frenzies, increasing attack speed and melee damage. The tank pops a defensive cooldown; this is distinct from the 35% all-hatch.",
+          "important": false
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "Kill one Hatcher and let the other release a controlled wave each cycle so the egg banks empty steadily; the off-tank gathers the hatchlings and the raid AoEs them. Dodge Flame Breath cones and move off Fire Bomb tiles inside the walls. Enter thirty-five percent with the eggs already cleared, save a tank cooldown for the twenty-percent frenzy, and burn him down."
+        }
+      ],
+      "roles": {
+        "tank": "A main tank on the boss in the center and an off-tank (a paladin is ideal for AoE threat) to gather the hatched hatchlings and Hatchers.",
+        "healer": "Watch the main tank through the twenty-percent frenzy and raid-heal through Flame Breath cones and Fire Bomb detonations.",
+        "dps": "Balance single-target on the boss with timely AoE on each hatched wave, controlling kill timing so the boss is not pushed to thirty-five percent with eggs still up."
+      },
+      "bossguide": {
+        "boss_num": 3,
+        "raid_short": "ZA",
+        "has_diagram": false,
+        "aliases": [
+          "jan'alai",
+          "janalai",
+          "dragonhawk boss",
+          "dragonhawk",
+          "jan"
+        ],
+        "role_counts": {
+          "tanks": 2,
+          "tank_healers": 2,
+          "raid_healers": 1
+        },
+        "context": "FIGHT: Jan'alai - Zul'Aman Dragonhawk boss (10-man)\n\nKEY MECHANICS:\n- Two egg banks. Amani'shi Hatchers run the rows hatching eggs - KILL ONE Hatcher, LET ONE release a controlled wave; off-tank gathers, raid AoEs. Empty the banks before 35%.\n- At 35% ALL remaining eggs hatch at once (ideally none left). Distinct from the ~20% melee FRENZY (tank cooldown).\n- Flame Breath: frontal cone - spread, stay out of the line.\n- Fire Bombs: teleports the raid to center, walls it in, bombs detonate - move off the tiles.\n\nROLES NEEDED:\n- {skull} Boss tank (center), {cross} Add off-tank (hatchlings; paladin ideal).\n- Healers: 2 tank, 1 raid.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull} for the boss tank, {cross} for the add tank.\n- Stress: kill one Hatcher, let one hatch; clear eggs before 35%; tank cooldown at 20%."
+      }
+    },
+    {
+      "name": "Halazzi",
+      "slug": "halazzi",
+      "summary": "The Lynx Avatar of Zul'Aman, a cyclical split fight. In his merged form he is a melee boss tanked by two stacked tanks sharing Saber Lash. At seventy-five, fifty and twenty-five percent he splits into his troll form, Halazzi the Worshipper, plus a separate Spirit of the Lynx that the off-tank holds; bringing either down to about twenty percent merges them back at the pre-split health. After the final split he stays merged in a permanent frenzy burn. Throughout, the raid dispels Flame Shock and kills the Corrupted Lightning Totem fast.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Merged form",
+          "hp_range": "between splits",
+          "description": "Two tanks stack to share Saber Lash on the boss; dispel Flame Shock and kill the Corrupted Lightning Totem on sight."
+        },
+        {
+          "number": 2,
+          "name": "Split",
+          "hp_range": "75% / 50% / 25%",
+          "description": "He splits into troll-form Halazzi the Worshipper and a separate Spirit of the Lynx that the off-tank holds. Bring either to about twenty percent to merge them back at the pre-split health."
+        },
+        {
+          "number": 3,
+          "name": "Frenzy burn",
+          "hp_range": "below 25%",
+          "description": "After the final split he stays merged and frenzied, no longer splitting. Bloodlust and burn; a hunter can Tranquilizing Shot the frenzy."
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Transfigure",
+          "mechanic_type": "special",
+          "targets": "raid",
+          "description": "The split: deals damage to the whole raid and summons the Spirit of the Lynx as Halazzi becomes his troll form. Healers should not instantly raid-heal off it, since the Lynx spawns near them and can pull aggro onto a healer.",
+          "important": true
+        },
+        {
+          "name": "Spirit of the Lynx",
+          "mechanic_type": "add_spawn",
+          "targets": "raid",
+          "description": "A separate add with its own threat table that spawns on each split; the off-tank holds it. When either it or the troll form reaches about twenty percent health they merge back into the Lynx Avatar.",
+          "important": true
+        },
+        {
+          "name": "Saber Lash",
+          "mechanic_type": "tank_swap",
+          "targets": "tank",
+          "description": "A heavy frontal melee on the tank that splits among players stacked in front. Two tanks stack to share it.",
+          "important": true
+        },
+        {
+          "name": "Flame Shock",
+          "mechanic_type": "debuff",
+          "targets": "random",
+          "description": "A fire nuke and damage-over-time on a random player that must be dispelled as soon as possible.",
+          "important": true
+        },
+        {
+          "name": "Corrupted Lightning Totem",
+          "mechanic_type": "add_spawn",
+          "targets": "raid",
+          "description": "A totem he summons that chains lightning to a random player and jumps to those nearby. Kill it fast and spread to limit the chains.",
+          "important": true
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "Two tanks stack to share Saber Lash. At each split the off-tank grabs the Spirit of the Lynx while the raid brings one split-form to about twenty percent to merge them back. Dispel Flame Shock fast, kill the Corrupted Lightning Totem on sight, and after the final split at twenty-five percent Bloodlust and burn through the frenzy."
+        }
+      ],
+      "roles": {
+        "tank": "Two tanks: the main tank stacks with the off-tank to share Saber Lash on the boss, and the off-tank picks up the Spirit of the Lynx on each split.",
+        "healer": "Dispel Flame Shock immediately, delay burst raid-healing right after Transfigure so the fresh Lynx does not pull onto a healer, and heal through totem chain lightning.",
+        "dps": "Focus the boss or troll form, swap to a totem the instant it drops, and help bring one split-form to about twenty percent to merge; in the final phase nuke the boss and ignore totems."
+      },
+      "bossguide": {
+        "boss_num": 4,
+        "raid_short": "ZA",
+        "has_diagram": false,
+        "aliases": [
+          "halazzi",
+          "lynx boss",
+          "lynx",
+          "hala"
+        ],
+        "role_counts": {
+          "tanks": 2,
+          "tank_healers": 2,
+          "raid_healers": 1
+        },
+        "context": "FIGHT: Halazzi - Zul'Aman Lynx boss (10-man)\n\nKEY MECHANICS:\n- Merged form: STACK 2 tanks to share Saber Lash.\n- Splits at 75/50/25% into troll-form Halazzi the Worshipper AND a separate Spirit of the Lynx (off-tank holds it). Bring EITHER to ~20% to MERGE them back at pre-split HP.\n- Flame Shock: DISPEL fast. Corrupted Lightning Totem: KILL on sight (chains lightning).\n- After the 25% split he stays merged and FRENZIED - Bloodlust and burn. Healers: don't burst-heal right after the split (the Lynx can pull onto you).\n\nROLES NEEDED:\n- {skull} Main tank (Saber Lash), {cross} Off-tank (Spirit of the Lynx).\n- Healers: 2 tank, 1 raid (dispel Flame Shock).\n\nASSIGNMENT FORMAT RULES:\n- Use {skull}/{cross} for the stacked main tank and the Lynx off-tank.\n- Name the totem-killer and Flame Shock dispellers."
+      }
+    },
+    {
+      "name": "Hex Lord Malacrass",
+      "slug": "hexlord",
+      "summary": "The fifth boss of Zul'Aman, an Amani witch doctor flanked by two add minions drawn from a larger pool, so the pull is semi-random and the adds must be crowd-controlled and killed first (the priest add, Alyson Antille, heals and dies first). He channels Spirit Bolts that hit the whole raid and ramp up as adds die, while Drain Power steadily buffs him as a soft enrage, and Siphon Soul copies a random player's class abilities. There is no hard berserk, but escalating Spirit Bolts and Drain Power mean the raid must kill him before damage outpaces healing.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Adds",
+          "hp_range": "opening",
+          "description": "Two minions flank him; crowd-control one and kill the other, prioritizing the Alyson Antille priest add, before tunneling the boss."
+        },
+        {
+          "number": 2,
+          "name": "Boss",
+          "hp_range": "after adds",
+          "description": "Heal through Spirit Bolts (which ramp as the adds die), maximize DPS uptime against Drain Power's stacking buff, and react to whatever class Siphon Soul copies."
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Starting minions",
+          "mechanic_type": "add_spawn",
+          "targets": "raid",
+          "description": "Two add NPCs flank him, drawn from a pool of eight (a blood elf priest, ogre, imp, dragonhawk, wraith, undead, elemental and serpent). Crowd-control one and kill the other; the Alyson Antille priest heals the others and dies first. They are not the four animal-god bosses.",
+          "important": true
+        },
+        {
+          "name": "Spirit Bolts",
+          "mechanic_type": "aoe",
+          "targets": "raid",
+          "description": "Channeled raid-wide shadow damage that escalates as the adds die, making it the primary healing pressure. Heal through it with raid cooldowns.",
+          "important": true
+        },
+        {
+          "name": "Drain Power",
+          "mechanic_type": "special",
+          "targets": "raid",
+          "description": "A periodic area drain that lowers players' damage and raises his own, stacking over the fight as a soft enrage. Maximize damage uptime; some groups spread to limit who is hit.",
+          "important": true
+        },
+        {
+          "name": "Siphon Soul",
+          "mechanic_type": "special",
+          "targets": "random",
+          "description": "Copies a random player's class abilities for a time, letting him cast that class's spells (traps, polymorph, heals, fears). React to the rolled class with positioning, interrupts or dispels.",
+          "important": true
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "Identify the two adds, crowd-control one and kill the other (the Alyson Antille priest first), then tunnel the boss. Heal through the ramping Spirit Bolts, keep damage uptime high against Drain Power's stacking buff, and react to whatever class Siphon Soul copies. There is no hard enrage, but a slow kill loses to the escalating damage."
+        }
+      ],
+      "roles": {
+        "tank": "Two tanks: one on Malacrass and one on the active add; position the boss away from add crowd-control and from where a copied hunter's traps would land.",
+        "healer": "Heavy raid healing through Spirit Bolts, plus dispels or interrupts depending on the add and the copied Siphon Soul class.",
+        "dps": "Burst the chosen add, crowd-control the other, then full-focus the boss before Spirit Bolts and Drain Power scale out of control."
+      },
+      "bossguide": {
+        "boss_num": 5,
+        "raid_short": "ZA",
+        "has_diagram": false,
+        "aliases": [
+          "hex lord malacrass",
+          "hexlord malacrass",
+          "hexlord",
+          "malacrass",
+          "hex lord"
+        ],
+        "role_counts": {
+          "tanks": 2,
+          "tank_healers": 2,
+          "raid_healers": 2,
+          "cc": 2
+        },
+        "context": "FIGHT: Hex Lord Malacrass - Zul'Aman Boss 5 (10-man)\n\nKEY MECHANICS:\n- Starts with TWO add minions from an 8-NPC pool (semi-random). CC one, KILL the other; the Alyson Antille PRIEST add heals - kill it first. (These are NOT the four animal-god bosses.)\n- Spirit Bolts: channeled raid-wide shadow damage that RAMPS as adds die - heal through with cooldowns.\n- Drain Power: stacking buff on him / debuff on you = soft enrage. Maximize DPS uptime.\n- Siphon Soul: copies a random player's CLASS abilities - react (interrupt/dispel/anti-trap positioning).\n\nROLES NEEDED:\n- {skull} Boss tank, {cross} Add tank. CC team: 2 (match CC to the adds).\n- Healers: 2 tank, 2 raid.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull}/{cross} for the tanks; assign per-add CC and kill order (priest first).\n- Brief the raid to react to Siphon Soul's copied class."
+      }
+    },
+    {
+      "name": "Zul'jin",
+      "slug": "zuljin",
+      "summary": "The final boss of Zul'Aman, a stationary five-phase fight. He begins as a troll and transforms into a new animal Aspect at fixed health thresholds: Bear, then Eagle, then Lynx, then Dragonhawk, each granting new abilities and dropping the previous set. Threat resets on every transition, so the tank re-establishes aggro each phase except Eagle, which has no threat table. It is one of the most healing-intensive fights in the raid, with the Lynx and Dragonhawk phases the deadliest, and resistance totems and Bloodlust ease the back half.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Troll",
+          "hp_range": "100% to 80%",
+          "description": "Tank-and-spank with Whirlwind (melee move out) and Grievous Throw, a bleed on a random player that only clears when they are healed to full health."
+        },
+        {
+          "number": 2,
+          "name": "Bear",
+          "hp_range": "at 80%",
+          "description": "Creeping Paralysis is a raid-wide timed debuff that stuns when it expires, so dispel it before it ticks off; Overpower hits the tank hard."
+        },
+        {
+          "number": 3,
+          "name": "Eagle",
+          "hp_range": "at 60%",
+          "description": "He has no melee and no threat table. Energy Storm damages anyone who casts a spell, so casters time their casts, and roaming cyclones must be dodged."
+        },
+        {
+          "number": 4,
+          "name": "Lynx",
+          "hp_range": "at 40%",
+          "description": "Claw Rage fixates and stuns a random non-tank with a rapid escalating burst (use an immunity or external saves), and Lynx Rush pounces many random targets with bleeds, making it very healing-heavy."
+        },
+        {
+          "number": 5,
+          "name": "Dragonhawk",
+          "hp_range": "at 20%",
+          "description": "Flame Breath is a frontal fire cone (face him away) and Pillars of Fire erupt under random players (move out). Stacking fire damage makes fire resistance and Bloodlust valuable for the final push."
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Grievous Throw",
+          "mechanic_type": "debuff",
+          "targets": "random",
+          "description": "Troll phase: a bleed on a random player that does not end until they are healed all the way to full health.",
+          "important": true
+        },
+        {
+          "name": "Creeping Paralysis",
+          "mechanic_type": "debuff",
+          "targets": "raid",
+          "description": "Bear phase: a raid-wide timed debuff that paralyzes when it expires. Dispel it before it ticks off (priest, paladin, or rogue Cloak).",
+          "important": true
+        },
+        {
+          "name": "Energy Storm",
+          "mechanic_type": "special",
+          "targets": "raid",
+          "description": "Eagle phase: a raid debuff that damages anyone who casts or uses a spell, so casters time their casts. He has no threat table this phase.",
+          "important": true
+        },
+        {
+          "name": "Cyclones",
+          "mechanic_type": "movement",
+          "targets": "raid",
+          "description": "Eagle phase: roaming tornadoes that deal damage and knock back on contact; dodge them.",
+          "important": false
+        },
+        {
+          "name": "Claw Rage",
+          "mechanic_type": "special",
+          "targets": "random",
+          "description": "Lynx phase: fixates and stuns a random non-tank with a rapid, escalating multi-hit burst. Save the target with an immunity (Blessing of Protection, Ice Block) or external heals and cooldowns.",
+          "important": true
+        },
+        {
+          "name": "Lynx Rush",
+          "mechanic_type": "special",
+          "targets": "raid",
+          "description": "Lynx phase: pounces many random targets for physical damage plus a bleed, a very healing-heavy raid-wide hit.",
+          "important": true
+        },
+        {
+          "name": "Flame Breath and Pillars of Fire",
+          "mechanic_type": "movement",
+          "targets": "raid",
+          "description": "Dragonhawk phase: a frontal fire cone (face him away) and fire pillars erupting under random players (move out). Stacking fire damage closes the fight.",
+          "important": true
+        },
+        {
+          "name": "Threat reset",
+          "mechanic_type": "special",
+          "targets": "tank",
+          "description": "Threat resets on every phase transition (Eagle excepted), so the tank must re-establish aggro at each change.",
+          "important": true
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "Progress through the five forms, re-establishing threat at each transition. Heal Grievous Throw targets to full, dispel Creeping Paralysis before it expires, time casts in the Eagle phase and dodge cyclones, save immunities for Claw Rage and heal through Lynx Rush bleeds, then face Dragonhawk away and dodge fire pillars while Bloodlusting the final burn. Resistance totems for the Bear, Lynx and Dragonhawk phases help."
+        }
+      ],
+      "roles": {
+        "tank": "A single tank is enough: re-taunt and rebuild threat at every transition (the Eagle phase has no threat table) and face Dragonhawk away from the raid.",
+        "healer": "The heaviest load in the raid: top Grievous Throw targets to full, cover Claw Rage spikes and Lynx Rush bleeds, and outheal the Dragonhawk fire.",
+        "dps": "Steady damage; time casts around Energy Storm in the Eagle phase, dodge cyclones and fire pillars, and burn hard with Bloodlust in the closing phases."
+      },
+      "bossguide": {
+        "boss_num": 6,
+        "raid_short": "ZA",
+        "has_diagram": false,
+        "aliases": [
+          "zul'jin",
+          "zuljin",
+          "warlord",
+          "amani"
+        ],
+        "role_counts": {
+          "tanks": 1,
+          "tank_healers": 2,
+          "raid_healers": 2
+        },
+        "context": "FIGHT: Zul'jin - Zul'Aman Final Boss (10-man) - 5 FORMS\n\n- Transforms at HP thresholds: Troll (100-80%) -> Bear (80%) -> Eagle (60%) -> Lynx (40%) -> Dragonhawk (20%). Threat RESETS each transition (re-taunt); Eagle has NO threat table.\nP1 Troll: Grievous Throw bleed clears only when healed to FULL. Whirlwind (melee move out).\nP2 Bear: Creeping Paralysis stuns when it EXPIRES - DISPEL before it ticks off.\nP3 Eagle: no melee/threat; Energy Storm hurts anyone CASTING - time casts; dodge cyclones.\nP4 Lynx: Claw Rage fixate burst on a random non-tank (immunity/externals); Lynx Rush bleeds (heal-heavy).\nP5 Dragonhawk: Flame Breath cone (face away) + Pillars of Fire (move out). Bloodlust.\n\nROLES NEEDED:\n- {skull} Tank (re-taunt each phase). Healers: 2 tank, 2 raid (heaviest fight in ZA).\n\nASSIGNMENT FORMAT RULES:\n- Use {skull} for the tank. Assign Creeping Paralysis dispellers and Claw Rage immunities.\n- Nature resistance for Bear/Lynx, Fire resistance for Dragonhawk; Bloodlust late."
+      }
+    }
+  ]
+}

@@ -373,17 +373,39 @@ def _best_gem_ep_per_socket(weights: dict, hit_weight: float,
 # Item candidate loading
 # ---------------------------------------------------------------------------
 
+_trinket_ep_cache: dict | None = None
+
+
+def _load_trinket_ep() -> dict:
+    """Item-id -> {spec_key: effective_EP} overrides for on-use/proc trinkets the
+    static stat model can't value (e.g. The Lightning Capacitor's crit proc).
+    Loaded from data/trinket_ep.json. Cached. {} on failure."""
+    global _trinket_ep_cache
+    if _trinket_ep_cache is None:
+        path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                            "data", "trinket_ep.json")
+        try:
+            with open(path, encoding="utf-8-sig") as f:
+                _trinket_ep_cache = json.load(f)
+        except (OSError, ValueError) as e:
+            log.warning("trinket_ep overrides unavailable: %s", e)
+            _trinket_ep_cache = {}
+    return _trinket_ep_cache
+
+
 def _load_candidates(
     db: sqlite3.Connection,
     spec_data: dict,
     params: OptimizeParams,
     equipped_ids: set,
+    spec_key: str = "",
 ) -> list[dict]:
     """
     Load all candidate items from the DB filtered for this spec/phase.
     Returns list of dicts with pre-computed EP values (excluding hit).
     """
     weights    = spec_data.get("weights", {})
+    trinket_ep = _load_trinket_ep()
     armor_types = spec_data.get("armor_types", [])
     allowed_weapon_types = set(spec_data.get("weapon_types", []) or [])
     world_boss_ids = _load_world_boss_ids()
@@ -559,6 +581,15 @@ def _load_candidates(
             sockets, socket_bonus, weights, nominal_hit_weight, gem_profile
         )
         base_ep += gem_ep
+
+        # Trinket override: on-use/proc trinkets (Lightning Capacitor, Quagmirran's
+        # Eye, ...) have an effect the static stat model can't see, so their raw EP
+        # badly understates them. When this item has a per-spec override, it REPLACES
+        # the computed EP (the override already bakes in proc/use uptime). Without
+        # this, the optimizer e.g. ranks Eye of Magtheridon over Lightning Capacitor.
+        ov = trinket_ep.get(str(item_id))
+        if ov and spec_key and spec_key in ov:
+            base_ep = float(ov[spec_key])
 
         if base_ep < EP_FLOOR:
             continue
@@ -1012,7 +1043,7 @@ def solve_bis(
     if snapshot:
         equipped_ids = {g.get("item_id", 0) for g in getattr(snapshot, "gear", [])}
 
-    candidates = _load_candidates(db, spec_data, params, equipped_ids)
+    candidates = _load_candidates(db, spec_data, params, equipped_ids, spec_key=spec)
     if not candidates:
         return OptimalSet(
             character=character, spec=spec,

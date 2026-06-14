@@ -349,16 +349,48 @@ def compute_active_set_bonuses(snapshot, set_bonuses: dict) -> list[ActiveSetBon
 # ---------------------------------------------------------------------------
 # Item EP computation (with hit cap correction)
 # ---------------------------------------------------------------------------
-def compute_item_ep(stats: dict, spec_data: dict, hit_status: HitCapStatus) -> float:
+def compute_item_ep(stats: dict, spec_data: dict, hit_status: HitCapStatus,
+                    item_id: int | None = None, spec_key: str = "") -> float:
     """
     Compute EP for an item's stats, applying the correct hit weight.
 
     Uses hit_status.effective_weight instead of the spec file weight when
     the character is at or over the hit cap — hit past cap is worth nothing.
+
+    For on-use/proc trinkets the static stat model can't value (Lightning
+    Capacitor, Quagmirran's Eye, ...), an effective-EP override from
+    data/trinket_ep.json REPLACES the computed value when (item_id, spec_key)
+    match. spec_key defaults to spec_data['spec'] when not passed explicitly.
     """
     weights = dict(spec_data.get("weights", {}))
-    weights["SpellHit"] = hit_status.effective_weight
-    return sum(stats.get(k, 0) * v for k, v in weights.items())
+    weights["SpellHit"] = hit_status.effective_weight if hit_status else weights.get("SpellHit", 0.0)
+    ep = sum(stats.get(k, 0) * v for k, v in weights.items())
+
+    if item_id is not None:
+        key = spec_key or spec_data.get("spec_key") or ""
+        ov = _load_trinket_ep().get(str(item_id))
+        if ov and key and key in ov:
+            return float(ov[key])
+    return ep
+
+
+_trinket_ep_cache: dict | None = None
+
+
+def _load_trinket_ep() -> dict:
+    """Item-id -> {spec_key: effective_EP} overrides for proc/use trinkets.
+    Shared with the optimizer; loaded from data/trinket_ep.json. {} on failure."""
+    global _trinket_ep_cache
+    if _trinket_ep_cache is None:
+        import json as _json
+        path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                            "data", "trinket_ep.json")
+        try:
+            with open(path, encoding="utf-8-sig") as f:
+                _trinket_ep_cache = _json.load(f)
+        except (OSError, ValueError):
+            _trinket_ep_cache = {}
+    return _trinket_ep_cache
 
 
 # ---------------------------------------------------------------------------
@@ -398,7 +430,8 @@ def build_context(snapshot, spec: str) -> GearContext:
     # Gear summary with EP values using corrected hit weight
     gear_summary = []
     for item in snapshot.gear:
-        ep = compute_item_ep(item.get("stats", {}), spec_data, hit_status)
+        ep = compute_item_ep(item.get("stats", {}), spec_data, hit_status,
+                             item_id=item.get("item_id"), spec_key=spec)
         gear_summary.append({
             "slot":     item["slot"],
             "name":     item["name"],

@@ -63,15 +63,20 @@ def _upgrade_marker(pct_off: float, cur_phase: int | None, current_phase: int) -
     if pct_off <= 0.05:
         return "↔️"                                  # sidegrade to BiS
     prior_phase = bool(cur_phase and current_phase and cur_phase < current_phase)
-    if prior_phase and pct_off <= 0.25:
-        return "🥈"                                  # former-tier, within 25%
+    if prior_phase:
+        # A prior-TIER raid item was legitimately good gear, so it never reads as
+        # 💩 ("replace this junk") no matter how big the current-tier upgrade is.
+        # 🥈 if it's still close to BiS; otherwise ❄️ "a real upgrade is waiting"
+        # (e.g. Nathrezim Mindblade, a P1 near-BiS 1H, vs a P2 2H - a real upgrade
+        # but the Mindblade isn't junk). 💩 stays reserved for pre-raid/world gear.
+        return "🥈" if pct_off <= 0.25 else "❄️"
     if pct_off <= 0.10:
         return "🔥"                                  # current piece, near BiS
     if pct_off <= 0.25:
         return "↔️"                                  # modest current-tier upgrade
     if pct_off <= 0.50:
         return "❄️"                                  # 25–50% off
-    return "💩"                                       # 50%+ off
+    return "💩"                                       # 50%+ off (no phase / pre-raid)
 
 
 # ---------------------------------------------------------------------------

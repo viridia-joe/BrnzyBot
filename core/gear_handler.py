@@ -37,6 +37,28 @@ _MARKER_LEGEND = ("_🥇 former-tier BiS (still best) · 🔥 current-tier BiS �
                   "❄️ 25–50% off BiS · 💩 50%+ off BiS_")
 
 
+def _beast_lord_caveat(spec: str, context, snapshot) -> str | None:
+    """BM-specific note on the Beast Lord 4pc, which is prized enough to keep
+    through Phase 2 (the Kill Command 600-armor-ignore is ~100% uptime) and should
+    only be broken for the FULL Tier 5 (Rift Stalker) 4pc, never individual raid
+    pieces. Surfaces when they have the 4pc, and warns when they've broken it."""
+    if (spec or "").lower() != "bm_hunter":
+        return None
+    bl_worn = sum(1 for g in (getattr(snapshot, "gear", []) or [])
+                  if "beast lord" in (g.get("set_name") or "").lower())
+    if bl_worn >= 4:
+        return ("_🐾 **Beast Lord 4pc:** keep this — the Kill Command armor-ignore is "
+                "near-100% uptime for BM and stays competitive through Phase 2. Don't "
+                "break it for a single raid piece; only swap once you can equip the "
+                "**full Tier 5 (Rift Stalker) 4pc** at once._")
+    if 1 <= bl_worn <= 3:
+        return ("_🐾 **Beast Lord:** you're wearing the set but no longer have the 4pc "
+                "bonus. For BM the Beast Lord 4pc (Kill Command armor-ignore) is usually "
+                "worth re-completing and keeping until you have the full Tier 5 4pc — "
+                "breaking it for individual raid pieces is typically a DPS loss._")
+    return None
+
+
 def _bis_marker(item_phase: int | None, current_phase: int) -> str:
     """
     Marker for a slot where the equipped item IS best-in-slot (no upgrade found):
@@ -451,6 +473,10 @@ def handle_gear_list(
         parts = [f"{sb.set_name} {sb.pieces_worn}pc (+{sb.ep_value:.0f} EP)"
                  for sb in context.active_set_bonuses]
         lines.append("Sets: " + ", ".join(parts))
+
+    bl_note = _beast_lord_caveat(spec, context, snapshot)
+    if bl_note:
+        lines.append(bl_note)
 
     if snapshot.from_cache:
         lines.append("_⚠ Gear from cache — WCL was unavailable_")

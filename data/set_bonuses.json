@@ -3,12 +3,12 @@
 
   "Beast Lord Armor": {
     "2": {"ep": 5, "desc": "Reduces trap cooldown by 4 sec (minor PvE value)", "stats": {}},
-    "4": {"ep": 45, "desc": "Kill Command makes your attacks ignore 600 armor for 15 sec. Keep 4pc until you have 4pc T5.", "stats": {}},
+    "4": {"ep": 62, "desc": "Kill Command makes your attacks ignore 600 armor for 15 sec (near-100% uptime on BM). Prized enough to keep through Phase 2 - only break it for the FULL 4pc Tier 5 (Rift Stalker), never for individual raid pieces.", "stats": {}},
     "spec_overrides": {
-      "survival_hunter": {"4": 25},
-      "mm_hunter": {"4": 20}
+      "survival_hunter": {"4": 30},
+      "mm_hunter": {"4": 25}
     },
-    "_source": "Wowhead/community: BM hunters keep 4pc through Phase 2. Only break for 4pc Rift Stalker (T5). ~80-100 AP equiv sustained = ~45 EP for BM. Lower for SV/MM since Kill Command is less central."
+    "_source": "Wowhead + TBC hunter theorycraft consensus (verified 2026-06): BM hunters keep Beast Lord 4pc through Phase 2 and only break it for the full 4pc Rift Stalker (T5), NOT until T6 (a common overstatement). The 600 armor-ignore on ~100% Kill Command uptime is worth more than the ~45 EP a flat AP-equivalence implies because armor pen scales all physical damage; bumped to 62 so the optimizer keeps it over individual ~55 EP raid pieces while the full T5 4pc bundle still wins. Lower for SV/MM (Kill Command less central)."
   },
 
   "Mana-Etched Regalia": {

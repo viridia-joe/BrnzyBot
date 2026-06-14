@@ -196,7 +196,7 @@
           "important": false
         },
         {
-          "name": "Malevolent Cleave",
+          "name": "Cleave",
           "mechanic_type": "cleave",
           "targets": "tank",
           "description": "A frontal cleave whose damage is split among those in front. Keep the boss faced away and nobody but the tank in front.",
@@ -229,7 +229,7 @@
           "tank_healers": 2,
           "raid_healers": 3
         },
-        "context": "FIGHT: Kaz'rogal - Battle for Mount Hyjal Boss 3 (Horde/Thrall base)\n\nKEY MECHANICS:\n- Tank faced AWAY (Malevolent Cleave). One-tank fight.\n- Mark of Kaz'rogal: drains mana from several mana users; at 0 mana the player EXPLODES for shadow AoE. SPREAD so a pop only hits the bomber. Keep mana HIGH (potions/runes/downrank) or be mana-less (druid Cat). It does NOT chain. The Mark recasts faster over time - a soft enrage, so race him.\n- War Stomp (AoE stun), Cripple (melee slow, needs Freedom).\n\nROLES NEEDED:\n- {skull} Tank (faces away).\n- Healers: 2 tank, 3 raid - all watch their own mana.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull} for the tank.\n- Remind mana users: stay topped, spread, pop away from the raid. Do NOT pre-drain to 0."
+        "context": "FIGHT: Kaz'rogal - Battle for Mount Hyjal Boss 3 (Horde/Thrall base)\n\nKEY MECHANICS:\n- Tank faced AWAY (Cleave). One-tank fight.\n- Mark of Kaz'rogal: drains mana from several mana users; at 0 mana the player EXPLODES for shadow AoE. SPREAD so a pop only hits the bomber. Keep mana HIGH (potions/runes/downrank) or be mana-less (druid Cat). It does NOT chain. The Mark recasts faster over time - a soft enrage, so race him.\n- War Stomp (AoE stun), Cripple (melee slow, needs Freedom).\n\nROLES NEEDED:\n- {skull} Tank (faces away).\n- Healers: 2 tank, 3 raid - all watch their own mana.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull} for the tank.\n- Remind mana users: stay topped, spread, pop away from the raid. Do NOT pre-drain to 0."
       }
     },
     {

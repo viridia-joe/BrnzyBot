@@ -16,7 +16,7 @@
     {
       "name": "High Warlord Naj'entus",
       "slug": "najentus",
-      "summary": "The first boss of Black Temple, a single-target healing and gear check with no adds and no movement phases beyond spreading. The boss tank-and-spanks while the raid soaks frequent raid-wide Needle Spine damage and frees impaled players. The signature mechanic is Tidal Shield: he periodically becomes immune and self-heals, and the raid must throw looted Naj'entus Spines at him to pop it, which detonates a large frost burst on the whole raid, so healers must top everyone before the shield is broken.",
+      "summary": "The first boss of Black Temple, a single-target healing and gear check with no adds and no movement phases beyond spreading. The boss tank-and-spanks while the raid soaks frequent Needle Spine damage (3 random targets plus splash) and frees impaled players. The signature mechanic is Tidal Shield: he periodically becomes immune and self-heals, and the raid must throw looted Naj'entus Spines at him to pop it, which detonates a large frost burst on the whole raid, so healers must top everyone before the shield is broken.",
       "phases": [
         {
           "number": 1,
@@ -50,8 +50,8 @@
         {
           "name": "Needle Spine",
           "mechanic_type": "aoe",
-          "targets": "raid",
-          "description": "Frequent raid-wide damage plus frost splash to anyone nearby, so the raid stays spread.",
+          "targets": "3 random",
+          "description": "Hits 3 random targets for heavy frost damage plus a frost splash to anyone nearby, so the raid stays spread.",
           "important": false
         },
         {
@@ -70,7 +70,7 @@
       ],
       "roles": {
         "tank": "One tank on the boss; no off-tank required.",
-        "healer": "The hardest job: sustain constant Needle Spine raid damage and top the entire raid to full immediately before each shield break to survive the Tidal Burst. Frost resistance eases it.",
+        "healer": "The hardest job: sustain constant Needle Spine damage (3 targets plus splash) and top the entire raid to full immediately before each shield break to survive the Tidal Burst. Frost resistance eases it.",
         "dps": "Burn the boss, free impaled players fast, and throw spines to break Tidal Shield only on the healers' call. Stay spread to avoid Needle Spine splash."
       },
       "bossguide": {
@@ -277,7 +277,7 @@
           "name": "Vengeful Spirit",
           "mechanic_type": "special",
           "targets": "random",
-          "description": "The marked player becomes a ghost with a special action bar (Spirit Lance, Spirit Volley, Spirit Chains, Spirit Shield) and is the only thing that can kill the Shadowy Constructs. Clear all four in time and the player is resurrected at their corpse.",
+          "description": "The marked player becomes a ghost with a special action bar (Spirit Lance, Spirit Volley, Spirit Chains, Spirit Strike) and is the only thing that can kill the Shadowy Constructs. Clear all four in time and the player is resurrected at their corpse.",
           "important": true
         },
         {
@@ -537,7 +537,7 @@
           "number": 1,
           "name": "Single phase",
           "hp_range": "100% to 0%",
-          "description": "Stack the tanks to split Saber Lash, spread the raid, run apart on Fatal Attraction, exploit favorable Prismatic Shield windows, and burn her before the enrage."
+          "description": "Stack the tanks to split Saber Lash, spread the raid, run apart on Fatal Attraction, exploit favorable Prismatic Aura windows, and burn her before the enrage."
         }
       ],
       "abilities": [
@@ -556,7 +556,7 @@
           "important": true
         },
         {
-          "name": "Prismatic Shield",
+          "name": "Prismatic Aura",
           "mechanic_type": "special",
           "targets": "raid",
           "description": "She cycles a random resistance aura on a timer that reduces one school of damage and increases another. Caster DPS pop cooldowns during a favorable window.",
@@ -580,13 +580,13 @@
       "strategies": [
         {
           "name": "Standard",
-          "summary": "Stack two or three tanks tightly in front to split Saber Lash and spread the rest of the raid. When Fatal Attraction teleports players together they immediately run apart to opposite corners without crossing the raid or the tanks. Run shadow resistance for most raiders in original tuning, exploit favorable Prismatic Shield windows, and Bloodlust early to beat the enrage."
+          "summary": "Stack two or three tanks tightly in front to split Saber Lash and spread the rest of the raid. When Fatal Attraction teleports players together they immediately run apart to opposite corners without crossing the raid or the tanks. Run shadow resistance for most raiders in original tuning, exploit favorable Prismatic Aura windows, and Bloodlust early to beat the enrage."
         }
       ],
       "roles": {
         "tank": "Two or three tanks stack tightly in front to split Saber Lash. Tanks generally do not need shadow resistance (Saber Lash grants Fatal Attraction immunity).",
         "healer": "The heaviest job: sustained raid-wide shadow damage plus spikes on Fatal Attraction targets, while Silencing Shriek can interrupt heals. Pre-position and stagger.",
-        "dps": "Pure burn. Spread to limit Fatal Attraction collateral, run apart instantly if targeted, exploit favorable Prismatic Shield windows, and beat the enrage."
+        "dps": "Pure burn. Spread to limit Fatal Attraction collateral, run apart instantly if targeted, exploit favorable Prismatic Aura windows, and beat the enrage."
       },
       "bossguide": {
         "boss_num": 7,
@@ -602,7 +602,7 @@
           "tank_healers": 4,
           "raid_healers": 3
         },
-        "context": "FIGHT: Mother Shahraz - Black Temple Boss 7\n\nKEY MECHANICS:\n- No adds/phases. The classic SHADOW RESISTANCE fight; constant raid shadow damage.\n- Saber Lash: heavy frontal SPLIT among players stacked in front - STACK 2-3 tanks tightly. A lone tank dies. (Saber Lash targets are immune to Fatal Attraction.)\n- Fatal Attraction: teleports several players together; they take escalating shadow damage while near each other - RUN APART to opposite corners, NOT through the raid/tanks. #1 wipe cause.\n- Prismatic Shield (rotating resistance), Silencing Shriek (silence). Hard enrage.\n\nROLES NEEDED:\n- {skull}/{cross}/{triangle} Tanks STACKED for Saber Lash.\n- Healers: 4 tank/raid, 3 raid (constant shadow damage). Raiders gear shadow resistance.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull}/{cross}/{triangle} for the stacked tanks.\n- Remind: shadow resistance, run apart on Fatal Attraction, Bloodlust early."
+        "context": "FIGHT: Mother Shahraz - Black Temple Boss 7\n\nKEY MECHANICS:\n- No adds/phases. The classic SHADOW RESISTANCE fight; constant raid shadow damage.\n- Saber Lash: heavy frontal SPLIT among players stacked in front - STACK 2-3 tanks tightly. A lone tank dies. (Saber Lash targets are immune to Fatal Attraction.)\n- Fatal Attraction: teleports several players together; they take escalating shadow damage while near each other - RUN APART to opposite corners, NOT through the raid/tanks. #1 wipe cause.\n- Prismatic Aura (rotating resistance), Silencing Shriek (silence). Hard enrage.\n\nROLES NEEDED:\n- {skull}/{cross}/{triangle} Tanks STACKED for Saber Lash.\n- Healers: 4 tank/raid, 3 raid (constant shadow damage). Raiders gear shadow resistance.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull}/{cross}/{triangle} for the stacked tanks.\n- Remind: shadow resistance, run apart on Fatal Attraction, Bloodlust early."
       }
     },
     {

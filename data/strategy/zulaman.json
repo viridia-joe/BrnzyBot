@@ -362,13 +362,13 @@
     {
       "name": "Hex Lord Malacrass",
       "slug": "hexlord",
-      "summary": "The fifth boss of Zul'Aman, an Amani witch doctor flanked by two add minions drawn from a larger pool, so the pull is semi-random and the adds must be crowd-controlled and killed first (the priest add, Alyson Antille, heals and dies first). He channels Spirit Bolts that hit the whole raid and ramp up as adds die, while Drain Power steadily buffs him as a soft enrage, and Siphon Soul copies a random player's class abilities. There is no hard berserk, but escalating Spirit Bolts and Drain Power mean the raid must kill him before damage outpaces healing.",
+      "summary": "The fifth boss of Zul'Aman, an Amani witch doctor flanked by FOUR add minions (much like Moroes in Karazhan), one randomly drawn from each of four crowd-control pairs, so the pull is semi-random and every add needs assigned CC and a kill order. He channels Spirit Bolts that hit the whole raid and ramp up as adds die, while Drain Power steadily buffs him as a soft enrage, and Siphon Soul copies a random player's class abilities. There is no hard berserk, but escalating Spirit Bolts and Drain Power mean the raid must kill him before damage outpaces healing.",
       "phases": [
         {
           "number": 1,
           "name": "Adds",
           "hp_range": "opening",
-          "description": "Two minions flank him; crowd-control one and kill the other, prioritizing the Alyson Antille priest add, before tunneling the boss."
+          "description": "Four minions flank him, one from each CC pair. Assign CC to each and pick a kill order; if the Alyson Antille healer add is up (she is one of two humanoid options), kill her first. Clear or control them before tunneling the boss."
         },
         {
           "number": 2,
@@ -382,7 +382,7 @@
           "name": "Starting minions",
           "mechanic_type": "add_spawn",
           "targets": "raid",
-          "description": "Two add NPCs flank him, drawn from a pool of eight (a blood elf priest, ogre, imp, dragonhawk, wraith, undead, elemental and serpent). Crowd-control one and kill the other; the Alyson Antille priest heals the others and dies first. They are not the four animal-god bosses.",
+          "description": "FOUR add NPCs flank him (Moroes-style), one rolled from each of four CC pairs: Sap/Polymorph (Alyson Antille or Thurg), Hibernate (Lord Raadan or Slither), Banish (Gazakroth or Fenstalker), and Shackle (Darkheart or Koragg). Assign CC per pair and a kill order; if Alyson Antille (the healer) is up, kill her first. These are not the four animal-god bosses.",
           "important": true
         },
         {
@@ -410,13 +410,13 @@
       "strategies": [
         {
           "name": "Standard",
-          "summary": "Identify the two adds, crowd-control one and kill the other (the Alyson Antille priest first), then tunnel the boss. Heal through the ramping Spirit Bolts, keep damage uptime high against Drain Power's stacking buff, and react to whatever class Siphon Soul copies. There is no hard enrage, but a slow kill loses to the escalating damage."
+          "summary": "Identify the four adds, assign CC per pair (Sap/Poly, Hibernate, Banish, Shackle) and a kill order (Alyson Antille first if up), then tunnel the boss. Heal through the ramping Spirit Bolts, keep damage uptime high against Drain Power's stacking buff, and react to whatever class Siphon Soul copies. There is no hard enrage, but a slow kill loses to the escalating damage."
         }
       ],
       "roles": {
-        "tank": "Two tanks: one on Malacrass and one on the active add; position the boss away from add crowd-control and from where a copied hunter's traps would land.",
-        "healer": "Heavy raid healing through Spirit Bolts, plus dispels or interrupts depending on the add and the copied Siphon Soul class.",
-        "dps": "Burst the chosen add, crowd-control the other, then full-focus the boss before Spirit Bolts and Drain Power scale out of control."
+        "tank": "Tank Malacrass and any non-CC'd adds; position the boss away from the CC'd adds and from where a copied hunter's traps would land.",
+        "healer": "Heavy raid healing through Spirit Bolts, plus dispels or interrupts depending on the live adds and the copied Siphon Soul class.",
+        "dps": "Hold CC on three adds, burst the kill-target add (Alyson Antille first if up), then full-focus the boss before Spirit Bolts and Drain Power scale out of control."
       },
       "bossguide": {
         "boss_num": 5,
@@ -433,9 +433,9 @@
           "tanks": 2,
           "tank_healers": 2,
           "raid_healers": 2,
-          "cc": 2
+          "cc": 3
         },
-        "context": "FIGHT: Hex Lord Malacrass - Zul'Aman Boss 5 (10-man)\n\nKEY MECHANICS:\n- Starts with TWO add minions from an 8-NPC pool (semi-random). CC one, KILL the other; the Alyson Antille PRIEST add heals - kill it first. (These are NOT the four animal-god bosses.)\n- Spirit Bolts: channeled raid-wide shadow damage that RAMPS as adds die - heal through with cooldowns.\n- Drain Power: stacking buff on him / debuff on you = soft enrage. Maximize DPS uptime.\n- Siphon Soul: copies a random player's CLASS abilities - react (interrupt/dispel/anti-trap positioning).\n\nROLES NEEDED:\n- {skull} Boss tank, {cross} Add tank. CC team: 2 (match CC to the adds).\n- Healers: 2 tank, 2 raid.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull}/{cross} for the tanks; assign per-add CC and kill order (priest first).\n- Brief the raid to react to Siphon Soul's copied class."
+        "context": "FIGHT: Hex Lord Malacrass - Zul'Aman Boss 5 (10-man)\n\nKEY MECHANICS:\n- Starts with FOUR add minions (Moroes-style), one rolled from each CC pair: Sap/Poly (Alyson Antille or Thurg), Hibernate (Lord Raadan or Slither), Banish (Gazakroth or Fenstalker), Shackle (Darkheart or Koragg). CC three, KILL one; if the Alyson Antille HEALER is up, kill her first. (These are NOT the four animal-god bosses.)\n- Spirit Bolts: channeled raid-wide shadow damage that RAMPS as adds die - heal through with cooldowns.\n- Drain Power: stacking buff on him / debuff on you = soft enrage. Maximize DPS uptime.\n- Siphon Soul: copies a random player's CLASS abilities - react (interrupt/dispel/anti-trap positioning).\n\nROLES NEEDED:\n- {skull} Boss tank, {cross} Add tank. CC team: 3 (one per remaining add, matched to its pair).\n- Healers: 2 tank, 2 raid.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull}/{cross} for the tanks; assign per-add CC and a kill order (Alyson Antille first if up).\n- Brief the raid to react to Siphon Soul's copied class."
       }
     },
     {

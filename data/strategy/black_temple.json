@@ -1,0 +1,805 @@
+{
+  "_meta": {
+    "zone": "Black Temple",
+    "zone_slug": "black_temple",
+    "phase": 3,
+    "content_phase": 3,
+    "strat_index": true,
+    "updated": "2026-06-14",
+    "sources": [
+      "icy-veins.com/tbc-classic",
+      "warcraft.wiki.gg",
+      "wowhead.com/tbc"
+    ]
+  },
+  "bosses": [
+    {
+      "name": "High Warlord Naj'entus",
+      "slug": "najentus",
+      "summary": "The first boss of Black Temple, a single-target healing and gear check with no adds and no movement phases beyond spreading. The boss tank-and-spanks while the raid soaks frequent raid-wide Needle Spine damage and frees impaled players. The signature mechanic is Tidal Shield: he periodically becomes immune and self-heals, and the raid must throw looted Naj'entus Spines at him to pop it, which detonates a large frost burst on the whole raid, so healers must top everyone before the shield is broken.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Single phase",
+          "hp_range": "100% to 0%",
+          "description": "Tank the boss, spread the raid, free impaled players for spines, and break Tidal Shield only when the raid is topped, all before the enrage."
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Impaling Spine",
+          "mechanic_type": "debuff",
+          "targets": "random",
+          "description": "Impales and stuns a random player with a heavy hit and a stacking damage-over-time. Other players free them by clicking the spine, which removes the debuff and yields a Naj'entus Spine item used to break the shield.",
+          "important": true
+        },
+        {
+          "name": "Tidal Shield",
+          "mechanic_type": "special",
+          "targets": "raid",
+          "description": "Periodically the boss becomes immune to all damage and self-heals. It is broken only by a player throwing a looted Naj'entus Spine at him.",
+          "important": true
+        },
+        {
+          "name": "Tidal Burst",
+          "mechanic_type": "aoe",
+          "targets": "raid",
+          "description": "When the shield is popped it deals large frost damage to the entire raid (the shield-break burst; sometimes mislabeled 'Crashing Wave'). Healers must top the raid to full before the spine is thrown.",
+          "important": true
+        },
+        {
+          "name": "Needle Spine",
+          "mechanic_type": "aoe",
+          "targets": "raid",
+          "description": "Frequent raid-wide damage plus frost splash to anyone nearby, so the raid stays spread.",
+          "important": false
+        },
+        {
+          "name": "Enrage",
+          "mechanic_type": "enrage",
+          "targets": "raid",
+          "description": "Hard enrage; treat the fight as a steady healing and DPS check.",
+          "important": false
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "Tank the boss and spread the raid. Free impaled players promptly to collect spines, and have a caller break Tidal Shield with a thrown spine only once healers confirm the raid is topped (the burst hits everyone). Keep ranged spread for Needle Spine and beat the enrage."
+        }
+      ],
+      "roles": {
+        "tank": "One tank on the boss; no off-tank required.",
+        "healer": "The hardest job: sustain constant Needle Spine raid damage and top the entire raid to full immediately before each shield break to survive the Tidal Burst. Frost resistance eases it.",
+        "dps": "Burn the boss, free impaled players fast, and throw spines to break Tidal Shield only on the healers' call. Stay spread to avoid Needle Spine splash."
+      },
+      "bossguide": {
+        "boss_num": 1,
+        "raid_short": "BT",
+        "has_diagram": false,
+        "aliases": [
+          "naj'entus",
+          "najentus",
+          "high warlord naj'entus",
+          "naj",
+          "warlord"
+        ],
+        "role_counts": {
+          "tanks": 1,
+          "tank_healers": 2,
+          "raid_healers": 4
+        },
+        "context": "FIGHT: High Warlord Naj'entus - Black Temple Boss 1\n\nKEY MECHANICS:\n- One tank, no adds. A healing/gear check. Raid SPREADS for Needle Spine (frost splash).\n- Impaling Spine: impales/stuns a random player - others CLICK the spine to free them, which yields a Naj'entus Spine item.\n- Tidal Shield: boss goes immune and self-heals - THROW looted spines at him to break it. Breaking it bursts FROST on the WHOLE raid, so a caller breaks it only when healers confirm the raid is TOPPED.\n- Hard enrage.\n\nROLES NEEDED:\n- {skull} Tank.\n- Healers: 2 tank, 4 raid (top the raid before each shield break). Frost resistance helps.\n- Spine throwers/clickers and a shield-break caller.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull} for the tank. Name the spine-break caller.\n- Remind raid: spread, free impaled players, only break the shield when topped."
+      }
+    },
+    {
+      "name": "Supremus",
+      "slug": "supremus",
+      "summary": "The second boss of Black Temple, a large fire construct that alternates two phases on a timer for the whole fight. In Phase 1 he is stationary and tankable: a soak tank eats Hateful Strike (which hits the highest-current-health player in melee) while the raid dodges molten fire trails. In Phase 2 he becomes untankable, drops aggro, and fixates a random player, slowly chasing them while volcanic geysers erupt under the raid, so everyone kites and spreads until the phase flips back. Movement-heavy but mechanically simple.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Tank phase",
+          "hp_range": "about 60 seconds",
+          "description": "Stationary and tankable. Main tank holds threat, a soak tank eats Hateful Strike, and the raid dodges molten fire trails."
+        },
+        {
+          "number": 2,
+          "name": "Fixate-kite phase",
+          "hp_range": "about 60 seconds",
+          "description": "Untankable. He drops aggro and fixates a random player, chasing them slowly. The raid kites him in a circle and dodges volcanic geysers until the phase flips back. Phases alternate until he dies."
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Hateful Strike",
+          "mechanic_type": "tank_swap",
+          "targets": "tank",
+          "description": "Phase 1 melee strike that hits the highest-current-health player in melee range, not the threat target. A soak tank with a large health pool stands in melee to take it; keep the main tank the highest-HP melee.",
+          "important": true
+        },
+        {
+          "name": "Molten Flame",
+          "mechanic_type": "movement",
+          "targets": "raid",
+          "description": "Phase 1: lines of fel fire erupt and travel along the ground toward random targets, dealing fire damage per second. Move out of the trails; spread so each trail only forces one player to move.",
+          "important": true
+        },
+        {
+          "name": "Fixate",
+          "mechanic_type": "movement",
+          "targets": "random",
+          "description": "Phase 2: he drops his threat table and fixates a random player, slowly chasing them. The raid kites him in a circle; the fixated player stays ahead of him.",
+          "important": true
+        },
+        {
+          "name": "Volcanic Geyser",
+          "mechanic_type": "movement",
+          "targets": "random",
+          "description": "Phase 2 (and sometimes earlier): volcanoes burst under random players for heavy fire damage. Move out immediately and stay spread.",
+          "important": true
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "Phase 1: a soak tank with the highest health eats Hateful Strike while the main tank holds threat and the raid dodges molten fire trails. Phase 2: kite the fixated boss in a circle around the courtyard and spread from volcanic geysers. The two phases alternate roughly every minute until he dies; there is no tight enrage."
+        }
+      ],
+      "roles": {
+        "tank": "Two tanks: a main tank for threat and a soak tank (high health pool) for Hateful Strike. Both go idle in Phase 2, when no one tanks him.",
+        "healer": "Keep both tanks topped in Phase 1 (Hateful Strikes are large); in Phase 2 use instant, on-the-move heals for the kiter and anyone caught by a geyser.",
+        "dps": "Burn in Phase 1 while dodging fire trails. In Phase 2 keep ranged damage up while moving, spread from volcanoes, and the fixated player kites."
+      },
+      "bossguide": {
+        "boss_num": 2,
+        "raid_short": "BT",
+        "has_diagram": false,
+        "aliases": [
+          "supremus",
+          "sup",
+          "gatekeeper"
+        ],
+        "role_counts": {
+          "tanks": 2,
+          "tank_healers": 3,
+          "raid_healers": 3
+        },
+        "context": "FIGHT: Supremus - Black Temple Boss 2\n\nKEY MECHANICS:\n- Two phases ALTERNATE on a timer (about 60s each) the whole fight - Phase 2 is NOT the end.\nP1 (tankable): Hateful Strike hits the HIGHEST-CURRENT-HEALTH melee player - a soak tank stands in melee; keep the MT highest HP. Molten Flame trails erupt across the ground - move out, spread.\nP2 (untankable): he drops aggro and FIXATES a random player, chasing slowly - the raid KITES him in a circle. Volcanic geysers burst under players - move out.\n\nROLES NEEDED:\n- {skull} Main tank, {cross} Soak tank (Hateful Strike). Both idle in P2.\n- Healers: 3 tank, 3 raid (instant/mobile heals in P2).\n\nASSIGNMENT FORMAT RULES:\n- Use {skull}/{cross} for the tanks. Define a circular kite path.\n- Remind everyone: anyone can be fixated in P2; spread from geysers, dodge fire trails."
+      }
+    },
+    {
+      "name": "Shade of Akama",
+      "slug": "shadeofakama",
+      "summary": "The third boss of Black Temple and widely the easiest, an add-control fight rather than a tank-and-spank. The friendly NPC Akama channels against the Shade at the back of the room while the raid kills waves of Ashtongue adds. Ashtongue Channelers (and replacement Sorcerers) shackle the Shade in place; killing them all frees it, and the Shade then advances on Akama. Once it reaches him, the raid burns the now-tankable Shade down quickly before it kills Akama, who must survive.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Add control",
+          "hp_range": "Shade shackled",
+          "description": "Akama channels; the raid kills the Channelers and their Sorcerer replacements to free the Shade while an add tank holds the Defenders and players control the support adds."
+        },
+        {
+          "number": 2,
+          "name": "Shade burn",
+          "hp_range": "Shade freed",
+          "description": "The freed Shade advances on Akama and becomes tankable. The raid bursts it down within its short window before it kills Akama."
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Ashtongue Channelers",
+          "mechanic_type": "add_spawn",
+          "targets": "raid",
+          "description": "Six channelers shackle the Shade, slowing it to a stop. They are the top kill priority; killing all of them frees the Shade.",
+          "important": true
+        },
+        {
+          "name": "Ashtongue Sorcerers",
+          "mechanic_type": "add_spawn",
+          "targets": "raid",
+          "description": "Spawn periodically and rush in to replace dead Channelers, re-shackling the Shade. They must also all be killed to fully free it.",
+          "important": true
+        },
+        {
+          "name": "Ashtongue Defenders",
+          "mechanic_type": "add_spawn",
+          "targets": "raid",
+          "description": "Hard-hitting melee adds picked up and held by a central add tank, away from Akama; they apply a melee-damage-reducing debuff.",
+          "important": false
+        },
+        {
+          "name": "Ashtongue Spiritbinders",
+          "mechanic_type": "add_spawn",
+          "targets": "raid",
+          "description": "Healer adds that must be killed, interrupted or dispelled fast or they heal the other adds. Crowd-controllable.",
+          "important": true
+        },
+        {
+          "name": "Ashtongue Rogues and Elementalists",
+          "mechanic_type": "add_spawn",
+          "targets": "raid",
+          "description": "Support adds: rogues apply a slowing poison, elementalists drop Rain of Fire. Both are crowd-controllable.",
+          "important": false
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "Talk to Akama to start. An add tank holds the center and grabs Defenders while DPS kill the Channelers and their Sorcerer replacements to free the Shade; assigned players interrupt or CC the Spiritbinders and support adds. When the Shade reaches Akama it becomes tankable, so the Shade tank snaps it up and the raid bursts it down before Akama dies."
+        }
+      ],
+      "roles": {
+        "tank": "A dedicated add tank (often a druid) holds the center and taunts every Defender off Akama; a separate tank grabs the Shade in Phase 2 the instant it reaches Akama.",
+        "healer": "Keep the central add tank alive and Akama topped through the channel and Phase 2; dispel Spiritbinder heals where possible.",
+        "dps": "Kill the Channelers, then incoming Sorcerers, to free the Shade, while assigned players crowd-control or kill the Spiritbinders, Rogues and Elementalists. In Phase 2 blow cooldowns to burst the Shade before Akama dies."
+      },
+      "bossguide": {
+        "boss_num": 3,
+        "raid_short": "BT",
+        "has_diagram": false,
+        "aliases": [
+          "shade of akama",
+          "akama",
+          "shade",
+          "soa"
+        ],
+        "role_counts": {
+          "tanks": 2,
+          "tank_healers": 3,
+          "raid_healers": 2,
+          "cc": 3
+        },
+        "context": "FIGHT: Shade of Akama - Black Temple Boss 3 (add control)\n\nKEY MECHANICS:\n- Akama channels at the back. The raid kills WAVES of Ashtongue adds; Akama must survive.\n- Ashtongue Channelers (6) shackle the Shade - TOP kill priority. Ashtongue Sorcerers spawn to replace them; kill them all to FREE the Shade.\n- An add tank holds Defenders in the CENTER. Spiritbinders (healers) must be interrupted/CC'd/killed fast. Rogues/Elementalists are CC-able.\n- P2: the freed Shade reaches Akama and becomes tankable - BURST it down (~60s window) before Akama dies.\n\nROLES NEEDED:\n- {skull} Add tank (center, Defenders), {cross} Shade tank (P2).\n- Healers: 3 add tank, 2 on Akama. CC team: 3 on support adds.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull} for the add tank, {cross} for the Shade tank.\n- Name the Channeler/Sorcerer kill squad, the CC team, and hold burst for the Shade."
+      }
+    },
+    {
+      "name": "Teron Gorefiend",
+      "slug": "teron",
+      "summary": "The fourth boss of Black Temple, a tank-and-spank whose entire difficulty is the Shadow of Death ghost mini-game. The boss is held by one tank while the raid stacks loosely toward the back. Periodically a random player is marked and, after a timer, dies and becomes a Vengeful Spirit (a ghost) who is the only thing that can kill the four Shadowy Constructs that spawn at their corpse; played correctly the ghost clears the constructs and is resurrected. Dispellable Incinerate and floating Doom Blossom adds add a soft enrage.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Single phase",
+          "hp_range": "100% to 0%",
+          "description": "One tank holds Teron while the raid stacks loosely at the back. Marked players move to a far corner before death and play their ghost phase to clear their constructs; dispel Incinerate and beat the soft enrage."
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Shadow of Death",
+          "mechanic_type": "special",
+          "targets": "random",
+          "description": "Periodically marks a random player who, after a timer, dies and returns as a Vengeful Spirit; four Shadowy Constructs spawn at their corpse. The marked player moves to a far corner before dying so the constructs spawn away from the raid.",
+          "important": true
+        },
+        {
+          "name": "Vengeful Spirit",
+          "mechanic_type": "special",
+          "targets": "random",
+          "description": "The marked player becomes a ghost with a special action bar (Spirit Lance, Spirit Volley, Spirit Chains, Spirit Shield) and is the only thing that can kill the Shadowy Constructs. Clear all four in time and the player is resurrected at their corpse.",
+          "important": true
+        },
+        {
+          "name": "Shadowy Construct",
+          "mechanic_type": "add_spawn",
+          "targets": "raid",
+          "description": "Four adds spawn at the dead player's corpse; only the ghost can damage them. If they reach the raid it is usually a wipe.",
+          "important": true
+        },
+        {
+          "name": "Incinerate",
+          "mechanic_type": "debuff",
+          "targets": "tank",
+          "description": "Heavy fire damage on the tank plus a damage-over-time; dispel it when it goes out.",
+          "important": false
+        },
+        {
+          "name": "Doom Blossom",
+          "mechanic_type": "add_spawn",
+          "targets": "raid",
+          "description": "Floating adds spawned periodically that rain shadow bolts on the raid; multiple can be up at once, so raid shadow damage accumulates over the fight as a soft enrage.",
+          "important": false
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "One tank holds Teron while the raid stacks loosely at the back. Every raider must know the Vengeful Spirit ability bar, because Shadow of Death is random: marked players run to a far corner before death and clear their four Shadowy Constructs (do not release or run off, or the constructs hit the raid with no ghost to stop them). Dispel Incinerate and burn the boss before Doom Blossom damage stacks too high."
+        }
+      ],
+      "roles": {
+        "tank": "Only one tank is needed; other tanks swap to DPS or healing.",
+        "healer": "Constant tank healing, dispel Incinerate, and cover growing Doom Blossom damage later. Ghosts play a mini-game and do not take normal damage.",
+        "dps": "Steady boss damage to beat the soft enrage. When you are the ghost, ignore the boss and clear your four constructs."
+      },
+      "bossguide": {
+        "boss_num": 4,
+        "raid_short": "BT",
+        "has_diagram": false,
+        "aliases": [
+          "teron gorefiend",
+          "teron",
+          "gorefiend",
+          "tg"
+        ],
+        "role_counts": {
+          "tanks": 1,
+          "tank_healers": 3,
+          "raid_healers": 3
+        },
+        "context": "FIGHT: Teron Gorefiend - Black Temple Boss 4\n\nKEY MECHANICS:\n- ONE tank; the raid stacks loosely at the back. EVERY raider must know the ghost mini-game.\n- Shadow of Death: marks a random player who DIES and becomes a Vengeful Spirit (ghost). 4 Shadowy Constructs spawn at the corpse - only the GHOST can kill them (special action bar: Volley/Chains/Lance).\n- Marked players RUN TO A FAR CORNER before dying. Do NOT release/run off - clear your 4 constructs and you get resurrected.\n- Dispel Incinerate (tank). Doom Blossom adds rain shadow on the raid = soft enrage.\n\nROLES NEEDED:\n- {skull} Tank. Healers: 3 tank, 3 raid (dispel Incinerate).\n\nASSIGNMENT FORMAT RULES:\n- Use {skull} for the tank.\n- Stress: everyone learns the ghost bar; run to a corner when marked; never release."
+      }
+    },
+    {
+      "name": "Gurtogg Bloodboil",
+      "slug": "gurtogg",
+      "summary": "The fifth boss of Black Temple, a positioning and healing-intensive single-target fight on a repeating timed loop. In Phase 1 he tanks normally and casts Bloodboil on the players furthest from him, so the raid splits into two groups that rotate in and out of furthest range so no one set eats every cast. In Phase 2 (Fel Rage) he ignores his tank and fixates a random non-tank, buffing them hugely while pounding them, so healers instantly switch all output onto that player. A hard enrage makes it a soft DPS check.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Bloodboil phase",
+          "hp_range": "about 60 seconds",
+          "description": "He tanks normally and casts Bloodboil on the furthest players. The two raid groups rotate through furthest range so each takes one Bloodboil, then swaps out to let it expire. Tanks swap on Acidic Wound stacks."
+        },
+        {
+          "number": 2,
+          "name": "Fel Rage phase",
+          "hp_range": "about 30 seconds",
+          "description": "He fixates a random non-tank with Fel Rage, ignoring the tank and buffing the target so they survive while being heavily healed. Every healer switches to the fixated player. The loop repeats until death or enrage."
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Bloodboil",
+          "mechanic_type": "debuff",
+          "targets": "raid",
+          "description": "Phase 1: a stacking damage-over-time placed on the players furthest from Gurtogg (commonly the five furthest). The raid pre-arranges two groups that alternate being furthest, so each set takes a Bloodboil then rotates out to let it expire.",
+          "important": true
+        },
+        {
+          "name": "Fel Rage",
+          "mechanic_type": "special",
+          "targets": "random",
+          "description": "Phase 2: fixates a random non-tank, ignoring the tank and granting the target large health and survivability buffs while pounding them. Every healer immediately switches to spam-heal the fixated player; if they die the boss returns to the tanks.",
+          "important": true
+        },
+        {
+          "name": "Acidic Wound",
+          "mechanic_type": "tank_swap",
+          "targets": "tank",
+          "description": "A stacking tank debuff applied on melee hits that deals nature damage and reduces armor. Tanks swap to let the stacks decay.",
+          "important": true
+        },
+        {
+          "name": "Fel Acid Breath",
+          "mechanic_type": "movement",
+          "targets": "tank",
+          "description": "A frontal cone of heavy nature damage over time. Keep the boss faced away from the raid; non-tanks avoid the front.",
+          "important": false
+        },
+        {
+          "name": "Insignificance",
+          "mechanic_type": "special",
+          "targets": "raid",
+          "description": "Applied to the raid at the start of Phase 2, preventing threat generation so the raid cannot pull the fixating boss off the Fel Rage target.",
+          "important": false
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "Split the raid into two groups that alternate standing furthest so Bloodboil spreads evenly, and rotate out to let stacks expire. Tanks swap on Acidic Wound stacks and keep the boss faced away for Fel Acid Breath. When Fel Rage fixates a random non-tank, every healer instantly switches to that player and keeps them alive. The two phases loop roughly every ninety seconds; beat the ten-minute enrage."
+        }
+      ],
+      "roles": {
+        "tank": "Two or three tanks rotate to keep Acidic Wound stacks low, staying close on threat for clean handoffs. Tanks do not hold the boss during Fel Rage.",
+        "healer": "Phase 1: tank plus the rotating Bloodboil group. Phase 2: the moment Fel Rage lands, every healer switches to spam-heal the fixated target with their largest heals.",
+        "dps": "Single-target burn against the enrage. Everyone is assigned to a rotation group and moves in and out of furthest range on cue so Bloodboil never piles on the same players."
+      },
+      "bossguide": {
+        "boss_num": 5,
+        "raid_short": "BT",
+        "has_diagram": false,
+        "aliases": [
+          "gurtogg bloodboil",
+          "gurtogg",
+          "bloodboil",
+          "gb"
+        ],
+        "role_counts": {
+          "tanks": 3,
+          "tank_healers": 4,
+          "raid_healers": 3
+        },
+        "context": "FIGHT: Gurtogg Bloodboil - Black Temple Boss 5\n\nKEY MECHANICS:\n- Timed loop (~90s), not HP-based. Split the raid into TWO groups that rotate.\nP1 Bloodboil: a stacking DoT on the FURTHEST players (the 5 furthest). The two groups alternate being furthest so each takes one, then rotates out to let it expire.\nP2 Fel Rage: he fixates a random NON-TANK, ignoring the tank, and buffs them - EVERY healer instantly switches to spam-heal that player or it wipes.\n- Tanks swap on Acidic Wound stacks; boss faced AWAY (Fel Acid Breath). Hard 10-min enrage.\n\nROLES NEEDED:\n- {skull}/{cross}/{triangle} Tanks (Acidic Wound swaps).\n- Healers: 4 tank, 3 raid - all ready to swap to the Fel Rage target.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull}/{cross}/{triangle} for the tanks; assign the two Bloodboil rotation groups.\n- Stress the instant healer switch on Fel Rage."
+      }
+    },
+    {
+      "name": "Reliquary of Souls",
+      "slug": "reliquary",
+      "summary": "The sixth boss of Black Temple, a single creature that manifests three Essences in sequence, each its own sub-boss with an aura that reshapes how the raid plays. The raid must defeat Essence of Suffering, then Essence of Desire, then Essence of Anger. After each Essence dies, low-health Enslaved Soul ghosts spawn whose deaths restore raid health and mana, the only recovery window. Phase 1 disables healing, Phase 2 punishes over-damage and over-healing with a reflect while draining mana, and Phase 3 is a hard raid-wide burn.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Essence of Suffering",
+          "hp_range": "first essence",
+          "description": "Aura of Suffering shuts off healing and drops the tank's armor and defense, so the tank survives on dodge, parry and absorbs. It fixates the nearest player; Soul Drain must be dispelled, and Frenzy and Enrage spike its damage."
+        },
+        {
+          "number": 2,
+          "name": "Essence of Desire",
+          "hp_range": "second essence",
+          "description": "Aura of Desire reflects part of the damage dealt back onto the dealer, doubles healing done, and steadily drains everyone's maximum mana, so do not over-burst. Interrupt Spirit Shock, and a mage ideally Spellsteals the Rune Shield."
+        },
+        {
+          "number": 3,
+          "name": "Essence of Anger",
+          "hp_range": "third essence",
+          "description": "Aura of Anger is a growing raid-wide shadow damage-over-time. Soul Scream is a frontal cone (face it away); Spite makes a target briefly immune then bursts them (top them); never taunt, which triggers Seethe. Bloodlust and burn."
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Aura of Suffering",
+          "mechanic_type": "special",
+          "targets": "raid",
+          "description": "Phase 1 raid aura that negates healing and drops the tank's armor and defense; the tank survives on avoidance and absorbs (Power Word: Shield, Healthstones).",
+          "important": true
+        },
+        {
+          "name": "Soul Drain",
+          "mechanic_type": "debuff",
+          "targets": "random",
+          "description": "Phase 1: shadow damage and a mana drain on several random targets that must be dispelled.",
+          "important": true
+        },
+        {
+          "name": "Aura of Desire",
+          "mechanic_type": "special",
+          "targets": "raid",
+          "description": "Phase 2 raid aura that reflects part of the damage you deal back onto you, doubles healing done, and steadily lowers everyone's maximum mana. Do not recklessly burst, and do not over-commit healing.",
+          "important": true
+        },
+        {
+          "name": "Spirit Shock",
+          "mechanic_type": "interrupt",
+          "targets": "raid",
+          "description": "Phase 2 arcane nuke with a disorient that must be interrupted.",
+          "important": true
+        },
+        {
+          "name": "Rune Shield",
+          "mechanic_type": "special",
+          "targets": "raid",
+          "description": "Phase 2 absorb shield with interrupt immunity and a haste buff; ideally a mage Spellsteals it.",
+          "important": false
+        },
+        {
+          "name": "Soul Scream",
+          "mechanic_type": "movement",
+          "targets": "tank",
+          "description": "Phase 3 frontal cone of heavy shadow damage and mana burn; face the Essence away from the raid.",
+          "important": true
+        },
+        {
+          "name": "Spite",
+          "mechanic_type": "special",
+          "targets": "random",
+          "description": "Phase 3: makes a target briefly immune to damage, then deals a large nature hit; top that player before and after the burst.",
+          "important": true
+        },
+        {
+          "name": "Seethe",
+          "mechanic_type": "special",
+          "targets": "raid",
+          "description": "Phase 3 threat mechanic: using a Taunt triggers a large attack-speed and threat boost, so do not taunt while the Essence is active.",
+          "important": true
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "Defeat the three Essences in order. In Suffering, healing is off, so survive on absorbs and Healthstones, dispel Soul Drain, and control the Fixate by positioning. In Desire, hold back burst and overheal because damage is reflected and mana drains; interrupt Spirit Shock and Spellsteal Rune Shield. Stack on the Enslaved Souls between phases to refill mana, then in Anger face the boss away, handle Spite, never taunt, and Bloodlust to burn it before the aura ramps lethal."
+        }
+      ],
+      "roles": {
+        "tank": "Pick up each Essence from the front. Phase 1 relies on avoidance and cooldowns since armor is gone; Phase 3 keeps the boss faced away for Soul Scream and never taunts (Seethe).",
+        "healer": "No healing in Phase 1 (rely on absorbs and Healthstones); Phase 2 healing is doubled but watch the mana drain; Phase 3 is maximum throughput. Use the Enslaved Soul intermissions to refill mana.",
+        "dps": "Phase 2: do not over-damage yourselves on the reflect, interrupt Spirit Shock, Spellsteal Rune Shield. Phase 3: avoid pulling threat and never act while holding Seethe; Bloodlust and burn."
+      },
+      "bossguide": {
+        "boss_num": 6,
+        "raid_short": "BT",
+        "has_diagram": false,
+        "aliases": [
+          "reliquary of souls",
+          "reliquary",
+          "ros",
+          "the essences",
+          "essences"
+        ],
+        "role_counts": {
+          "tanks": 2,
+          "tank_healers": 4,
+          "raid_healers": 3,
+          "interrupts": 3
+        },
+        "context": "FIGHT: Reliquary of Souls - Black Temple Boss 6 (3 Essences)\n\nP1 Essence of Suffering: Aura of Suffering turns OFF healing and strips tank armor - survive on absorbs/Healthstones/avoidance. It FIXATES the nearest player (positioning = tanking). DISPEL Soul Drain.\nP2 Essence of Desire: Aura of Desire REFLECTS damage you deal back on you and doubles healing while draining max mana - do NOT over-burst/overheal. Interrupt Spirit Shock; mage Spellsteals Rune Shield.\nP3 Essence of Anger: growing raid-wide shadow DoT. Face the boss AWAY (Soul Scream cone). Top Spite targets. Do NOT taunt (Seethe). Bloodlust and burn.\n- Between phases: kill the Enslaved Soul ghosts NEAR the raid to refill HP and mana (the only recovery window).\n\nROLES NEEDED:\n- {skull}/{cross} Tanks. Healers: 4 tank, 3 raid. Interrupt team: 3 (Spirit Shock).\n\nASSIGNMENT FORMAT RULES:\n- Use {skull}/{cross} for the tanks; name interrupters and the Spellsteal mage.\n- Remind: P1 no heals, P2 no over-burst/overheal, P3 no taunt; stack on souls between phases."
+      }
+    },
+    {
+      "name": "Mother Shahraz",
+      "slug": "shahraz",
+      "summary": "The seventh boss of Black Temple, a gear-and-coordination check with no adds and no real phases. It is essentially a tank-and-spank with two dominating mechanics under a hard enrage: Saber Lash, a heavy frontal attack split among the tanks stacked in front, and Fatal Attraction, which teleports several players together and damages them while they are near each other. Nearly the whole raid takes constant shadow damage, making it the classic shadow-resistance fight of the instance.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Single phase",
+          "hp_range": "100% to 0%",
+          "description": "Stack the tanks to split Saber Lash, spread the raid, run apart on Fatal Attraction, exploit favorable Prismatic Shield windows, and burn her before the enrage."
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Saber Lash",
+          "mechanic_type": "tank_swap",
+          "targets": "tank",
+          "description": "A heavy frontal attack split evenly among the players stacked directly in front. Stack two or three tanks tightly together to share it; a lone tank takes the full hit and dies. Saber Lash targets are immune to Fatal Attraction.",
+          "important": true
+        },
+        {
+          "name": "Fatal Attraction",
+          "mechanic_type": "movement",
+          "targets": "random",
+          "description": "Teleports several random players together and links them with a debuff that deals heavy shadow damage while they are near each other. Affected players immediately run apart to opposite corners, NOT through other raiders or toward the tanks. The number-one wipe cause.",
+          "important": true
+        },
+        {
+          "name": "Prismatic Shield",
+          "mechanic_type": "special",
+          "targets": "raid",
+          "description": "She cycles a random resistance aura on a timer that reduces one school of damage and increases another. Caster DPS pop cooldowns during a favorable window.",
+          "important": false
+        },
+        {
+          "name": "Silencing Shriek",
+          "mechanic_type": "interrupt",
+          "targets": "raid",
+          "description": "A frontal area silence that interrupts casting; position casters and healers to minimize who is caught.",
+          "important": false
+        },
+        {
+          "name": "Enrage",
+          "mechanic_type": "enrage",
+          "targets": "raid",
+          "description": "Hard enrage after several minutes; treat it as a DPS race and Bloodlust early.",
+          "important": false
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "Stack two or three tanks tightly in front to split Saber Lash and spread the rest of the raid. When Fatal Attraction teleports players together they immediately run apart to opposite corners without crossing the raid or the tanks. Run shadow resistance for most raiders in original tuning, exploit favorable Prismatic Shield windows, and Bloodlust early to beat the enrage."
+        }
+      ],
+      "roles": {
+        "tank": "Two or three tanks stack tightly in front to split Saber Lash. Tanks generally do not need shadow resistance (Saber Lash grants Fatal Attraction immunity).",
+        "healer": "The heaviest job: sustained raid-wide shadow damage plus spikes on Fatal Attraction targets, while Silencing Shriek can interrupt heals. Pre-position and stagger.",
+        "dps": "Pure burn. Spread to limit Fatal Attraction collateral, run apart instantly if targeted, exploit favorable Prismatic Shield windows, and beat the enrage."
+      },
+      "bossguide": {
+        "boss_num": 7,
+        "raid_short": "BT",
+        "has_diagram": false,
+        "aliases": [
+          "mother shahraz",
+          "shahraz",
+          "mother"
+        ],
+        "role_counts": {
+          "tanks": 3,
+          "tank_healers": 4,
+          "raid_healers": 3
+        },
+        "context": "FIGHT: Mother Shahraz - Black Temple Boss 7\n\nKEY MECHANICS:\n- No adds/phases. The classic SHADOW RESISTANCE fight; constant raid shadow damage.\n- Saber Lash: heavy frontal SPLIT among players stacked in front - STACK 2-3 tanks tightly. A lone tank dies. (Saber Lash targets are immune to Fatal Attraction.)\n- Fatal Attraction: teleports several players together; they take escalating shadow damage while near each other - RUN APART to opposite corners, NOT through the raid/tanks. #1 wipe cause.\n- Prismatic Shield (rotating resistance), Silencing Shriek (silence). Hard enrage.\n\nROLES NEEDED:\n- {skull}/{cross}/{triangle} Tanks STACKED for Saber Lash.\n- Healers: 4 tank/raid, 3 raid (constant shadow damage). Raiders gear shadow resistance.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull}/{cross}/{triangle} for the stacked tanks.\n- Remind: shadow resistance, run apart on Fatal Attraction, Bloodlust early."
+      }
+    },
+    {
+      "name": "Illidari Council",
+      "slug": "illidaricouncil",
+      "summary": "The eighth boss of Black Temple, four Blood Elf Illidari fought at once who share a single health pool and die together. They are tanked apart in separate spots so their auras, AoE and attacks do not overlap onto the raid. The defining job is interrupting Lady Malande's Circle of Healing, which heals the whole pool, while Veras stealths and bursts random players. A coordination, positioning and interrupt fight under a fifteen-minute enrage.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Council",
+          "hp_range": "shared health pool",
+          "description": "Four members tanked apart, sharing one health pool. Interrupt Malande's heals, keep melee off Zerevor and out of Consecration, spot-heal Veras's poison victims, and balance damage so all four fall together before the enrage."
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Gathios the Shatterer",
+          "mechanic_type": "special",
+          "targets": "tank",
+          "description": "Paladin: Consecration (move melee out), Hammer of Justice (stun), and Blessing of Spell Warding or Protection on other members (switch DPS off a protected member). Tank him apart so his auras and blessings do not aid the others.",
+          "important": false
+        },
+        {
+          "name": "High Nethermancer Zerevor",
+          "mechanic_type": "special",
+          "targets": "raid",
+          "description": "Mage: Arcane Bolt, Blizzard and Flamestrike ground patches, and Arcane Explosion if a player is in melee. Keep melee off him and move out of his ground AoE.",
+          "important": false
+        },
+        {
+          "name": "Lady Malande",
+          "mechanic_type": "interrupt",
+          "targets": "raid",
+          "description": "Priest: Circle of Healing heals the shared pool and is the priority interrupt; Reflective Shield reflects your damage; Divine Wrath and Empowered Smite hit random players. Dedicate interrupters to her.",
+          "important": true
+        },
+        {
+          "name": "Veras Darkshadow",
+          "mechanic_type": "special",
+          "targets": "random",
+          "description": "Rogue: Vanishes (dropping threat) and re-engages a random player with Deadly Poison and Envenom. An off-tank holds him but must re-establish threat after each Vanish; healers spot-heal his targets.",
+          "important": true
+        },
+        {
+          "name": "Shared health pool",
+          "mechanic_type": "enrage",
+          "targets": "raid",
+          "description": "All four draw on one health pool and die together, and the council enrages at fifteen minutes; missed interrupts on Circle of Healing are the usual cause of hitting it.",
+          "important": true
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "Tank the four members apart, one each. A dedicated interrupt rotation must lock down Lady Malande's Circle of Healing, which heals the shared pool, or the fight drags to the fifteen-minute enrage. Keep melee off Zerevor and out of Consecration, do not attack Malande through Reflective Shield, re-establish threat on Veras after each Vanish, and balance damage so all four die together."
+        }
+      ],
+      "roles": {
+        "tank": "Four tanks, one per member, positioned apart so the members do not buff each other or overlap their AoE on the raid.",
+        "healer": "Heavy raid-aware healing for random Divine Wrath, Veras's Envenom, and ground AoE; watch the whole raid, not just the tanks.",
+        "dps": "Spread across the members per the raid's balance plan, melee staying off Zerevor and out of Consecration. A dedicated interrupt rotation locks down Malande's Circle of Healing."
+      },
+      "bossguide": {
+        "boss_num": 8,
+        "raid_short": "BT",
+        "has_diagram": false,
+        "aliases": [
+          "illidari council",
+          "council",
+          "the council",
+          "illidari"
+        ],
+        "role_counts": {
+          "tanks": 4,
+          "tank_healers": 5,
+          "raid_healers": 3,
+          "interrupts": 3
+        },
+        "context": "FIGHT: Illidari Council - Black Temple Boss 8 (4-member council, SHARED HP)\n\nKEY MECHANICS:\n- Four members fought at once, tanked APART, sharing ONE health pool - they die together. 15-min enrage.\n- Gathios (paladin): Consecration (melee move), blessings on members (switch off a protected one).\n- Zerevor (mage): Blizzard/Flamestrike patches, Arcane Explosion if melee on him - keep melee OFF.\n- Lady Malande (priest): Circle of Healing heals the POOL - this is the PRIORITY INTERRUPT. Reflective Shield reflects your damage.\n- Veras (rogue): Vanishes and bursts a random player with poison - re-tank after Vanish; spot-heal his targets.\n\nROLES NEEDED:\n- {skull} Gathios, {cross} Zerevor (ranged), {triangle} Malande, {moon} Veras tanks.\n- Healers: 5 tank, 3 raid. Interrupt team: 3 on Malande's Circle of Healing.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull}/{cross}/{triangle}/{moon} for the four tanks.\n- Name the Malande interrupt rotation; melee stay off Zerevor."
+      }
+    },
+    {
+      "name": "Illidan Stormrage",
+      "slug": "illidan",
+      "summary": "The final boss of Black Temple, opened by Akama, a long five-phase fight alternating ground melee phases with special phases. Phase 1 is a tank-and-spank with brutal Shear hits. At sixty-five percent he flies up and summons the Flames of Azzinoth, two fire elementals each kited by a fire-resistance tank. After both Flames die the fight returns to the ground, then cycles through Demon Form until thirty percent, when Maiev Shadowsong appears and the raid uses her Cage Traps to break his enrage and finish him.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Melee",
+          "hp_range": "100% to 65%",
+          "description": "Tank-and-spank. The main tank faces Illidan away and survives Shear with active mitigation; the raid stacks and avoids Flame Crash, Draw Soul and Parasitic Shadowfiend."
+        },
+        {
+          "number": 2,
+          "name": "Flames of Azzinoth",
+          "hp_range": "flight",
+          "description": "Illidan throws his glaives down as two Blades, spawning two Flame elementals. Two fire-resistance tanks each kite a Flame, avoiding Blaze patches and facing Flame Blast away from the raid. Killing both Flames ends the phase."
+        },
+        {
+          "number": 3,
+          "name": "Ground",
+          "hp_range": "65% to 30%",
+          "description": "Like Phase 1 plus Agonizing Flames (a spreading fire damage-over-time, so spread). After a time he transforms into Demon Form."
+        },
+        {
+          "number": 4,
+          "name": "Demon Form",
+          "hp_range": "alternates with P3",
+          "description": "He transforms (aggro reset) and is taken by a shadow-resistance warlock tank. Stay over twenty yards from that tank for Shadow Blast, dodge Eye Blast lines, and kill the Shadow Demons fast. Reverts after a time; P3 and P4 alternate until thirty percent."
+        },
+        {
+          "number": 5,
+          "name": "Maiev",
+          "hp_range": "30% to 0%",
+          "description": "Maiev appears and places Cage Traps; lead Illidan onto a trap to cage him and strip his enrage, opening the final burn. Agonizing Flames returns."
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Shear",
+          "mechanic_type": "tank_swap",
+          "targets": "tank",
+          "description": "Phase 1 and 3: removes most of the main tank's health unless active mitigation, a big absorb or a cooldown is used; tanks often swap or pre-mitigate. The defining tank danger.",
+          "important": true
+        },
+        {
+          "name": "Flames of Azzinoth",
+          "mechanic_type": "add_spawn",
+          "targets": "raid",
+          "description": "Phase 2: two Flame elementals spawn from the thrown Blades. Each is kited by a fire-resistance tank; Blaze leaves lethal fire patches and Flame Blast is a frontal cone, so tanks keep moving and face the Flames away. Kill both to end the phase.",
+          "important": true
+        },
+        {
+          "name": "Agonizing Flames",
+          "mechanic_type": "movement",
+          "targets": "random",
+          "description": "Phase 3 and 5: a fire damage-over-time on a random player that spreads, so the raid stays spread out.",
+          "important": true
+        },
+        {
+          "name": "Shadow Blast",
+          "mechanic_type": "special",
+          "targets": "raid",
+          "description": "Demon Form: heavy shadow damage to the highest-aggro target and everyone within twenty yards, so the raid stays spread from the demon tank.",
+          "important": true
+        },
+        {
+          "name": "Eye Blast",
+          "mechanic_type": "movement",
+          "targets": "raid",
+          "description": "Demon Form: lays a line of demon fire across the floor; move out of the line.",
+          "important": true
+        },
+        {
+          "name": "Shadow Demons",
+          "mechanic_type": "add_spawn",
+          "targets": "raid",
+          "description": "Demon Form: several adds spawn that fixate and stun random players and crawl toward them, draining mana; DPS them down immediately before they reach their target.",
+          "important": true
+        },
+        {
+          "name": "Cage Trap",
+          "mechanic_type": "special",
+          "targets": "raid",
+          "description": "Phase 5: Maiev places traps; lead Illidan onto one to cage him and strip his enrage, opening the burn window.",
+          "important": true
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "Phase 1: face Illidan away and survive Shear with mitigation. At 65% two fire-resistance tanks each kite a Flame of Azzinoth, avoiding Blaze and facing Flame Blast away, until both die. Phase 3 adds Agonizing Flames; he then alternates into Demon Form, where a shadow-resistance warlock tanks him, the raid spreads over twenty yards, dodges Eye Blast, and kills Shadow Demons. At 30% Maiev appears: lead Illidan onto Cage Traps to strip his enrage and burn him down."
+        }
+      ],
+      "roles": {
+        "tank": "A main tank for the melee phases who manages Shear (often two swapping), two fire-resistance tanks for the Phase 2 Flames, and a shadow-resistance warlock tank for Demon Form.",
+        "healer": "Heavy single-target on the Shear tank and the Flame tanks, plus raid healing for Agonizing Flames, Shadow Blast and Eye Blast.",
+        "dps": "Burn the Flames of Azzinoth fast in Phase 2, kill the Shadow Demons immediately in Demon Form, spread for Agonizing Flames, and maximize damage during Cage Trap windows in Phase 5."
+      },
+      "bossguide": {
+        "boss_num": 9,
+        "raid_short": "BT",
+        "has_diagram": false,
+        "aliases": [
+          "illidan stormrage",
+          "illidan",
+          "the betrayer",
+          "illi"
+        ],
+        "role_counts": {
+          "tanks": 4,
+          "tank_healers": 6,
+          "raid_healers": 4,
+          "interrupts": 0
+        },
+        "context": "FIGHT: Illidan Stormrage - Black Temple Boss 9 (Final) - 5 PHASES\n\nOpened by Akama (flavor, not a tank).\nP1 (100-65%, melee): face him AWAY. Shear removes most of the tank's HP unless mitigated - tanks swap/cooldown. Avoid Flame Crash, Draw Soul cone.\nP2 (flight) Flames of Azzinoth: two Flame elementals - TWO FIRE-RESISTANCE tanks each kite one, avoid Blaze patches, face Flame Blast away. Kill both to end P2.\nP3 (65-30%, ground): like P1 plus Agonizing Flames (spreads - SPREAD).\nP4 Demon Form: a SHADOW-RESISTANCE WARLOCK tanks him; raid stays >20yd (Shadow Blast); dodge Eye Blast lines; KILL Shadow Demons fast. P3/P4 alternate to 30%.\nP5 (30-0%): Maiev places Cage Traps - lead Illidan onto one to strip his enrage, then burn.\n\nROLES NEEDED:\n- {skull} Main tank (Shear), {cross}/{triangle} two FIRE-resist Flame tanks, {moon} SHADOW-resist warlock (Demon Form).\n- Healers: 6 tank, 4 raid. Shadow Demon kill squad; Cage Trap baiters.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull} for MT, {cross}/{triangle} for the FR Flame tanks, {moon} for the SR warlock.\n- Name Shadow Demon killers and Cage Trap duty. Stress FR for P2, SR for P4."
+      }
+    }
+  ]
+}

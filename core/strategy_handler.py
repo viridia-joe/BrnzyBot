@@ -54,13 +54,19 @@ def handle_strategy_question(question: str, guild_id: str = "global") -> str:
     Returns a Discord-ready string. Never posts anything itself.
     """
     from core import entitlements
-    context_block = get_strategy_context(question)
-    log.info("Strategy context fetched for query: %s", question[:60])
+    from core import phase as _phase
+    # Gate to the raids live on the guild's realm: future-phase content stays
+    # hidden until the realm reaches that phase.
+    pinfo = _phase.resolve_for_guild(guild_id)
+    context_block = get_strategy_context(question, max_phase=pinfo.calendar_phase)
+    log.info("Strategy context fetched for query: %s (phase<=%d)",
+             question[:60], pinfo.calendar_phase)
 
     if "no strategy data found" in context_block.lower():
         return (
-            f"I don't have strategy data for that in my knowledge base yet. "
-            "Currently I cover: **Karazhan**, **Gruul's Lair**, and **Magtheridon**."
+            "I don't have strategy data for that in my knowledge base yet. "
+            f"It may be for a raid that isn't live yet (your realm is on Phase "
+            f"{pinfo.calendar_phase}: {', '.join(pinfo.raids) or 'the current tier'})."
         )
 
     # Deterministic mode: the strategy context block is already a complete,

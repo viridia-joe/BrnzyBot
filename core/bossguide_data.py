@@ -48,6 +48,7 @@ class BossEntry:
     aliases: List[str]
     context: str
     roles: Dict[str, int]  # role label -> count hint
+    content_phase: int = 1  # realm phase this raid belongs to (for gating)
 
 
 def _load() -> Tuple[Dict[str, BossEntry], List[Tuple[str, str]]]:
@@ -82,6 +83,7 @@ def _load() -> Tuple[Dict[str, BossEntry], List[Tuple[str, str]]]:
                 aliases=list(bg.get("aliases", [])),
                 context=bg.get("context", ""),
                 roles=dict(bg.get("role_counts", {})),
+                content_phase=phase,
             )
             order.append((phase, raid_short, boss_num, key, boss["name"]))
 
@@ -101,15 +103,31 @@ for _key, _entry in BOSS_DATA.items():
         _ALIAS_MAP[_alias.lower()] = _key
 
 
-def resolve_boss(name: str) -> str | None:
-    """Return canonical boss key for a given name/alias, or None if not found."""
+def resolve_boss(name: str, max_phase: int | None = None) -> str | None:
+    """Return canonical boss key for a given name/alias, or None if not found.
+
+    If max_phase is given, bosses from a later content phase are treated as not
+    found (so future-raid bosses are not selectable until the realm reaches them).
+    """
     normalized = name.lower().strip()
-    if normalized in BOSS_DATA:
+
+    def _ok(key: str) -> bool:
+        return max_phase is None or BOSS_DATA[key].content_phase <= max_phase
+
+    if normalized in BOSS_DATA and _ok(normalized):
         return normalized
-    if normalized in _ALIAS_MAP:
+    if normalized in _ALIAS_MAP and _ok(_ALIAS_MAP[normalized]):
         return _ALIAS_MAP[normalized]
     # Partial substring match
     for alias, key in _ALIAS_MAP.items():
-        if normalized in alias or alias in normalized:
+        if (normalized in alias or alias in normalized) and _ok(key):
             return key
     return None
+
+
+def display_order(max_phase: int | None = None) -> List[Tuple[str, str]]:
+    """BOSS_DISPLAY_ORDER, optionally filtered to raids live at max_phase."""
+    if max_phase is None:
+        return BOSS_DISPLAY_ORDER
+    return [(k, n) for k, n in BOSS_DISPLAY_ORDER
+            if BOSS_DATA[k].content_phase <= max_phase]

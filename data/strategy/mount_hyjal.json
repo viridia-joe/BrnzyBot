@@ -1,0 +1,411 @@
+{
+  "_meta": {
+    "zone": "Battle for Mount Hyjal",
+    "zone_slug": "mount_hyjal",
+    "phase": 3,
+    "content_phase": 3,
+    "strat_index": true,
+    "updated": "2026-06-14",
+    "sources": [
+      "icy-veins.com/tbc-classic",
+      "warcraft.wiki.gg",
+      "wowhead.com/tbc"
+    ]
+  },
+  "bosses": [
+    {
+      "name": "Rage Winterchill",
+      "slug": "ragewinterchill",
+      "summary": "The first boss of the Battle for Mount Hyjal, a reanimated lich who spawns at the Alliance base defended by Jaina Proudmoore after the first block of trash waves is cleared. A one-tank, lightly-healed fight that is more about reacting to two abilities than about output: Icebolt roots and bursts a random player with a fast damage-over-time, and Death and Decay drops persistent ground pools, so the raid spreads in a wide ring. A hard berserk caps the kill, and the encounter resets if Jaina dies.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Single phase",
+          "hp_range": "100% to 0%",
+          "description": "Tank Rage Winterchill centrally; the raid spreads wide. React to Icebolt targets and move out of Death and Decay until he dies before the berserk."
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Icebolt",
+          "mechanic_type": "debuff",
+          "targets": "random",
+          "description": "Targets a random player, dealing heavy Frost damage and rooting them in ice with a fast damage-over-time. It cannot be dispelled but can be broken early with a PvP trinket or a class immunity. Heal the target fast; do NOT stop DPSing the boss (it does not store and release damage).",
+          "important": true
+        },
+        {
+          "name": "Death and Decay",
+          "mechanic_type": "movement",
+          "targets": "random",
+          "description": "A persistent ground pool under a random player that ticks a percentage of maximum health per second. Spread in a wide ring so each pool catches as few players as possible, and move out of it immediately.",
+          "important": true
+        },
+        {
+          "name": "Frost Armor",
+          "mechanic_type": "special",
+          "targets": "tank",
+          "description": "A self-buff that chills and slows melee who strike him and raises his armor. Melee simply play through it.",
+          "important": false
+        },
+        {
+          "name": "Berserk",
+          "mechanic_type": "enrage",
+          "targets": "raid",
+          "description": "Hard enrage after a set time that wipes the raid. Maintain steady damage and use Bloodlust.",
+          "important": false
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "Misdirect onto a single tank at the central crossroads and pre-spread the raid in a wide ring. Assign one or two instant-cast healers to Icebolt duty. Everyone moves out of Death and Decay on sight. Keep AoE off Jaina and the friendly NPCs, and burn the boss before the berserk."
+        }
+      ],
+      "roles": {
+        "tank": "One tank; his melee damage is low, so a threat or off-spec tank is fine. Hunter Misdirection helps open threat.",
+        "healer": "A light requirement. Dedicate one or two healers with instant casts to the Icebolt target; the rest cover the tank and spot-heal the spread raid.",
+        "dps": "Spread at max range, prioritize avoiding Death and Decay and surviving Icebolt over parsing, and push the boss down before the berserk."
+      },
+      "bossguide": {
+        "boss_num": 1,
+        "raid_short": "MH",
+        "has_diagram": false,
+        "aliases": [
+          "rage winterchill",
+          "rage",
+          "winterchill",
+          "rw"
+        ],
+        "role_counts": {
+          "tanks": 1,
+          "tank_healers": 2,
+          "raid_healers": 3
+        },
+        "context": "FIGHT: Rage Winterchill - Battle for Mount Hyjal Boss 1 (Alliance/Jaina base)\n\nKEY MECHANICS:\n- One tank, light healing. Spread the raid in a WIDE RING.\n- Icebolt: roots and bursts a random player with a fast DoT - heal it FAST or break with a PvP trinket/immunity. Do NOT stop DPSing the boss.\n- Death and Decay: persistent ground pools (percent max HP/sec) - MOVE OUT, stay spread.\n- Hard berserk. Do not kill Jaina (resets the encounter).\n\nROLES NEEDED:\n- {skull} Tank: holds the boss centrally.\n- Icebolt healers: 1-2 with instant casts. Raid healers: 2-3.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull} for the tank. Name the Icebolt healers.\n- Remind the raid to spread and dodge Death and Decay."
+      }
+    },
+    {
+      "name": "Anetheron",
+      "slug": "anetheron",
+      "summary": "The second boss of Mount Hyjal and the last at the Alliance base, a dreadlord fought as a two-tank patchwork with two control layers. Carrion Swarm is a frontal shadow cone that cripples healing, so the raid spreads and never stacks healers, while a fire off-tank isolates each Towering Infernal away from the boss and raid. Anetheron self-heals heavily from Vampiric Aura, so healing-reduction debuffs on him are a large damage gain. A long berserk caps the kill.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Single phase",
+          "hp_range": "100% to 0%",
+          "description": "Main-tank Anetheron facing away from the raid while a fire off-tank picks up each Infernal. Stay spread for Carrion Swarm, kill Infernals away from the group, and keep healing-reduction debuffs on the boss."
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Carrion Swarm",
+          "mechanic_type": "movement",
+          "targets": "raid",
+          "description": "A frontal cone of shadow damage that applies a heavy healing-reduction debuff. Spread the raid around the boss and never stack healers so it lands on as few people as possible; the tank faces him away from the raid.",
+          "important": true
+        },
+        {
+          "name": "Sleep",
+          "mechanic_type": "debuff",
+          "targets": "random",
+          "description": "Incapacitates random players. It cannot be dispelled or trinketed and breaks only on taking damage. Assign backup healers so a slept healer is covered.",
+          "important": true
+        },
+        {
+          "name": "Inferno",
+          "mechanic_type": "add_spawn",
+          "targets": "raid",
+          "description": "Periodically drops a Towering Infernal on a random player, stunning those nearby on impact; it pulses heavy fire damage. The fire off-tank picks it up immediately and holds it away from the boss and raid while ranged burn it.",
+          "important": true
+        },
+        {
+          "name": "Vampiric Aura",
+          "mechanic_type": "special",
+          "targets": "tank",
+          "description": "Anetheron heals heavily from the melee damage he deals. Healing-reduction debuffs (Mortal Strike, Aimed Shot, Wound Poison) on the boss sharply cut this and are the main reason the fight does not drag.",
+          "important": false
+        },
+        {
+          "name": "Berserk",
+          "mechanic_type": "enrage",
+          "targets": "raid",
+          "description": "Hard enrage that effectively wipes the raid; a soft DPS check.",
+          "important": false
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "Spread around Anetheron, main tank facing him away from the raid. A fire off-tank grabs each Towering Infernal and holds it clear while ranged kill it. Keep healing-reduction debuffs on the boss to beat Vampiric Aura, back up slept healers, and burn him before the enrage."
+        }
+      ],
+      "roles": {
+        "tank": "Two tanks: a main tank on Anetheron, faced away from the raid, and a dedicated fire off-tank that isolates every Towering Infernal.",
+        "healer": "Spread out and assign overlapping coverage so a slept or healing-reduced healer is backstopped; cooldowns ready for Infernal landings and Carrion Swarm spikes.",
+        "dps": "Maintain healing-reduction debuffs on the boss, swap ranged onto Infernals to kill them fast, stay spread, and beat the enrage."
+      },
+      "bossguide": {
+        "boss_num": 2,
+        "raid_short": "MH",
+        "has_diagram": false,
+        "aliases": [
+          "anetheron",
+          "aneth",
+          "anatheron"
+        ],
+        "role_counts": {
+          "tanks": 2,
+          "tank_healers": 3,
+          "raid_healers": 3
+        },
+        "context": "FIGHT: Anetheron - Battle for Mount Hyjal Boss 2 (Alliance/Jaina base)\n\nKEY MECHANICS:\n- SPREAD around the boss; never stack healers. Carrion Swarm is a frontal shadow cone that cripples healing - tank faces him AWAY.\n- Sleep: undispellable, breaks on damage - assign backup healers.\n- Inferno: a Towering Infernal drops on a random player and pulses heavy fire - a FIRE OFF-TANK isolates it away from boss and raid; ranged burn it.\n- Vampiric Aura: he self-heals from melee damage - keep Mortal Strike/Aimed Shot/Wound Poison on him.\n\nROLES NEEDED:\n- {skull} Main tank (faces away), {cross} Fire off-tank (Infernals).\n- Tank healers: 3. Raid healers: 3 with backup pairs for Sleep.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull} for MT, {cross} for the Infernal tank.\n- Name the healing-reduction debuffers and the Infernal-killing ranged."
+      }
+    },
+    {
+      "name": "Kaz'rogal",
+      "slug": "kazrogal",
+      "summary": "The third boss of Mount Hyjal and the first at the Horde base defended by Thrall, a doomguard tank-and-spank with a mana-attrition twist. Mark of Kaz'rogal drains mana from mana users, and if a marked player hits zero mana they explode for heavy shadow damage to everyone nearby; he recasts the Mark more and more often as the fight drags, so it is a soft enrage. The raid spreads, keeps mana high or goes mana-less, and races him down before the Marks cascade.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Single phase",
+          "hp_range": "100% to 0%",
+          "description": "Tank the boss faced away from the raid. Mana users spread and manage mana while the raid burns him before the escalating Marks overwhelm it."
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Mark of Kaz'rogal",
+          "mechanic_type": "debuff",
+          "targets": "raid",
+          "description": "Applied to several mana users at once; it drains their mana, and if a marked player reaches zero mana they explode for heavy shadow damage to nearby allies. Spread out so any detonation hits only the bomber; keep mana topped with potions and runes, or be in a mana-less form. The recast interval shrinks over the fight, which is the soft enrage. It does NOT chain or re-apply on explosion.",
+          "important": true
+        },
+        {
+          "name": "War Stomp",
+          "mechanic_type": "stun",
+          "targets": "raid",
+          "description": "A point-blank area stun around the boss that hits melee and tanks. Healers cover the stunned group.",
+          "important": false
+        },
+        {
+          "name": "Cripple",
+          "mechanic_type": "debuff",
+          "targets": "random",
+          "description": "A debuff on melee that heavily slows attack and movement speed and reduces strength; removed by Blessing of Freedom or a Free Action Potion, not a normal dispel.",
+          "important": false
+        },
+        {
+          "name": "Malevolent Cleave",
+          "mechanic_type": "cleave",
+          "targets": "tank",
+          "description": "A frontal cleave whose damage is split among those in front. Keep the boss faced away and nobody but the tank in front.",
+          "important": false
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "Tank Kaz'rogal faced away; the raid spreads with clear run-out lanes. Mana users keep mana above the drain with Super Mana Potions, runes and downranking (druids shift to Cat to ignore it); anyone about to bottom out steps away to detonate safely. Race him down before the Mark frequency cascades."
+        }
+      ],
+      "roles": {
+        "tank": "One tank (a second as backup), faced away from the raid to control the Cleave.",
+        "healer": "Mana efficiency is everything: downrank, avoid overheal, use mana-return cooldowns. Healers are mana users too, so watch your own mana and step out to detonate safely. Shadow resistance helps resist the Mark.",
+        "dps": "Casters keep mana above the drain with potions, runes and downranking; druids go mana-less. Non-mana classes pad the DPS check. Spread, and pop away from the raid if you bottom out."
+      },
+      "bossguide": {
+        "boss_num": 3,
+        "raid_short": "MH",
+        "has_diagram": false,
+        "aliases": [
+          "kaz'rogal",
+          "kazrogal",
+          "kaz",
+          "kazrog"
+        ],
+        "role_counts": {
+          "tanks": 1,
+          "tank_healers": 2,
+          "raid_healers": 3
+        },
+        "context": "FIGHT: Kaz'rogal - Battle for Mount Hyjal Boss 3 (Horde/Thrall base)\n\nKEY MECHANICS:\n- Tank faced AWAY (Malevolent Cleave). One-tank fight.\n- Mark of Kaz'rogal: drains mana from several mana users; at 0 mana the player EXPLODES for shadow AoE. SPREAD so a pop only hits the bomber. Keep mana HIGH (potions/runes/downrank) or be mana-less (druid Cat). It does NOT chain. The Mark recasts faster over time - a soft enrage, so race him.\n- War Stomp (AoE stun), Cripple (melee slow, needs Freedom).\n\nROLES NEEDED:\n- {skull} Tank (faces away).\n- Healers: 2 tank, 3 raid - all watch their own mana.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull} for the tank.\n- Remind mana users: stay topped, spread, pop away from the raid. Do NOT pre-drain to 0."
+      }
+    },
+    {
+      "name": "Azgalor",
+      "slug": "azgalor",
+      "summary": "The fourth boss of Mount Hyjal and the last before Archimonde, a pit lord at the Horde base. It is an add-management survival fight: every cycle a random player is cursed with Doom, which cannot be removed and which kills them and spawns a Lesser Doomguard that must be tanked and killed, so a battle-rez or Soulstone rotation keeps the raid whole. The raid also spreads for Rain of Fire and plans around the recurring raid-wide silence, Howl of Azgalor, racing the berserk.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Single phase",
+          "hp_range": "100% to 0%",
+          "description": "Main-tank Azgalor faced away while add tanks pick up each Lesser Doomguard. Doom victims run to the add tank before dying and get battle-rezzed; the raid spreads for Rain of Fire and rides out Howl silences."
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Doom",
+          "mechanic_type": "add_spawn",
+          "targets": "random",
+          "description": "A curse on a random player that cannot be resisted, dispelled or removed by any means other than death. After a short time the target dies and spawns a Lesser Doomguard add on their corpse. The doomed player runs to the add tank before dying; a Soulstone or Druid battle-rez restores them so the raid does not bleed a body each cycle.",
+          "important": true
+        },
+        {
+          "name": "Lesser Doomguard",
+          "mechanic_type": "add_spawn",
+          "targets": "raid",
+          "description": "Spawns from each Doom death; tanked away from the raid and killed. It uses War Stomp (a nearby stun) and Cripple. Loose, untanked Doomguards stomping the raid are a primary wipe cause.",
+          "important": true
+        },
+        {
+          "name": "Rain of Fire",
+          "mechanic_type": "movement",
+          "targets": "random",
+          "description": "A ground fire pool on a random target that ticks and applies a stacking fire damage-over-time to anyone who lingers. Move out immediately; spreading limits how many it catches.",
+          "important": true
+        },
+        {
+          "name": "Howl of Azgalor",
+          "mechanic_type": "interrupt",
+          "targets": "raid",
+          "description": "A raid-wide silence on a short cooldown that interrupts healers and casters. Stagger cooldowns and keep instant heals and HoTs rolling; shadow resistance can resist it.",
+          "important": true
+        },
+        {
+          "name": "Cleave",
+          "mechanic_type": "cleave",
+          "targets": "tank",
+          "description": "A heavy frontal cleave. Keep the boss faced away from the raid.",
+          "important": false
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "Main-tank Azgalor faced away with two or more add tanks ready. Each Doom victim runs to the fixed add-tank spot before dying; a Soulstone or Rebirth rotation rezzes them while the add tanks pick up the Lesser Doomguard and the raid burns it. Spread for Rain of Fire, keep instant heals up through Howl, and beat the berserk."
+        }
+      ],
+      "roles": {
+        "tank": "At least two tanks, ideally three: one on Azgalor faced away, one or more on the Lesser Doomguards (a Protection Paladin is excellent for instant ranged threat), with a spare in case the Doomguard tank is the one Doomed.",
+        "healer": "Spread for coverage, plan around Howl silences with instants and HoTs, keep the doomed player and add tanks topped, and watch Rain of Fire spikes.",
+        "dps": "Burn each Lesser Doomguard quickly, then return to the boss; avoid Rain of Fire, stay out of the cleave, and respect the berserk without dying to AoE."
+      },
+      "bossguide": {
+        "boss_num": 4,
+        "raid_short": "MH",
+        "has_diagram": false,
+        "aliases": [
+          "azgalor",
+          "azg",
+          "pit lord"
+        ],
+        "role_counts": {
+          "tanks": 3,
+          "tank_healers": 4,
+          "raid_healers": 3
+        },
+        "context": "FIGHT: Azgalor - Battle for Mount Hyjal Boss 4 (Horde/Thrall base)\n\nKEY MECHANICS:\n- Doom: a curse on a random player that CANNOT be removed by any means - the player dies and spawns a Lesser Doomguard. The victim runs to the ADD TANK before dying; Soulstone/Rebirth them back. Do NOT tell people to dispel it - impossible.\n- Lesser Doomguard: tank away from raid and kill it (War Stomp stun if loose).\n- Rain of Fire: move out, stay spread. Howl of Azgalor: raid-wide SILENCE - keep instants/HoTs rolling.\n- Tank faced AWAY (Cleave). Hard berserk.\n\nROLES NEEDED:\n- {skull} Azgalor tank (faces away), {cross}/{triangle} Doomguard add tanks (Prot Paladin ideal).\n- Healers: 4 tank, 3 raid. Soulstone/Rebirth rotation for Doom victims.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull} for MT, {cross}/{triangle} for add tanks.\n- Name the Soulstone/battle-rez rotation and the add-tank run-to spot."
+      }
+    },
+    {
+      "name": "Archimonde",
+      "slug": "archimonde",
+      "summary": "The final boss of Mount Hyjal, a movement-heavy individual-execution fight rather than a DPS or gear check. He is tanked by a single tank near the center while the raid spreads in a wide ring so random-target abilities only catch one player. The defining mechanic is Air Burst, which launches players up for lethal fall damage, survived only by using Tears of the Goddess (a consumable every raider gets from Tyrande before the pull). The fight gets harder with every death, since each one grants a Soul Charge he releases as a class-based raid nova, so avoidable deaths can cascade into a wipe. A Hand of Death timer caps the encounter.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Single phase",
+          "hp_range": "100% to 0%",
+          "description": "One tank holds Archimonde near center; the raid spreads in a wide ring, uses Tears of the Goddess on every Air Burst, runs from Doomfire, dispels Grip of the Legion, and keeps a melee on him to suppress Finger of Death, all before the Hand of Death timer."
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Air Burst",
+          "mechanic_type": "movement",
+          "targets": "random",
+          "description": "Launches a random player (and anyone too close) high into the air; the fall is lethal without Tears of the Goddess, and it also deals area nature damage. Stay spread so it catches only one person, and use a Tear as you begin to fall.",
+          "important": true
+        },
+        {
+          "name": "Tears of the Goddess",
+          "mechanic_type": "special",
+          "targets": "raid",
+          "description": "A consumable every raider must collect from Tyrande Whisperwind at the Night Elf base before the pull. Using it grants a brief slow-fall that negates Air Burst's fall damage. The single most important raid-wide responsibility; do not use it too early.",
+          "important": true
+        },
+        {
+          "name": "Doomfire",
+          "mechanic_type": "movement",
+          "targets": "raid",
+          "description": "A trail of fire that travels across the ground and changes direction randomly, chasing players and applying a stacking, non-dispellable fire damage-over-time. Run away from it and never let it path through the raid.",
+          "important": true
+        },
+        {
+          "name": "Grip of the Legion",
+          "mechanic_type": "debuff",
+          "targets": "random",
+          "description": "A dispellable magic damage-over-time at long range. Assign dispellers to keep it off raiders.",
+          "important": false
+        },
+        {
+          "name": "Finger of Death",
+          "mechanic_type": "special",
+          "targets": "raid",
+          "description": "Instantly kills its target. Archimonde casts it when no player is in melee range, so always keep a tank or melee on him and it never fires.",
+          "important": true
+        },
+        {
+          "name": "Soul Charge",
+          "mechanic_type": "special",
+          "targets": "raid",
+          "description": "Whenever a raider dies, Archimonde gains a Soul Charge that he later releases as a raid-wide nova whose type depends on the dead player's class. Every death makes the fight harder, so deaths must be minimized.",
+          "important": true
+        },
+        {
+          "name": "Fear",
+          "mechanic_type": "fear",
+          "targets": "raid",
+          "description": "A raid-wide fear on a cooldown, not removable by normal dispel but prevented by Tremor Totem, Fear Ward, or the tank's Berserker Rage. A bad-timed fear can throw players into Doomfire or out of melee range.",
+          "important": false
+        },
+        {
+          "name": "Hand of Death",
+          "mechanic_type": "enrage",
+          "targets": "raid",
+          "description": "A hard timer: after the fight runs long he kills the whole raid. It also leashes the encounter. Treat it as a soft berserk that caps fight length.",
+          "important": false
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "Every raider collects Tears of the Goddess from Tyrande first. One tank holds Archimonde near center with the raid spread in a wide ring and melee split into two camps. Use a Tear on every Air Burst, run from Doomfire, dispel Grip of the Legion, keep a melee on him to suppress Finger of Death, and protect against Fear. Minimize deaths so Soul Charges do not cascade, and push him down before Hand of Death."
+        }
+      ],
+      "roles": {
+        "tank": "A single tank on Archimonde near center (a Protection Warrior is favored for Berserker Rage fear-immunity); the tank or melee presence keeps Finger of Death suppressed.",
+        "healer": "Spread with the raid (no stacking), keep Air Burst survivors and Doomfire/Grip damage healed, and pre-position for Fear; triage is constant.",
+        "dps": "Survival-first damage. Melee split into two camps so one Air Burst cannot launch them all; decursers handle Grip of the Legion. Every raider must use a Tear on every Air Burst."
+      },
+      "bossguide": {
+        "boss_num": 5,
+        "raid_short": "MH",
+        "has_diagram": false,
+        "aliases": [
+          "archimonde",
+          "archi",
+          "the defiler"
+        ],
+        "role_counts": {
+          "tanks": 1,
+          "tank_healers": 3,
+          "raid_healers": 4
+        },
+        "context": "FIGHT: Archimonde - Battle for Mount Hyjal Boss 5 (Final, Night Elf base)\n\nKEY MECHANICS:\n- EVERY raider must get Tears of the Goddess from Tyrande BEFORE the pull and use it on every Air Burst (it launches you up for LETHAL fall damage). This is the #1 responsibility.\n- SPREAD in a wide ring; melee in TWO camps so one Air Burst can't launch them all.\n- Doomfire: a chasing fire trail - RUN from it, never through the raid.\n- Finger of Death: instakill if NO melee is on him - always keep a melee/tank in range.\n- Soul Charge: every death gives him a class-based raid nova - minimize deaths or it cascades.\n- Grip of the Legion: dispel it. Fear: Tremor/Fear Ward/Berserker Rage. Hand of Death: hard timer.\n\nROLES NEEDED:\n- {skull} Tank (Prot Warrior ideal, near center).\n- Healers: 3 tank/spread, 4 raid. Dispellers on Grip. Fear protection assigned.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull} for the tank. Confirm ALL raiders have Tears of the Goddess.\n- Name dispellers and fear protection; remind: spread, Tear on Air Burst, run from Doomfire, keep melee on him."
+      }
+    }
+  ]
+}

@@ -50,39 +50,46 @@ def _fts_query(raw: str) -> str:
     return f'{phrase} OR {individual}'
 
 
-def _lookup_boss_by_name(conn: sqlite3.Connection, query: str) -> sqlite3.Row | None:
+def _lookup_boss_by_name(conn: sqlite3.Connection, query: str,
+                         max_phase: int | None = None) -> sqlite3.Row | None:
     fts = _fts_query(query)
+    phase_clause = " AND b.phase <= ?" if max_phase is not None else ""
+    params = (fts, max_phase) if max_phase is not None else (fts,)
     try:
         row = conn.execute(
-            """SELECT b.* FROM bosses b
+            f"""SELECT b.* FROM bosses b
                JOIN bosses_fts f ON b.boss_id = f.rowid
-               WHERE bosses_fts MATCH ?
+               WHERE bosses_fts MATCH ?{phase_clause}
                ORDER BY rank LIMIT 1""",
-            (fts,),
+            params,
         ).fetchone()
         return row
     except sqlite3.OperationalError:
         return None
 
 
-def _lookup_boss_by_ability(conn: sqlite3.Connection, query: str) -> sqlite3.Row | None:
+def _lookup_boss_by_ability(conn: sqlite3.Connection, query: str,
+                            max_phase: int | None = None) -> sqlite3.Row | None:
     """Find a boss via ability FTS — useful for 'what is Enfeeble' queries."""
     fts = _fts_query(query)
+    phase_clause = " AND b.phase <= ?" if max_phase is not None else ""
+    params = (fts, max_phase) if max_phase is not None else (fts,)
     try:
         row = conn.execute(
-            """SELECT b.* FROM bosses b
+            f"""SELECT b.* FROM bosses b
                JOIN abilities a ON a.boss_id = b.boss_id
                JOIN abilities_fts af ON a.ability_id = af.rowid
-               WHERE abilities_fts MATCH ?
+               WHERE abilities_fts MATCH ?{phase_clause}
                ORDER BY af.rank LIMIT 1""",
-            (fts,),
+            params,
         ).fetchone()
         return row
     except sqlite3.OperationalError:
         return None
 
 
-def _lookup_boss_by_zone(conn: sqlite3.Connection, query: str) -> list[sqlite3.Row]:
+def _lookup_boss_by_zone(conn: sqlite3.Connection, query: str,
+                         max_phase: int | None = None) -> list[sqlite3.Row]:
     """Return all bosses for a matched zone name."""
     clean = query.lower()
     zone_keywords = {
@@ -92,6 +99,18 @@ def _lookup_boss_by_zone(conn: sqlite3.Connection, query: str) -> list[sqlite3.R
         "gruul's": "gruuls_lair",
         "magtheridon": "magtheridon",
         "mag": "magtheridon",
+        "serpentshrine": "serpentshrine_cavern",
+        "ssc": "serpentshrine_cavern",
+        "tempest keep": "tempest_keep",
+        "the eye": "tempest_keep",
+        "tk": "tempest_keep",
+        "hyjal": "mount_hyjal",
+        "black temple": "black_temple",
+        "bt": "black_temple",
+        "zul'aman": "zulaman",
+        "zulaman": "zulaman",
+        "zul aman": "zulaman",
+        "za": "zulaman",
     }
     zone_slug = None
     for keyword, slug in zone_keywords.items():
@@ -100,9 +119,11 @@ def _lookup_boss_by_zone(conn: sqlite3.Connection, query: str) -> list[sqlite3.R
             break
     if not zone_slug:
         return []
+    phase_clause = " AND phase <= ?" if max_phase is not None else ""
+    params = (zone_slug, max_phase) if max_phase is not None else (zone_slug,)
     return conn.execute(
-        "SELECT * FROM bosses WHERE zone_slug = ? ORDER BY boss_id",
-        (zone_slug,),
+        f"SELECT * FROM bosses WHERE zone_slug = ?{phase_clause} ORDER BY boss_id",
+        params,
     ).fetchall()
 
 
@@ -213,7 +234,10 @@ class StrategyContext:
 # Public API
 # ---------------------------------------------------------------------------
 
-def _build_context(query: str) -> StrategyContext:
+def _build_context(query: str, max_phase: int | None = None) -> StrategyContext:
+    """Build strategy context for a query. If max_phase is given, bosses from a
+    later content phase are excluded (so future-raid content stays hidden until
+    the realm reaches that phase). None = no gate (used by tests / offline tools)."""
     try:
         conn = _connect()
     except FileNotFoundError as e:
@@ -222,7 +246,7 @@ def _build_context(query: str) -> StrategyContext:
 
     try:
         # 1. Try direct boss name search
-        row = _lookup_boss_by_name(conn, query)
+        row = _lookup_boss_by_name(conn, query, max_phase)
         if row:
             abilities = _get_abilities(conn, row["boss_id"])
             boss = dict(row)
@@ -237,7 +261,7 @@ def _build_context(query: str) -> StrategyContext:
             )
 
         # 2. Try ability name search (e.g. "what is Enfeeble")
-        row = _lookup_boss_by_ability(conn, query)
+        row = _lookup_boss_by_ability(conn, query, max_phase)
         if row:
             abilities = _get_abilities(conn, row["boss_id"])
             boss = dict(row)
@@ -252,7 +276,7 @@ def _build_context(query: str) -> StrategyContext:
             )
 
         # 3. Zone summary (e.g. "what bosses are in Karazhan")
-        zone_rows = _lookup_boss_by_zone(conn, query)
+        zone_rows = _lookup_boss_by_zone(conn, query, max_phase)
         if zone_rows:
             return StrategyContext(
                 query=query,
@@ -267,13 +291,14 @@ def _build_context(query: str) -> StrategyContext:
         conn.close()
 
 
-def get_strategy_context(query: str) -> str:
-    """Return a prompt-ready strategy context block for the given query."""
-    ctx = _build_context(query)
+def get_strategy_context(query: str, max_phase: int | None = None) -> str:
+    """Return a prompt-ready strategy context block for the given query.
+    max_phase gates out later-phase content (None = no gate)."""
+    ctx = _build_context(query, max_phase)
     return ctx.to_prompt_block()
 
 
-def search_boss(query: str) -> dict | None:
+def search_boss(query: str, max_phase: int | None = None) -> dict | None:
     """Return the matched boss dict (with parsed JSON fields) or None. Used by cogs."""
-    ctx = _build_context(query)
+    ctx = _build_context(query, max_phase)
     return ctx.boss

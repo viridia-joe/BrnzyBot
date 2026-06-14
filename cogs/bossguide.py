@@ -74,7 +74,10 @@ class BossGuideCog(commands.Cog, name="BossGuide"):
     ) -> List[app_commands.Choice[str]]:
         current_lower = current.lower()
         choices = []
-        for key, display in BOSS_DISPLAY_ORDER:
+        from core import phase as _phase
+        from core.bossguide_data import display_order
+        max_phase = _phase.resolve_for_guild(str(interaction.guild_id)).calendar_phase
+        for key, display in display_order(max_phase):
             if not current_lower or current_lower in display.lower() or current_lower in key:
                 choices.append(app_commands.Choice(name=display, value=key))
         return choices[:25]
@@ -91,10 +94,12 @@ class BossGuideCog(commands.Cog, name="BossGuide"):
     ) -> None:
         await interaction.response.defer(thinking=True)
 
-        boss_key = resolve_boss(boss)
+        from core import phase as _phase
+        from core.bossguide_data import display_order
+        max_phase = _phase.resolve_for_guild(str(interaction.guild_id)).calendar_phase
+        boss_key = resolve_boss(boss, max_phase=max_phase)
         if boss_key is None:
-            from core.bossguide_data import BOSS_DATA
-            names = ", ".join(e.full_name for e in BOSS_DATA.values())
+            names = ", ".join(n for _k, n in display_order(max_phase))
             await interaction.followup.send(
                 f"**Unknown boss:** `{boss}`\nAvailable: {names}"
             )

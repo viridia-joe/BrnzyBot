@@ -73,6 +73,31 @@ def test_tk_corrections_held():
     assert "melee" in alar
 
 
+def test_phase_gating_hides_future_raids():
+    # Mount Hyjal is content_phase 3 -> hidden at the realm's current calendar phase 2.
+    assert BG.BOSS_DATA["archimonde"].content_phase == 3
+    assert BG.resolve_boss("archimonde", max_phase=2) is None
+    assert BG.resolve_boss("archimonde", max_phase=3) == "archimonde"
+    assert BG.resolve_boss("hydross", max_phase=2) == "hydross"  # P2 still visible
+    keys2 = [k for k, _ in BG.display_order(2)]
+    assert "archimonde" not in keys2 and "hydross" in keys2
+    assert "archimonde" in [k for k, _ in BG.display_order(3)]
+    assert BG.display_order(None) == BG.BOSS_DISPLAY_ORDER  # no gate = everything
+
+
+def test_strat_fts_phase_gating():
+    import core.strategy_context as SC
+    conn = _build_db()
+    conn.row_factory = sqlite3.Row
+    assert SC._lookup_boss_by_name(conn, "archimonde", 2) is None, "Hyjal must be gated at phase 2"
+    r = SC._lookup_boss_by_name(conn, "archimonde", 3)
+    assert r is not None and r["name"] == "Archimonde"
+    # ability gating too (use a term exclusive to a phase-3 boss)
+    assert SC._lookup_boss_by_ability(conn, "doomfire", 2) is None
+    r2 = SC._lookup_boss_by_ability(conn, "doomfire", 3)
+    assert r2 is not None and r2["name"] == "Archimonde"
+
+
 def test_strat_fts_indexes_ssc_and_tk():
     # Both phase-2 raids are now research-verified and indexed for /strat.
     conn = _build_db()

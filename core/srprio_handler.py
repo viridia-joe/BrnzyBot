@@ -195,6 +195,28 @@ def _boss_of(source_name: str, raid_name: str) -> str:
     return source_name or raid_name
 
 
+# Armor slots the Beast Lord set occupies (the slots a raid SR-pick could break).
+_BEAST_LORD_SLOTS = {"Head", "Shoulder", "Chest", "Hands", "Legs"}
+
+
+def _beast_lord_srprio_caveat(spec: str, snapshot, swaps) -> str | None:
+    """When a BM hunter wearing Beast Lord 4pc gets an SR pick that would break the
+    set (a raid piece in a Beast Lord slot), warn that consensus is to keep the
+    4pc until the FULL Tier 5 4pc - mirrors the /gearcheck caveat."""
+    if (spec or "").lower() != "bm_hunter":
+        return None
+    bl_worn = sum(1 for g in (getattr(snapshot, "gear", []) or [])
+                  if "beast lord" in (g.get("set_name") or "").lower())
+    if bl_worn < 4:
+        return None
+    if not any(getattr(sr, "slot", "") in _BEAST_LORD_SLOTS for sr in swaps):
+        return None
+    return ("_🐾 **Beast Lord 4pc:** some picks above sit in your Beast Lord slots. "
+            "BM consensus is to keep the 4pc (Kill Command armor-ignore) through "
+            "Phase 2 and only break it for the **full Tier 5 (Rift Stalker) 4pc** at "
+            "once - so SR these as part of a planned T5 transition, not one-offs._")
+
+
 def handle_srprio(character: str, spec: str, realm: str, raid: str,
                   region: str = "us", guild_id: str = "global",
                   phase_override: int | None = None) -> str:
@@ -262,6 +284,11 @@ def handle_srprio(character: str, spec: str, realm: str, raid: str,
         "and won't show as upgrades - that's correct, not a bug._" if capped else ""
     )
 
+    # BM hunters on Beast Lord 4pc: the optimizer will SR-recommend individual T5
+    # raid pieces that break the 4pc, which consensus says to avoid. Surface the
+    # same caveat /gearcheck shows - and only when a swap actually breaks the set.
+    bl_note = _beast_lord_srprio_caveat(spec, snapshot, swaps)
+
     if not swaps:
         return (f"**SR Priority — {character} ({context.spec_desc}) · {rname}**\n"
                 f"Nothing in **{rname}** is an upgrade over what **{character}** already "
@@ -275,5 +302,7 @@ def handle_srprio(character: str, spec: str, realm: str, raid: str,
     if len(swaps) < 5:
         lines.append(f"_(only {len(swaps)} upgrade{'s' if len(swaps) != 1 else ''} "
                      f"in {rname} for this gear - normal when you're well-geared)_")
+    if bl_note:
+        lines.append(bl_note)
     lines.append(cap_note.lstrip("\n") if cap_note else "")
     return "\n".join(l for l in lines if l)

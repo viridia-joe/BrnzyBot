@@ -528,6 +528,15 @@ def _load_candidates(
                 and weapon_type not in allowed_weapon_types):
             continue
 
+        # Wand slot: in TBC only Mage/Priest/Warlock can use wands. The DB leaves
+        # weapon_type empty on wands, so the check above misses them — gate the
+        # Wand SLOT directly on the spec's declared proficiency (only the three
+        # caster classes list "Wand" in weapon_types). Fixes e.g. an Elemental
+        # Shaman being recommended a wand.
+        if (slot == "Wand" and allowed_weapon_types
+                and "Wand" not in allowed_weapon_types):
+            continue
+
         # World-boss drops: nearly unobtainable on crowded servers. The source
         # data is empty so the source_type filter can't catch them — use the
         # curated id list. Equipped items are always kept as a baseline.

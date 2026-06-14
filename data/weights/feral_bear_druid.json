@@ -24,6 +24,6 @@
     "notes": "9% melee hit cap. Threat gen values hit/expertise, but survival stats come first."
   },
   "armor_types": ["Leather"],
-  "weapon_types": ["Mace", "Fist", "Staff", "Polearm"],
+  "weapon_types": ["Mace", "Fist", "Staff", "Dagger"],
   "class": "Druid"
 }

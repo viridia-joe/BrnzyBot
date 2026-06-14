@@ -23,6 +23,6 @@
     "notes": "9% melee hit cap vs bosses = 142 rating. No hit talents."
   },
   "armor_types": ["Leather"],
-  "weapon_types": ["Mace", "Fist", "Staff", "Polearm"],
+  "weapon_types": ["Mace", "Fist", "Staff", "Dagger"],
   "class": "Druid"
 }

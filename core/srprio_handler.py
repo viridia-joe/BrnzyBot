@@ -114,7 +114,8 @@ def _load_raid_candidates(db: sqlite3.Connection, raid_key: str,
     like_clauses = " OR ".join("source_name LIKE ?" for _ in meta["match"])
     params = [f"%{m}%" for m in meta["match"]] + [max_phase]
     rows = db.execute(
-        f"""SELECT name, slot, stats, source_name, phase, armor_type, class_restriction
+        f"""SELECT name, slot, stats, source_name, phase, armor_type,
+                   class_restriction, weapon_type
             FROM items
             WHERE source_type IN ('Raid', '25-man Raid', '10-man Raid', 'Raid10')
               AND ({like_clauses})
@@ -125,8 +126,12 @@ def _load_raid_candidates(db: sqlite3.Connection, raid_key: str,
 
     spec_class = (spec_data.get("class") or "").strip()
     armor_types = set(spec_data.get("armor_types") or [])
+    weapon_types = set(spec_data.get("weapon_types") or [])
+    # Real weapon types we validate proficiency on (matches gear_optimizer).
+    real_weapon_types = {"Mace", "Sword", "Axe", "Dagger", "Fist", "Polearm",
+                         "Staff", "Gun", "Bow", "Crossbow", "Thrown", "Wand"}
     out = []
-    for name, slot, stats_json, source_name, phase, armor_type, class_restr in rows:
+    for name, slot, stats_json, source_name, phase, armor_type, class_restr, weapon_type in rows:
         try:
             cr = json.loads(class_restr or "[]")
         except ValueError:
@@ -135,6 +140,13 @@ def _load_raid_candidates(db: sqlite3.Connection, raid_key: str,
             continue
         if armor_type and armor_types and armor_type not in armor_types:
             continue
+        # Weapon proficiency: skip weapons (and the Wand slot) the spec can't wield
+        # so e.g. an Elemental Shaman isn't soft-reserve-recommended a wand.
+        if weapon_types:
+            if weapon_type in real_weapon_types and weapon_type not in weapon_types:
+                continue
+            if slot == "Wand" and "Wand" not in weapon_types:
+                continue
         try:
             stats = json.loads(stats_json or "{}")
         except ValueError:

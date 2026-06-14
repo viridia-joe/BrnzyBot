@@ -3,12 +3,12 @@
 
   "Beast Lord Armor": {
     "2": {"ep": 5, "desc": "Reduces trap cooldown by 4 sec (minor PvE value)", "stats": {}},
-    "4": {"ep": 62, "desc": "Kill Command makes your attacks ignore 600 armor for 15 sec (near-100% uptime on BM). Prized enough to keep through Phase 2 - only break it for the FULL 4pc Tier 5 (Rift Stalker), never for individual raid pieces.", "stats": {}},
+    "4": {"ep": 50, "desc": "Kill Command makes your attacks ignore 600 armor for 15 sec (near-100% uptime on BM). Prized enough to keep through Phase 2 - only break it for the FULL 4pc Tier 5 (Rift Stalker), never for individual raid pieces. See the BM caveat note.", "stats": {}},
     "spec_overrides": {
-      "survival_hunter": {"4": 30},
-      "mm_hunter": {"4": 25}
+      "survival_hunter": {"4": 28},
+      "mm_hunter": {"4": 22}
     },
-    "_source": "Wowhead + TBC hunter theorycraft consensus (verified 2026-06): BM hunters keep Beast Lord 4pc through Phase 2 and only break it for the full 4pc Rift Stalker (T5), NOT until T6 (a common overstatement). The 600 armor-ignore on ~100% Kill Command uptime is worth more than the ~45 EP a flat AP-equivalence implies because armor pen scales all physical damage; bumped to 62 so the optimizer keeps it over individual ~55 EP raid pieces while the full T5 4pc bundle still wins. Lower for SV/MM (Kill Command less central)."
+    "_source": "Wowhead + TBC hunter theorycraft consensus (verified 2026-06): BM hunters keep Beast Lord 4pc through Phase 2 and only break it for the full 4pc Rift Stalker (T5), NOT until T6 (a common overstatement). Value ~45-50 EP from AP-equivalence of the 600 armor-ignore. NOTE: individual SSC/TK pieces have such high raw statlines in the item DB that the optimizer's per-piece math breaks the 4pc even at inflated bonus values - forcing it would over-freeze hunters. So we surface the nuance via a BM-specific CAVEAT in /gearcheck rather than overriding the solver; the 600 armor-pen value is genuinely gear-and-target dependent and best left to the player. Lower for SV/MM (Kill Command less central)."
   },
 
   "Mana-Etched Regalia": {

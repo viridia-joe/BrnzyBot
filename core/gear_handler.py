@@ -47,10 +47,13 @@ def _beast_lord_caveat(spec: str, context, snapshot) -> str | None:
     bl_worn = sum(1 for g in (getattr(snapshot, "gear", []) or [])
                   if "beast lord" in (g.get("set_name") or "").lower())
     if bl_worn >= 4:
-        return ("_🐾 **Beast Lord 4pc:** keep this — the Kill Command armor-ignore is "
-                "near-100% uptime for BM and stays competitive through Phase 2. Don't "
-                "break it for a single raid piece; only swap once you can equip the "
-                "**full Tier 5 (Rift Stalker) 4pc** at once._")
+        return ("_🐾 **Beast Lord 4pc — read before swapping:** the Kill Command "
+                "armor-ignore (600 armor, ~100% uptime) is hard to price from raw "
+                "stats, so the per-slot upgrades below may suggest breaking it. Most "
+                "BM theorycraft keeps the 4pc through Phase 2 and only breaks it for "
+                "the **full Tier 5 (Rift Stalker) 4pc** equipped at once — not for "
+                "individual raid pieces. Treat single-slot raid upgrades here as "
+                "'wait until you can complete T5'._")
     if 1 <= bl_worn <= 3:
         return ("_🐾 **Beast Lord:** you're wearing the set but no longer have the 4pc "
                 "bonus. For BM the Beast Lord 4pc (Kill Command armor-ignore) is usually "

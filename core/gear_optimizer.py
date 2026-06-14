@@ -399,10 +399,17 @@ def _load_candidates(
     params: OptimizeParams,
     equipped_ids: set,
     spec_key: str = "",
+    candidate_filter=None,
 ) -> list[dict]:
     """
     Load all candidate items from the DB filtered for this spec/phase.
     Returns list of dicts with pre-computed EP values (excluding hit).
+
+    `candidate_filter(item) -> bool`, when given, restricts which NON-equipped
+    items the optimizer may swap IN (equipped items are always kept as the
+    baseline). srprio uses this to confine new picks to one raid's loot while the
+    solver still optimizes the whole set (so hit-cap and set-bonus interactions
+    are handled correctly).
     """
     weights    = spec_data.get("weights", {})
     trinket_ep = _load_trinket_ep()
@@ -484,6 +491,15 @@ def _load_candidates(
          weapon_type) = row
 
         if not slot:
+            continue
+
+        # Candidate restriction (srprio): keep equipped items as the baseline, but
+        # only let NON-equipped items in if they pass the filter (e.g. from one raid).
+        if (candidate_filter is not None and item_id not in equipped_ids
+                and not candidate_filter({
+                    "item_id": item_id, "name": name, "slot": slot,
+                    "source_type": source_type or "", "source_name": source_name or "",
+                    "phase": phase})):
             continue
 
         # Shields: Shaman, Paladin, and Warrior can equip them in the Off Hand slot.
@@ -1039,12 +1055,14 @@ def solve_bis(
     db: sqlite3.Connection,
     params: OptimizeParams,
     snapshot=None,
+    candidate_filter=None,
 ) -> OptimalSet:
     """
     Find the globally optimal gear set for this character/spec.
 
     Ignores current gear — pure BiS from the available item pool.
     Use solve_upgrades() to constrain the number of changes from current gear.
+    `candidate_filter` restricts which new items may be swapped in (srprio).
     """
     spec_data    = _load_spec(spec)
     set_bonuses  = _load_set_bonuses()
@@ -1052,7 +1070,8 @@ def solve_bis(
     if snapshot:
         equipped_ids = {g.get("item_id", 0) for g in getattr(snapshot, "gear", [])}
 
-    candidates = _load_candidates(db, spec_data, params, equipped_ids, spec_key=spec)
+    candidates = _load_candidates(db, spec_data, params, equipped_ids,
+                                  spec_key=spec, candidate_filter=candidate_filter)
     if not candidates:
         return OptimalSet(
             character=character, spec=spec,
@@ -1075,6 +1094,7 @@ def solve_upgrades(
     params: OptimizeParams,
     snapshot,
     max_changes: int = 5,
+    candidate_filter=None,
 ) -> OptimalSet:
     """
     Find the optimal gear set reachable within max_changes swaps from current gear.
@@ -1093,5 +1113,7 @@ def solve_upgrades(
         include_pvp=params.include_pvp,
         include_arena=params.include_arena,
         include_world_boss=params.include_world_boss,
+        racial_hit=params.racial_hit,
+        gem_hit_weight=params.gem_hit_weight,
     )
-    return solve_bis(character, spec, db, p, snapshot)
+    return solve_bis(character, spec, db, p, snapshot, candidate_filter=candidate_filter)

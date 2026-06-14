@@ -209,6 +209,21 @@ def handle_srprio(character: str, spec: str, realm: str, raid: str,
     if not os.path.exists(ITEM_DB_PATH):
         return "Item database not found — the optimizer/SR feature needs a populated item DB."
 
+    from core.gear_optimizer import solve_upgrades, OptimizeParams
+    from core import phase as _phase
+    meta = RAIDS[raid_key]
+
+    # Only this raid's loot is swap-able; everything else of the character's gear
+    # stays fixed. The optimizer still optimizes the WHOLE set, so the hit cap and
+    # set bonuses are handled correctly (a swap that would drop you below the hit
+    # cap won't be recommended - the greedy per-slot ranker couldn't see that).
+    def _raid_filter(item: dict) -> bool:
+        if (item.get("source_type") or "") not in (
+                "Raid", "25-man Raid", "10-man Raid", "Raid10"):
+            return False
+        src = item.get("source_name") or ""
+        return any(m.lower() in src.lower() for m in meta["match"])
+
     item_db = sqlite3.connect(ITEM_DB_PATH)
     try:
         snapshot = get_gear(character, realm, spec, region=region, item_db_conn=item_db)
@@ -216,27 +231,49 @@ def handle_srprio(character: str, spec: str, realm: str, raid: str,
             return (f"Can't locate gear data for **{character}** — WCL is unreachable and "
                     "no cached snapshot exists. Try again in a moment.")
         context = build_context(snapshot, spec)
-        spec_data = load_spec(spec) or {"weights": {}}
-        # srprio filters raid loot by the optimizer item ceiling (phase <= ?).
-        from core import phase as _phase
-        phase = _phase.resolve_for_guild(guild_id, override=phase_override).content_phase_max
-        candidates = _load_raid_candidates(item_db, raid_key, spec_data, phase)
+        ceiling = _phase.resolve_for_guild(guild_id, override=phase_override).content_phase_max
+        is_alliance_shaman = "shaman" in spec.lower() and getattr(snapshot, "faction", -1) == 1
+        params = OptimizeParams(
+            phase=ceiling, include_pvp=False, include_arena=True,
+            include_world_boss=False, mode="upgrades",
+            racial_hit=13 if is_alliance_shaman else 0,
+            gem_hit_weight=context.hit_cap.effective_weight,
+        )
+        # max_changes large enough to surface every worthwhile raid upgrade.
+        opt = solve_upgrades(character, spec, item_db, params, snapshot,
+                             max_changes=10, candidate_filter=_raid_filter)
     finally:
         item_db.close()
 
-    if not candidates:
+    if opt.solver_status == "error":
         return (f"No **{rname}** loot found for {character}'s class/spec in the item DB. "
                 "(If the DB has no source data yet, that's expected until it's enriched on the host.)")
 
-    ranked = rank_candidates(candidates, _equipped_ep_by_slot(context),
-                             spec_data, context.hit_cap, limit=5)
-    if not ranked:
-        return f"Good news — nothing in **{rname}** beats what **{character}** already wears. Reserve freely. 🎉"
+    # The optimizer's non-equipped slot results ARE the raid swaps (the filter
+    # confined new picks to this raid). Rank by marginal EP gain, top 5.
+    swaps = sorted((sr for sr in opt.slots if not sr.was_equipped and sr.ep > 0.5),
+                   key=lambda sr: sr.ep, reverse=True)[:5]
+
+    # At/over the hit cap: hit past cap is worth 0 EP, so hit-heavy pieces won't
+    # surface as upgrades. Flag this so a near-cap raider isn't confused.
+    capped = not context.hit_cap.hit_is_valuable
+    cap_note = (
+        "\n_You're at the spell hit cap, so hit-heavy pieces are valued at zero "
+        "and won't show as upgrades - that's correct, not a bug._" if capped else ""
+    )
+
+    if not swaps:
+        return (f"**SR Priority — {character} ({context.spec_desc}) · {rname}**\n"
+                f"Nothing in **{rname}** is an upgrade over what **{character}** already "
+                f"wears - totally normal once you're geared. Reserve freely, or check "
+                f"another raid.{cap_note}")
 
     lines = [f"**SR Priority — {character} ({context.spec_desc}) · {rname}**"]
-    for i, r in enumerate(ranked, 1):
-        boss = _boss_of(r["source"], rname)
-        lines.append(f"{i}. **{r['name']}** ({boss}) — +{r['gain']:.0f} EP  · _{r['slot']}_")
-    if len(ranked) < 5:
-        lines.append(f"_(only {len(ranked)} upgrade{'s' if len(ranked) != 1 else ''} in {rname} for this gear)_")
-    return "\n".join(lines)
+    for i, sr in enumerate(swaps, 1):
+        boss = _boss_of(sr.source, rname)
+        lines.append(f"{i}. **{sr.item_name}** ({boss}) — +{sr.ep:.0f} EP  · _{sr.slot}_")
+    if len(swaps) < 5:
+        lines.append(f"_(only {len(swaps)} upgrade{'s' if len(swaps) != 1 else ''} "
+                     f"in {rname} for this gear - normal when you're well-geared)_")
+    lines.append(cap_note.lstrip("\n") if cap_note else "")
+    return "\n".join(l for l in lines if l)

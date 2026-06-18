@@ -1,0 +1,571 @@
+{
+  "_meta": {
+    "zone": "Sunwell Plateau",
+    "zone_slug": "sunwell",
+    "phase": 4,
+    "content_phase": 4,
+    "strat_index": true,
+    "updated": "2026-06-14",
+    "note": "Anniversary calendar P4; gear is item content-phase 5 (ceilinged by core/phase.py). Strategy gates at calendar phase 4.",
+    "sources": [
+      "icy-veins.com/tbc-classic",
+      "warcraft.wiki.gg",
+      "wowhead.com/tbc"
+    ]
+  },
+  "bosses": [
+    {
+      "name": "Kalecgos",
+      "slug": "kalecgos",
+      "summary": "The first boss of Sunwell Plateau, a two-realm fight run simultaneously. In the normal realm the raid fights the corrupted blue dragon Kalecgos; Spectral Blast periodically pulls a player into the Spectral Realm, where the dreadlord Sathrovarr the Corruptor is fought alongside the friendly half-elf Kalec, who must be kept alive. The two bosses have separate health pools but both must be driven to about one percent, and at ten percent both gain the stacking Crazed Rage, so the raid balances damage across realms to bring them down together.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Two realms",
+          "hp_range": "100% to ~1% (both)",
+          "description": "Tank Kalecgos in the normal realm and Sathrovarr in the Spectral Realm at the same time, rotating players and tanks through the portal. Balance damage so both reach ten percent together, then push both to one percent."
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Spectral Blast",
+          "mechanic_type": "movement",
+          "targets": "random",
+          "description": "Periodically hits a random non-tank with heavy arcane damage and teleports them into the Spectral Realm, opening a portal others can click to follow.",
+          "important": true
+        },
+        {
+          "name": "Spectral Exhaustion",
+          "mechanic_type": "debuff",
+          "targets": "raid",
+          "description": "After about a minute in the Spectral Realm a player is removed and cannot re-enter for a time, so a third tank is needed to rotate through Sathrovarr.",
+          "important": false
+        },
+        {
+          "name": "Arcane Buffet",
+          "mechanic_type": "debuff",
+          "targets": "raid",
+          "description": "A stacking debuff in the normal realm that amplifies the next Arcane Buffet; it is cleared only by taking a trip to the Spectral Realm, so everyone eventually goes down to shed stacks.",
+          "important": true
+        },
+        {
+          "name": "Curse of Boundless Agony",
+          "mechanic_type": "debuff",
+          "targets": "random",
+          "description": "A scaling shadow curse in the Spectral Realm that jumps to a nearby player when dispelled or when its target dies. A decurser lets it scale, then passes it deliberately; never let it kill someone uncontrolled.",
+          "important": true
+        },
+        {
+          "name": "Crazed Rage",
+          "mechanic_type": "enrage",
+          "targets": "raid",
+          "description": "When either boss reaches ten percent, both gain a stacking attack-speed and damage buff. Bring both to ten percent together, then push to one percent, or the survivor's rage wipes the raid.",
+          "important": true
+        },
+        {
+          "name": "Kalec (friendly NPC)",
+          "mechanic_type": "special",
+          "targets": "raid",
+          "description": "Kalec helps tank Sathrovarr in the Spectral Realm and buffs the raid. If Kalec dies the encounter is instantly lost.",
+          "important": true
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "Run both realms at once: a tank on Kalecgos, a tank (plus Kalec) on Sathrovarr, and a third tank rotating through Spectral Exhaustion. Decurse and pass Curse of Boundless Agony in the Spectral Realm, send players down to shed Arcane Buffet, keep Kalec alive, and balance damage so both bosses reach ten percent together before pushing to one percent."
+        }
+      ],
+      "roles": {
+        "tank": "Three tanks: one on Kalecgos in the normal realm, one on Sathrovarr in the Spectral Realm, and a third rotating in because Spectral Exhaustion forces the spectral tank out.",
+        "healer": "Split across both realms; the Spectral Realm needs sustained healing plus a decurser for Curse of Boundless Agony.",
+        "dps": "Balance damage between realms so Kalecgos and Sathrovarr hit ten and one percent together. Everyone takes at least one Spectral Realm trip to clear Arcane Buffet."
+      },
+      "bossguide": {
+        "boss_num": 1,
+        "raid_short": "SWP",
+        "has_diagram": false,
+        "aliases": [
+          "kalecgos",
+          "kalec",
+          "sathrovarr",
+          "kalecgos and sathrovarr"
+        ],
+        "role_counts": {
+          "tanks": 3,
+          "tank_healers": 4,
+          "raid_healers": 3
+        },
+        "context": "FIGHT: Kalecgos - Sunwell Plateau Boss 1 (two realms)\n\nKEY MECHANICS:\n- Two realms at once: Kalecgos (normal) and Sathrovarr the Corruptor (Spectral Realm) + friendly Kalec (MUST survive).\n- Separate health pools but BOTH must reach ~1%. At 10% both gain Crazed Rage - bring them down TOGETHER.\n- Spectral Blast teleports a random player to the Spectral Realm (portal to follow). Spectral Exhaustion locks you out after ~1 min, so a 3rd tank rotates.\n- Arcane Buffet (normal): cleared only by a Spectral Realm trip. Curse of Boundless Agony (spectral): decurse to PASS it.\n\nROLES NEEDED:\n- {skull} Kalecgos tank (normal), {cross} Sathrovarr tank (spectral), {triangle} rotating spectral tank.\n- Healers split both realms; a decurser in the spectral realm.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull}/{cross}/{triangle} for the three tanks.\n- Assign spectral-realm DPS/healers and a decurser; keep Kalec alive; both to 10% together."
+      }
+    },
+    {
+      "name": "Brutallus",
+      "slug": "brutallus",
+      "summary": "The second boss of Sunwell Plateau, a pure gear and execution gate: a stationary boss with no adds and no phases, won or lost on raw raid damage and tight healing against a hard enrage at around six minutes. Meteor Slash is a frontal cone that splits fire damage among everyone hit and stacks a fire-vulnerability debuff, so the raid forms two soak groups on opposite sides that alternate to let stacks decay. A random spreading fire DoT, Burn, makes raiders peel away from their group, and Stomp punishes the active tank.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Single phase",
+          "hp_range": "100% to 0%",
+          "description": "Two soak groups alternate the boss on Meteor Slash stacks, Burn targets run out or use an immunity, and the raid maximizes damage to beat the six-minute enrage."
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Meteor Slash",
+          "mechanic_type": "tank_swap",
+          "targets": "tank",
+          "description": "A frontal cone of fire damage split evenly among everyone in it, plus a stacking debuff that greatly increases fire damage taken. The raid splits into two soak groups on opposite sides; when the active side reaches about three stacks the other side's tank taunts so the first side's stacks decay, then they swap back.",
+          "important": true
+        },
+        {
+          "name": "Burn",
+          "mechanic_type": "debuff",
+          "targets": "random",
+          "description": "A fire damage-over-time on a random player that ramps up and spreads to nearby players. The afflicted player runs out to an empty spot until it expires, or clears it early with a damage immunity.",
+          "important": true
+        },
+        {
+          "name": "Stomp",
+          "mechanic_type": "special",
+          "targets": "tank",
+          "description": "Hits the active tank for heavy physical damage and reduces their armor, a healing-spike and a common moment to time the taunt swap.",
+          "important": false
+        },
+        {
+          "name": "Berserk",
+          "mechanic_type": "enrage",
+          "targets": "raid",
+          "description": "A hard enrage at around six minutes that one-shots the raid; the enforced DPS check.",
+          "important": true
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "Form two soak groups on opposite sides of the boss and alternate the tank via taunt as Meteor Slash hits about three stacks so fire-vulnerability decays. Burn targets immediately run to a marked empty spot (or use a damage immunity) so it does not spread. Stack damage cooldowns and Bloodlust to beat the roughly six-minute hard enrage."
+        }
+      ],
+      "roles": {
+        "tank": "Two tanks, one per soak side, alternating via taunt as Meteor Slash stacks reach about three; call taunts on voice so heals follow.",
+        "healer": "Heavy coordinated tank healing through Meteor Slash split damage and Stomp armor windows, while covering the stacking fire vulnerability.",
+        "dps": "Maximize uptime; this is a raw output race against the enrage. Stay out of the cone unless assigned to soak, and self-clear Burn with an immunity rather than running if you can."
+      },
+      "bossguide": {
+        "boss_num": 2,
+        "raid_short": "SWP",
+        "has_diagram": false,
+        "aliases": [
+          "brutallus",
+          "brut",
+          "the dps check"
+        ],
+        "role_counts": {
+          "tanks": 2,
+          "tank_healers": 4,
+          "raid_healers": 3
+        },
+        "context": "FIGHT: Brutallus - Sunwell Plateau Boss 2 (the DPS check)\n\nKEY MECHANICS:\n- No adds, no phases. HARD enrage at ~6 minutes - a raw gear/DPS race.\n- Meteor Slash: frontal cone SPLIT among players in it + a stacking +fire-damage-taken debuff. TWO soak groups on opposite sides; swap the boss via taunt at ~3 stacks so each side decays.\n- Burn: a spreading, ramping fire DoT on a random player - RUN OUT to an empty spot (or use an immunity: Divine Shield/Ice Block/Cloak).\n- Stomp: heavy hit + armor reduction on the active tank.\n\nROLES NEEDED:\n- {skull}/{cross} Two tanks (one per soak side, taunt-swap at ~3 stacks).\n- Healers: 4 tank, 3 raid. Mark 'Burn out' spots.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull}/{cross} for the two soak-side tanks.\n- Assign the two soak groups and Burn-out spots; Bloodlust to beat the enrage."
+      }
+    },
+    {
+      "name": "Felmyst",
+      "slug": "felmyst",
+      "summary": "The third boss of Sunwell Plateau, a fel undead dragon raised from Brutallus's slain foe. The fight alternates a ground phase, a tank-and-spank with a dispellable area drain and a heavy tank debuff, with an air phase where she flies up and the raid spreads to dodge a chasing vapor trail and a sweeping breath that mind-controls anyone caught. The same cycle repeats until she dies; there is no special low-health behavior.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Ground phase",
+          "hp_range": "alternating",
+          "description": "Tank-and-spank. Priests Mass Dispel Gas Nova, the tank handles Corrosion (often a swap), and Encapsulated players move out. The raid is split into sub-groups so Mass Dispel covers each."
+        },
+        {
+          "number": 2,
+          "name": "Air phase",
+          "hp_range": "alternating",
+          "description": "She flies up and the raid spreads out, dodging the Demonic Vapor trail (which spawns Unyielding Dead skeletons) and running to the safe side of the Fog of Corruption breath."
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Gas Nova",
+          "mechanic_type": "aoe",
+          "targets": "raid",
+          "description": "A point-blank area attack that drains health and mana over time. A priest Mass Dispel removes it, which is why the raid is split into sub-groups of ten or fewer.",
+          "important": true
+        },
+        {
+          "name": "Corrosion",
+          "mechanic_type": "tank_swap",
+          "targets": "tank",
+          "description": "Hits the current tank for heavy nature damage and increases their physical damage taken sharply, so the fight often uses a tank swap.",
+          "important": true
+        },
+        {
+          "name": "Encapsulate",
+          "mechanic_type": "movement",
+          "targets": "random",
+          "description": "Traps a random player in a bubble that damages them and everyone nearby. The trapped player runs away from the raid; an immunity can clear it.",
+          "important": true
+        },
+        {
+          "name": "Demonic Vapor",
+          "mechanic_type": "movement",
+          "targets": "random",
+          "description": "Air phase: she targets a random player and chases them with a trail of heavy nature damage that also spawns Unyielding Dead skeletons. Kite it away from the raid, stay out of the trail, and kill the skeletons.",
+          "important": true
+        },
+        {
+          "name": "Fog of Corruption",
+          "mechanic_type": "movement",
+          "targets": "raid",
+          "description": "Air phase: a sweeping green breath cloud covering part of the platform; anyone caught is mind-controlled and effectively removed from the fight. Dodge by running to the uncovered safe side.",
+          "important": true
+        },
+        {
+          "name": "Noxious Fumes",
+          "mechanic_type": "aoe",
+          "targets": "raid",
+          "description": "A passive raid-wide nature damage aura, heaviest in the air phase; steady raid healing covers it.",
+          "important": false
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "Ground phase: split the raid into sub-groups so priests can Mass Dispel Gas Nova, swap tanks on Corrosion, and have Encapsulated players run out. Air phase: spread immediately as she takes off, run to the safe side of the Fog of Corruption breath, kite the Demonic Vapor trail away and kill its skeletons. Repeat the cycle and beat the enrage."
+        }
+      ],
+      "roles": {
+        "tank": "Two tanks rotating to manage the Corrosion physical-damage-taken debuff.",
+        "healer": "Heavy raid healing for Noxious Fumes, Gas Nova residue and Encapsulate splash, plus tank spikes from Corrosion; priests are required for Mass Dispel on Gas Nova.",
+        "dps": "Burn the boss in the ground phase, then in the air phase dodge the Fog of Corruption, avoid the Demonic Vapor trail, and kill the Unyielding Dead skeletons."
+      },
+      "bossguide": {
+        "boss_num": 3,
+        "raid_short": "SWP",
+        "has_diagram": false,
+        "aliases": [
+          "felmyst",
+          "fel",
+          "felmist"
+        ],
+        "role_counts": {
+          "tanks": 2,
+          "tank_healers": 3,
+          "raid_healers": 4
+        },
+        "context": "FIGHT: Felmyst - Sunwell Plateau Boss 3 (ground + air)\n\nKEY MECHANICS:\n- GROUND phase: Gas Nova (PBAoE drain) - priests MASS DISPEL it (split into <=10 sub-groups). Corrosion: heavy tank hit + 100% physical taken - tank swap. Encapsulate: trapped player runs OUT.\n- AIR phase: SPREAD. Demonic Vapor: chasing trail that spawns Unyielding Dead skeletons - kite it, kill them. Fog of Corruption: a breath cloud that MIND-CONTROLS anyone caught - dodge to the SAFE side.\n- No special low-HP behavior; the cycle just repeats.\n\nROLES NEEDED:\n- {skull}/{cross} Two tanks (Corrosion swap).\n- Healers: 3 tank, 4 raid. Priests assigned to Mass Dispel Gas Nova.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull}/{cross} for the tanks; assign the <=10 dispel sub-groups.\n- Call the Fog of Corruption safe side; never stand in the vapor trail."
+      }
+    },
+    {
+      "name": "Eredar Twins",
+      "slug": "eredartwins",
+      "summary": "The fourth boss of Sunwell Plateau, the eredar sisters Lady Sacrolash (shadow) and Grand Warlock Alythess (fire), fought at once. They do NOT share a health pool, but when one dies the survivor gains one of the dead twin's abilities, so the standard kill order is Sacrolash first. The fight revolves around two opposing debuffs, Dark Touched from shadow damage and Flame Touched from fire damage, each cleared only by taking a hit of the other school. A hard enrage near six minutes forces a steady, coordinated burn.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Both twins",
+          "hp_range": "to one death",
+          "description": "Tank Sacrolash with a swap rotation and hold Alythess at range, managing the Dark and Flame Touched debuffs, until Sacrolash dies."
+        },
+        {
+          "number": 2,
+          "name": "Survivor",
+          "hp_range": "after one death",
+          "description": "The surviving twin gains one ability from the dead one (kill Sacrolash first so Alythess only gains the weaker Shadow Nova, not Conflagration). Finish the survivor before the enrage."
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Dark Touched and Flame Touched",
+          "mechanic_type": "debuff",
+          "targets": "raid",
+          "description": "Shadow damage applies Dark Touched (reduces healing received) and fire damage applies Flame Touched (a stacking fire damage-over-time). Each is cleared only by taking a hit of the OPPOSITE school, so players manage both stacks rather than avoiding all damage.",
+          "important": true
+        },
+        {
+          "name": "Confounding Blow",
+          "mechanic_type": "tank_swap",
+          "targets": "tank",
+          "description": "Lady Sacrolash's heavy shadow hit plus a disorient on her tank that drops threat, which is why she needs two tanks in a taunt rotation.",
+          "important": true
+        },
+        {
+          "name": "Shadow Nova",
+          "mechanic_type": "aoe",
+          "targets": "random",
+          "description": "Lady Sacrolash's area shadow damage on a player and everyone near them; spread out.",
+          "important": true
+        },
+        {
+          "name": "Conflagration",
+          "mechanic_type": "special",
+          "targets": "random",
+          "description": "Grand Warlock Alythess's cast on a target that confounds them and burns them and nearby players; spread out. If Alythess dies first, Sacrolash gains this, which is why Sacrolash is killed first.",
+          "important": true
+        },
+        {
+          "name": "Pyrogenics",
+          "mechanic_type": "special",
+          "targets": "raid",
+          "description": "Grand Warlock Alythess's self-buff that increases her fire damage; purge or spellsteal it immediately.",
+          "important": false
+        },
+        {
+          "name": "Blaze",
+          "mechanic_type": "movement",
+          "targets": "tank",
+          "description": "Grand Warlock Alythess hits her tank for heavy fire damage and leaves fire patches on the ground; move out of them.",
+          "important": false
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "Tank Sacrolash with a taunt rotation for Confounding Blow and hold Alythess at range, spreading for Shadow Nova and Conflagration. Players reset Dark Touched and Flame Touched by taking a little of the opposite school, purge Pyrogenics on sight, and the raid kills Sacrolash first so the survivor only gains Shadow Nova. Resistance gear is not the answer here; stack stamina and beat the six-minute enrage."
+        }
+      ],
+      "roles": {
+        "tank": "At least two tanks, both on Sacrolash in a taunt rotation for Confounding Blow's disorient; Alythess is held at range.",
+        "healer": "Watch Dark Touched healing reduction and the Conflagration, Flame Sear and Blaze bursts, keeping tanks topped through Blaze.",
+        "dps": "Balance damage toward a Sacrolash-first kill, manage your own Touched stacks by taking measured opposite-school damage, purge Pyrogenics, and beat the enrage."
+      },
+      "bossguide": {
+        "boss_num": 4,
+        "raid_short": "SWP",
+        "has_diagram": false,
+        "aliases": [
+          "eredar twins",
+          "twins",
+          "sacrolash",
+          "alythess",
+          "lady sacrolash",
+          "grand warlock alythess"
+        ],
+        "role_counts": {
+          "tanks": 2,
+          "tank_healers": 4,
+          "raid_healers": 3
+        },
+        "context": "FIGHT: Eredar Twins - Sunwell Plateau Boss 4 (two bosses)\n\nKEY MECHANICS:\n- Lady Sacrolash (SHADOW) + Grand Warlock Alythess (FIRE). They do NOT share health. Kill SACROLASH FIRST (the survivor inherits one ability; Alythess then only gains weak Shadow Nova, not deadly Conflagration).\n- Dark Touched (from shadow) reduces your healing; Flame Touched (from fire) is a stacking fire DoT. Clear each by taking a hit of the OPPOSITE school.\n- Sacrolash: Confounding Blow disorients her tank (2-tank swap), Shadow Nova (spread). Alythess: Conflagration (spread), Blaze fire patches, Pyrogenics (PURGE).\n- ~6-min hard enrage. Resistance gear is NOT the answer - stack stamina.\n\nROLES NEEDED:\n- {skull}/{cross} Two tanks on Sacrolash (taunt rotation); Alythess held at range.\n- Healers: 4 tank, 3 raid. A purger/spellsteal for Pyrogenics.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull}/{cross} for the Sacrolash taunt rotation.\n- State kill order (Sacrolash first) and the Pyrogenics purger; spread for novas."
+      }
+    },
+    {
+      "name": "M'uru",
+      "slug": "muru",
+      "summary": "The fifth boss of Sunwell Plateau, widely the hardest encounter in the game at the time, a two-phase fight with no break between. Phase one is a stationary add-control war: M'uru deals raid-wide damage while summoning humanoid waves from two portals, periodic Void Sentinels, and swarms of Dark Fiends that must be killed with Mass Dispel. When M'uru dies he becomes the mobile demon Entropius, who drops most adds but escalates Negative Energy and adds a roaming Black Hole, turning the fight into a frantic damage race against a shared enrage.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "M'uru",
+          "hp_range": "add control",
+          "description": "Tank M'uru in place. Off-tanks grab the Shadowsword Berserkers from the two portals, a dedicated tank takes each Void Sentinel away, dispellers Mass Dispel the Dark Fiends, and ranged AoE the Void Spawns. Reach the transition with adds dead."
+        },
+        {
+          "number": 2,
+          "name": "Entropius",
+          "hp_range": "burn",
+          "description": "M'uru becomes Entropius: a main tank holds him while the raid dodges the roaming Black Hole and spreads for the escalating Negative Energy, burning him before the shared enrage."
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Negative Energy",
+          "mechanic_type": "aoe",
+          "targets": "raid",
+          "description": "Raid-wide arcane damage: a single target in phase one, but in the Entropius phase it chains to additional players and grows more frequent over time, which is the true enrage.",
+          "important": true
+        },
+        {
+          "name": "Darkness and Dark Fiends",
+          "mechanic_type": "add_spawn",
+          "targets": "raid",
+          "description": "M'uru spawns a swarm of about eight Dark Fiends that drift to the highest-threat target and detonate for heavy shadow damage. They are killed with an offensive Mass Dispel centered on the boss, not tanked.",
+          "important": true
+        },
+        {
+          "name": "Humanoid waves",
+          "mechanic_type": "add_spawn",
+          "targets": "raid",
+          "description": "Two portals each spawn a wave of two Shadowsword Berserkers and one Shadowsword Fury Mage roughly every minute. Off-tanks grab the Berserkers; interrupt and kill the Fury Mages.",
+          "important": true
+        },
+        {
+          "name": "Void Sentinel",
+          "mechanic_type": "add_spawn",
+          "targets": "raid",
+          "description": "A single large add summoned periodically from M'uru and tanked away from the raid; on death it splits into about eight Void Spawns that the raid AoEs down.",
+          "important": true
+        },
+        {
+          "name": "Black Hole",
+          "mechanic_type": "movement",
+          "targets": "raid",
+          "description": "Entropius phase: a void zone that slowly roams the room, knocking back and damaging anyone close. Dodge it while burning the boss.",
+          "important": true
+        },
+        {
+          "name": "Shared enrage",
+          "mechanic_type": "enrage",
+          "targets": "raid",
+          "description": "M'uru and Entropius share a single enrage around ten minutes, so add control in phase one must not bleed the damage needed to burn Entropius.",
+          "important": false
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "Phase one is an add war: tank M'uru in place, off-tanks grab the Berserkers from the two portals, a dedicated tank takes each Void Sentinel away (killing its Void Spawns), and priests Mass Dispel the eight Dark Fiends on every Darkness. Reach the transition with adds dead, then a main tank holds Entropius while the raid dodges the roaming Black Hole, spreads for the escalating Negative Energy, and Bloodlusts the burn before the shared enrage."
+        }
+      ],
+      "roles": {
+        "tank": "Several tanks: one on M'uru and then Entropius, off-tanks for the Berserker waves, and a dedicated Void Sentinel tank.",
+        "healer": "Heavy raid healing for the Negative Energy ramp, with tank healers assigned per add tank.",
+        "dps": "Split ranged and AoE onto Void Spawns and humanoid cleanup, melee on M'uru, with a mandatory Mass Dispel rotation for the Dark Fiends; then everyone burns Entropius."
+      },
+      "bossguide": {
+        "boss_num": 5,
+        "raid_short": "SWP",
+        "has_diagram": false,
+        "aliases": [
+          "m'uru",
+          "muru",
+          "entropius"
+        ],
+        "role_counts": {
+          "tanks": 4,
+          "tank_healers": 5,
+          "raid_healers": 4,
+          "interrupts": 2
+        },
+        "context": "FIGHT: M'uru - Sunwell Plateau Boss 5 (M'uru -> Entropius, no break)\n\nP1 (M'uru, add war):\n- TWO portals each spawn 2 Shadowsword Berserkers + 1 Fury Mage every ~60s - off-tanks grab Berserkers, interrupt/kill Fury Mages.\n- Void Sentinel (from M'uru): a big add tanked AWAY; on death splits into ~8 Void Spawns - AoE them.\n- Darkness: ~8 Dark Fiends drift to top threat and detonate - KILL with offensive MASS DISPEL (not tanked).\n- Negative Energy: raid-wide arcane.\nP2 (Entropius): Negative Energy chains +2 and accelerates (the enrage); Black Hole roams - dodge it; Darkness under players. Bloodlust and burn.\n- Shared ~10-min enrage across both phases.\n\nROLES NEEDED:\n- {skull} M'uru/Entropius tank, {cross} Void Sentinel tank, {triangle}/{moon} Berserker off-tanks.\n- Healers: 5 tank, 4 raid. Priest Mass Dispel rotation for Dark Fiends.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull}/{cross}/{triangle}/{moon} for the tanks; assign per-portal off-tanks.\n- Name the Mass Dispel rotation and Void Spawn AoE; clear adds before the transition."
+      }
+    },
+    {
+      "name": "Kil'jaeden",
+      "slug": "kiljaeden",
+      "summary": "The final boss of Sunwell Plateau and the end boss of The Burning Crusade. He is summoned through the Sunwell and must first be reached by killing his three Hand of the Deceiver channelers, after which he emerges and the fight escalates through health gates at eighty-five, fifty-five and twenty-five percent. The blue dragon Kalecgos empowers Orbs of the Blue Flight that turn raiders into dragons whose Shield of the Blue is used to survive the raid-wide nuke Darkness of a Thousand Souls. A long healing and movement check that ends the expansion.",
+      "phases": [
+        {
+          "number": 1,
+          "name": "Hands of the Deceiver",
+          "hp_range": "opening",
+          "description": "Three Hand of the Deceiver adds channel by the Sunwell. Spread them apart and tank and kill them one at a time, each with its own tank; do not cleave them together."
+        },
+        {
+          "number": 2,
+          "name": "Kil'jaeden emerges",
+          "hp_range": "100% to 85%",
+          "description": "Kil'jaeden rises. Soul Flay channels on the tank, Legion Lightning chains between players (spread), and Fire Bloom burns several players and their neighbors (spread)."
+        },
+        {
+          "number": 3,
+          "name": "85% gate",
+          "hp_range": "85% to 55%",
+          "description": "Adds Flame Dart and Shield Orbs (small adds that fire shadow bolts, killed by ranged), and Darkness of a Thousand Souls begins, a channeled raid-wide nuke survived by stacking under Shield of the Blue. Kalecgos empowers the first orb."
+        },
+        {
+          "number": 4,
+          "name": "55% gate",
+          "hp_range": "55% to 25%",
+          "description": "Adds Armageddon, meteors that crash at marked spots after a short telegraph; move out of them. Kalecgos empowers the second orb."
+        },
+        {
+          "number": 5,
+          "name": "25% gate",
+          "hp_range": "25% to 0%",
+          "description": "All mechanics continue and Darkness of a Thousand Souls comes faster. Kalecgos empowers the last two orbs. Pop all cooldowns and burn."
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Hands of the Deceiver",
+          "mechanic_type": "add_spawn",
+          "targets": "raid",
+          "description": "Three channeler adds open the fight; spread them apart and kill them one at a time with separate tanks, never cleaved together.",
+          "important": true
+        },
+        {
+          "name": "Darkness of a Thousand Souls",
+          "mechanic_type": "aoe",
+          "targets": "raid",
+          "description": "A channeled raid-wide shadow nuke that begins at the eighty-five percent gate and comes faster late. The raid stacks under Shield of the Blue from an Orb dragon to survive each cast.",
+          "important": true
+        },
+        {
+          "name": "Orbs of the Blue Flight",
+          "mechanic_type": "special",
+          "targets": "raid",
+          "description": "Kalecgos empowers four corner orbs over the fight (one at eighty-five, one at fifty-five, two at twenty-five percent). A player clicks one to become a blue dragon with Shield of the Blue, a bubble that hugely reduces damage but drains the dragon's health, so it has limited uses; the raid stacks under it for Darkness.",
+          "important": true
+        },
+        {
+          "name": "Sinister Reflection",
+          "mechanic_type": "add_spawn",
+          "targets": "raid",
+          "description": "At each health gate (eighty-five, fifty-five, twenty-five percent) he spawns four shadowy copies of a random player that mimic that class, ignore crowd control, and must be tanked and burned fast.",
+          "important": true
+        },
+        {
+          "name": "Legion Lightning",
+          "mechanic_type": "special",
+          "targets": "raid",
+          "description": "Chain lightning that hits several players and drains mana; spread out to limit the chain.",
+          "important": false
+        },
+        {
+          "name": "Fire Bloom",
+          "mechanic_type": "debuff",
+          "targets": "random",
+          "description": "A fire damage-over-time on several random players that also burns anyone nearby; spread out.",
+          "important": true
+        },
+        {
+          "name": "Armageddon",
+          "mechanic_type": "movement",
+          "targets": "raid",
+          "description": "Fifty-five percent gate: meteors crash at marked ground spots after a short telegraph for heavy fire damage; move out of the impact.",
+          "important": true
+        },
+        {
+          "name": "Soul Flay",
+          "mechanic_type": "special",
+          "targets": "tank",
+          "description": "A shadow channel on the main tank with a slow.",
+          "important": false
+        }
+      ],
+      "strategies": [
+        {
+          "name": "Standard",
+          "summary": "Kill the three Hands of the Deceiver one at a time, then fight Kil'jaeden through the eighty-five, fifty-five and twenty-five percent gates. Spread for Legion Lightning and Fire Bloom, kill Shield Orbs and the four Sinister Reflections at each gate, and dodge Armageddon meteors. Designated players ride the empowered Orbs of the Blue Flight and drop Shield of the Blue so the raid survives each Darkness of a Thousand Souls, then Bloodlust the final burn."
+        }
+      ],
+      "roles": {
+        "tank": "Three tanks for the opening Hands (one each), then a main tank on Kil'jaeden and a tank to grab the four Sinister Reflections at each gate.",
+        "healer": "A heavy, sustained load; mix raid and tank healers and designate the orb-dragon drivers who position Shield of the Blue for each Darkness of a Thousand Souls.",
+        "dps": "Kill the Hands one at a time, then prioritize Shield Orbs and Sinister Reflections while burning the boss, saving cooldowns for the twenty-five percent push."
+      },
+      "bossguide": {
+        "boss_num": 6,
+        "raid_short": "SWP",
+        "has_diagram": false,
+        "aliases": [
+          "kil'jaeden",
+          "kiljaeden",
+          "kj",
+          "the deceiver",
+          "deceiver"
+        ],
+        "role_counts": {
+          "tanks": 3,
+          "tank_healers": 5,
+          "raid_healers": 5
+        },
+        "context": "FIGHT: Kil'jaeden - Sunwell Plateau FINAL BOSS (multi-phase, HP gates 85/55/25%)\n\nP1: THREE Hand of the Deceiver adds channel - spread them apart and kill ONE AT A TIME (separate tanks, do NOT cleave).\nP2 (KJ emerges): Soul Flay (tank), Legion Lightning (chain - SPREAD), Fire Bloom (fire on ~5 + neighbors - SPREAD).\nP3 (85%): Shield Orbs (ranged kill), Flame Dart, and Darkness of a Thousand Souls (raid-wide nuke) begins.\nP4 (55%): Armageddon meteors at marked spots - move out.\nP5 (25%): Darkness comes faster - burn.\n- ORBS OF THE BLUE FLIGHT: Kalecgos empowers 4 corner orbs (1 at 85%, 1 at 55%, 2 at 25%). A player rides one and drops SHIELD OF THE BLUE; the raid STACKS under it to survive each Darkness of a Thousand Souls (limited uses - the shield drains the dragon).\n- SINISTER REFLECTION: 4 clones of a random player at EACH gate (85/55/25) - tank and burn them.\n\nROLES NEEDED:\n- {skull} KJ tank, {cross} Reflection tank, plus 3 tanks for the opening Hands.\n- Healers: 5 tank, 5 raid. Designated Orb/dragon drivers for Shield of the Blue.\n\nASSIGNMENT FORMAT RULES:\n- Use {skull} for the KJ tank, {cross} for the Reflection tank; name the 3 Hand tanks.\n- Name the Orb/dragon drivers and Shield-of-the-Blue timing on Darkness; spread for Legion Lightning/Fire Bloom."
+      }
+    }
+  ]
+}
